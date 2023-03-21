@@ -1,0 +1,19 @@
+@font-face {
+  font-family: "Autumn in November";
+  src: url("./fonts/Autumn in November.ttf");
+}
+.typography-title {
+  font-family: "Autumn in November";
+  font-size: 7rem;
+  color: #530094;
+  margin: 0;
+}
+.typography-body {
+  font-family: "Autumn in November";
+  font-size: 2.5rem;
+  color: #7e4990;
+  max-width: 30rem;
+}
+.align-right {
+  text-align: end;
+}
