@@ -1,10 +1,11 @@
 import twilio from "twilio"
+import axios from "axios"
 
 const client = twilio(
   process.env.TWILIO_ACCOUNTSID,
   process.env.TWILIO_AUTHTOKEN
 )
-export const sendOTP = (phone) => {
+export const sendOTP = async (phone) => {
   client.verify.v2
     .services(process.env.TWILIO_VERIFYSID)
     .verifications.create({ to: phone, channel: "sms" })
@@ -28,6 +29,7 @@ export const checkOTPAsync = async (phone, otp) => {
   const verificationCheck = await client.verify.v2
     .services(process.env.TWILIO_VERIFYSID)
     .verificationChecks.create({ to: phone, code: otp })
+  console.log(verificationCheck.status)
   if (verificationCheck.status === "approved") {
     return true
   }

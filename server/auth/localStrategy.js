@@ -11,7 +11,7 @@ passport.use(
       passReqToCallback: true,
     },
     async (req, email, password, done) => {
-      const { phone, firstName, lastName, username } = req.body
+      const { phone, firstName, lastName, username, dob } = req.body
       try {
         const user = new userModel({
           email,
@@ -20,6 +20,7 @@ passport.use(
           firstName,
           lastName,
           username,
+          dob,
         })
         await user.save()
         return done(null, user)

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import CssBaseline from "@mui/material/CssBaseline"
 import TextField from "@mui/material/TextField"
 import Link from "@mui/material/Link"
@@ -6,16 +6,18 @@ import Grid from "@mui/material/Grid"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
 import Container from "@mui/material/Container"
-import { Button } from "@mui/material"
+import { Alert, Button, CircularProgress, Slide } from "@mui/material"
 import GoogleIcon from "@mui/icons-material/Google"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import axios from "../../axios"
-import { TOKEN_KEY } from "../../constants/constant"
-import { setAuth } from "../../features/users/authSlice"
+import { setUser } from "../../features/users/userSlice"
+import { useDispatch } from "react-redux"
 
 function SignupForm() {
+  const dispatch = useDispatch()
+  const containerRef = useRef()
   const navigate = useNavigate()
-  const [user, setUser] = useState({
+  const [users, setUsers] = useState({
     firstName: "",
     lastName: "",
     dob: "",
@@ -23,6 +25,7 @@ function SignupForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    username: "",
   })
   const [error, setError] = useState({
     firstName: "",
@@ -32,45 +35,52 @@ function SignupForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    username: "",
     others: "",
   })
+  const [loading, setLoading] = useState(false)
   const handleSubmit = (event) => {
     event.preventDefault()
-    setError((prevState) => {
-      return {
-        ...prevState,
-        others: "",
-      }
-    })
-    axios
-      .post("/api/register", { ...user })
-      .then(({ data }) => {
-        if (data.success) {
-          localStorage.setItem(TOKEN_KEY, `Bearer ${data.token}`)
-          setAuth()
-          navigate("/login")
+    setLoading(true)
+    if (!loading) {
+      setError((prevState) => {
+        return {
+          ...prevState,
+          others: "",
         }
       })
-      .catch((error) => {
-        console.log(error)
-        if (error?.response?.status === 400) {
-          const { data } = error?.response
-          setError((prevState) => {
-            return {
-              ...prevState,
-              ...data,
-            }
-          })
-        }
-        if (error?.response?.status === 409) {
-          setError((prevState) => {
-            return {
-              ...prevState,
-              others: "User already exists",
-            }
-          })
-        }
-      })
+      axios
+        .post("/api/register", { ...users })
+        .then(({ data }) => {
+          setLoading(false)
+          if (data.success) {
+            dispatch(setUser(data.user))
+            console.log(data.user)
+            navigate("/signup/otp")
+          }
+        })
+        .catch((error) => {
+          setLoading(false)
+          console.log(error)
+          if (error?.response?.status === 400) {
+            const { data } = error?.response
+            setError((prevState) => {
+              return {
+                ...prevState,
+                ...data,
+              }
+            })
+          }
+          if (error?.response?.status === 409) {
+            setError((prevState) => {
+              return {
+                ...prevState,
+                others: error.response.data.message,
+              }
+            })
+          }
+        })
+    }
   }
   const handleChange = (event) => {
     setError((prevState) => {
@@ -80,7 +90,7 @@ function SignupForm() {
         [name]: "",
       }
     })
-    setUser((prevState) => {
+    setUsers((prevState) => {
       const { name } = event.target
       return {
         ...prevState,
@@ -106,9 +116,26 @@ function SignupForm() {
         >
           Register
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 5 }}>
-          <Typography color="error">{error.others}</Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
+            <Grid item xs={12} ref={containerRef}>
+              {error.others && (
+                <Slide
+                  direction="up"
+                  in={!!error.others}
+                  container={containerRef.current}
+                >
+                  <Alert
+                    variant="filled"
+                    severity="error"
+                    sx={{ mt: 1 }}
+                    fullWidth
+                  >
+                    {error.others}
+                  </Alert>
+                </Slide>
+              )}
+            </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 margin="normal"
@@ -121,7 +148,7 @@ function SignupForm() {
                 autoFocus
                 color="primary"
                 variant="filled"
-                value={user.firstName}
+                value={users.firstName}
                 onChange={handleChange}
                 error={!!error.firstName}
                 helperText={error.firstName}
@@ -138,10 +165,28 @@ function SignupForm() {
                 autoComplete="name"
                 color="primary"
                 variant="filled"
-                value={user.lastName}
+                value={users.lastName}
                 onChange={handleChange}
                 error={!!error.lastName}
                 helperText={error.lastName}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="username"
+                label="Username"
+                type="text"
+                id="username"
+                autoComplete="username"
+                color="primary"
+                variant="filled"
+                value={users.username}
+                onChange={handleChange}
+                error={!!error.username}
+                helperText={error.username}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -156,7 +201,7 @@ function SignupForm() {
                 variant="filled"
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                value={user.dob}
+                value={users.dob}
                 onChange={handleChange}
                 error={!!error.dob}
                 helperText={error.dob}
@@ -173,7 +218,7 @@ function SignupForm() {
                 color="primary"
                 variant="filled"
                 type="text"
-                value={user.phone}
+                value={users.phone}
                 onChange={handleChange}
                 error={!!error.phone}
                 helperText={error.phone}
@@ -191,7 +236,7 @@ function SignupForm() {
                 autoComplete="email"
                 color="primary"
                 variant="filled"
-                value={user.email}
+                value={users.email}
                 onChange={handleChange}
                 error={!!error.email}
                 helperText={error.email}
@@ -209,7 +254,7 @@ function SignupForm() {
                 autoComplete="current-password"
                 color="primary"
                 variant="filled"
-                value={user.password}
+                value={users.password}
                 onChange={handleChange}
                 error={!!error.password}
                 helperText={error.password}
@@ -227,7 +272,7 @@ function SignupForm() {
                 autoComplete="current-password"
                 color="primary"
                 variant="filled"
-                value={user.confirmPassword}
+                value={users.confirmPassword}
                 onChange={handleChange}
                 error={!!error.confirmPassword}
                 helperText={error.confirmPassword}
@@ -241,7 +286,11 @@ function SignupForm() {
             sx={{ mt: 3, mb: 2 }}
             size="large"
           >
-            Login
+            {loading ? (
+              <CircularProgress sx={{ color: "white" }} size="1.7rem" />
+            ) : (
+              "Login"
+            )}
           </Button>
           <Button
             type="button"

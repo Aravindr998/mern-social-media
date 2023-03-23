@@ -88,6 +88,9 @@ export const validateRegister = (user) => {
   if (!isNameValid(user.lastName)) {
     errors.lastName = "Please enter a valid last name"
   }
+  if (!isUsernameValid(user.username)) {
+    errors.username = "Please enter a valid last name"
+  }
   if (!isDateValid(user.dob)) {
     errors.dob = "Please enter a valid date"
   }
@@ -128,6 +131,18 @@ export const checkDetails = (details) => {
   }
   if (!isGenderValid(details.gender)) {
     errors.gender = "Please enter a valid gender"
+  }
+  const isValid = !Object.keys(errors).length
+  return { isValid, errors }
+}
+
+export const validateLoginUser = (details) => {
+  const errors = {}
+  if (!isEmailValid(details.email)) {
+    errors.email = "Please enter a valid email"
+  }
+  if (!isPasswordValid(details.password)) {
+    errors.password = "Please enter a valid password"
   }
   const isValid = !Object.keys(errors).length
   return { isValid, errors }

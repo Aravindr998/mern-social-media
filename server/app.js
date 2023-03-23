@@ -4,6 +4,7 @@ import express from "express"
 import cors from "cors"
 import db from "./config/db.config.js"
 import userRouter from "./routers/userRouter.js"
+import postRouter from "./routers/postRouter.js"
 
 const app = express()
 
@@ -21,3 +22,4 @@ db.once("open", () => {
 })
 
 app.use("/api", userRouter)
+app.use("/api/post", postRouter)

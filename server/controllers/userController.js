@@ -37,3 +37,14 @@ export const addDetails = async (req, res) => {
     })
   }
 }
+
+export const getDetails = async (req, res) => {
+  try {
+    const { id } = req.user
+    const user = await userModel.findById(id)
+    res.json(user)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: "Something went wrong" })
+  }
+}
