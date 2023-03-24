@@ -13,6 +13,7 @@ import HomePage from "./pages/HomePage"
 import ProtectedRoutes from "./utils/ProtectedRoutes"
 import PublicRoutes from "./utils/PublicRoutes"
 import AddDetailsPage from "./pages/AddDetailsPage"
+import ProfilePage from "./pages/ProfilePage"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -25,7 +26,6 @@ function App() {
       axios
         .get("/api/user/details", { headers: { Authorization: authToken } })
         .then(({ data }) => {
-          console.log(data)
           dispatch(setUser(data))
         })
         .catch((error) => console.log(error))
@@ -39,6 +39,7 @@ function App() {
           <Route element={<ProtectedRoutes />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/details/add" element={<AddDetailsPage />} />
+            <Route path="/profile/:username" element={<ProfilePage />} />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />

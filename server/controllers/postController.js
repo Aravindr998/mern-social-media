@@ -1,5 +1,6 @@
 import postModel from "../model/Posts.js"
-import { isPostValid } from "../helpers/postHelper.js"
+import userModel from "../model/User.js"
+import { isPostValid, getAllRelatedPosts } from "../helpers/postHelper.js"
 
 export const createPost = async (req, res) => {
   try {
@@ -44,5 +45,49 @@ export const validatePost = (req, res, next) => {
     return res
       .status(400)
       .json({ errors: { privacy: "Please select a privacy option" } })
+  }
+}
+
+export const getPosts = async (req, res) => {
+  try {
+    const { id } = req.user
+    const posts = await getAllRelatedPosts(id)
+    res.json({ posts })
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+export const getPostOfOneUser = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { username } = req.params
+    const user = await userModel.findById(id)
+    if (user.username === username) {
+      const posts = await postModel.find({ createdBy: id })
+      return res.json({ posts })
+    } else {
+      const otherUser = await userModel.findOne({ username })
+      if (otherUser) {
+        if (user.friends.includes(otherUser._id)) {
+          const posts = await postModel.find({ createdBy: otherUser._id })
+          return res.json({ posts })
+        } else {
+          const posts = await postModel.find({
+            createdBy: otherUser._id,
+            privacy: "public",
+          })
+          return res.json({ posts })
+        }
+      } else {
+        res.status(404).json({ message: "User does not exist" })
+      }
+    }
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, Please try again later" })
   }
 }

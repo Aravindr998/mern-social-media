@@ -7,7 +7,7 @@ import CardActions from "@mui/material/CardActions"
 import Avatar from "@mui/material/Avatar"
 import IconButton from "@mui/material/IconButton"
 import Typography from "@mui/material/Typography"
-import { red } from "@mui/material/colors"
+import { deepPurple } from "@mui/material/colors"
 import FavoriteIcon from "@mui/icons-material/Favorite"
 import ShareIcon from "@mui/icons-material/Share"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
@@ -15,12 +15,17 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
 
 function PostFeed(props) {
+  const fromatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
   return (
-    <Card sx={{ maxWidth: { xs: "90%", sm: "50%" }, marginBottom: "1rem" }}>
+    <Card sx={{ width: { xs: "90%", sm: "50%" }, marginBottom: "1rem" }}>
       <CardHeader
         avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            R
+          <Avatar
+            sx={{ bgcolor: deepPurple[900] }}
+            aria-label="profile-picture"
+            src={props?.createdBy?.profilePicture}
+          >
+            {props?.createdBy?.firstName?.charAt(0)}
           </Avatar>
         }
         action={
@@ -28,32 +33,34 @@ function PostFeed(props) {
             <MoreVertIcon />
           </IconButton>
         }
-        title="Shrimp and Chorizo Paella"
-        subheader="September 14, 2016"
+        title={props?.createdBy?.username}
+        subheader={fromatter.format(new Date(props?.createdAt))}
       />
       <CardContent>
         <Typography variant="body2" color="text.secondary">
-          This impressive paella is a perfect party dish and a fun meal to cook
-          together with your guests. Add 1 cup of frozen peas along with the
-          mussels, if you like.
+          {props?.description}
         </Typography>
       </CardContent>
-      <CardMedia
-        component="img"
-        height="400"
-        image="https://picsum.photos/200/300"
-        alt="Paella dish"
-        sx={{ padding: "2rem", borderRadius: "3rem" }}
-      />
+      {props?.media && (
+        <CardMedia
+          component="img"
+          height="400"
+          image={props?.media}
+          alt="Paella dish"
+          sx={{ padding: "2rem", borderRadius: "3rem" }}
+        />
+      )}
       <CardActions sx={{ display: "flex", justifyContent: "space-between" }}>
         <IconButton aria-label="like">
           <FavoriteBorderIcon color="primary" />
-          <Typography>200</Typography>
+          <Typography>{props?.likes ? props.likes : "Like"}</Typography>
           {/* <FavoriteIcon/> */}
         </IconButton>
         <IconButton aria-label="comment">
           <ChatBubbleOutlineIcon color="primary" />
-          <Typography>Comment</Typography>
+          <Typography>
+            {props?.comments?.length ? props.comments.length : "Comment"}
+          </Typography>
         </IconButton>
         <IconButton aria-label="share">
           <ShareIcon color="primary" />

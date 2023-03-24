@@ -46,6 +46,7 @@ export const authenticate = (req, res, next) => {
         throw err
       }
       res.json({ success: true, user })
+      sendOTP(user.phone)
     } catch (error) {
       console.log(error)
       return res
@@ -133,6 +134,7 @@ export const loginUser = (req, res) => {
           return res.status(401).json(info)
         }
         if (!user.isVerified) {
+          sendOTP(user.phone)
           return res.status(403).json({ notVerified: true, user })
         }
         const token = createToken(user.id, user.email)
