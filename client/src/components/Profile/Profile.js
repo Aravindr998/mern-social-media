@@ -14,6 +14,8 @@ function Profile() {
   const [posts, setPosts] = useState([])
   const [user, setUser] = useState({})
   const [authorized, setAuthorized] = useState(false)
+  const [friend, setFriend] = useState("Add Friend")
+  const [request, setRequest] = useState(false)
   const auth = useSelector((state) => state.auth)
   const loggedinUser = useSelector((state) => state.user)
   useEffect(() => {
@@ -23,17 +25,24 @@ function Profile() {
       })
       .then(({ data }) => {
         setUser(data.user)
-        console.log(data.user?._id, data.loggedinUser?.id)
         if (data.user?._id === data.loggedinUser?.id) {
           setAuthorized(true)
         } else {
           setAuthorized(false)
         }
+        if (data.friend) {
+          setFriend("Unfriend")
+        } else if (data.pending) {
+          setFriend("Request Sent")
+        }
+        if (data.requestReceived) {
+          setRequest(true)
+        }
       })
       .catch(({ response }) => {
         console.log(response)
       })
-  }, [])
+  }, [username])
   useEffect(() => {
     axios
       .get(`/api/post/user/${username}`, {
@@ -45,13 +54,33 @@ function Profile() {
       .catch(({ response }) => {
         console.log(response)
       })
-  }, [])
+  }, [username])
+  const friendHandler = () => {
+    axios
+      .patch(
+        "/api/friend/change",
+        { id: user._id },
+        { headers: { Authorization: auth } }
+      )
+      .then(({ data }) => {
+        if (data.success) {
+          if (data.message === "Unfriend") {
+            setRequest((prevState) => !prevState)
+          }
+          setFriend(data.message)
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
   let postFeed
   if (posts.length > 0) {
     postFeed = posts.map((post) => {
       return (
         <PostFeed
           key={post._id}
+          postId={post._id}
           createdBy={post.createdBy}
           createdAt={post.createdAt}
           description={post.description}
@@ -60,6 +89,7 @@ function Profile() {
           location={post.location}
           shared={post.shared}
           comments={post.comments}
+          liked={post.likes.includes(loggedinUser._id)}
         />
       )
     })
@@ -139,11 +169,15 @@ function Profile() {
               justifyContent: { xs: "center", lg: "flex-start" },
             }}
           >
-            <Button variant="outlined">
-              {loggedinUser?.friends?.includes(user._id)
-                ? "Unfriend"
-                : "Add Friend"}
-            </Button>
+            {!request ? (
+              <Button variant="outlined" onClick={friendHandler}>
+                {friend}
+              </Button>
+            ) : (
+              <Button variant="contained" onClick={friendHandler}>
+                Accept Request
+              </Button>
+            )}
             <Button variant="outlined" color="error" sx={{ marginLeft: 2 }}>
               Block
             </Button>

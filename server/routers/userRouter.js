@@ -14,6 +14,7 @@ import {
   getDetails,
   getSearchResult,
   getUserDetails,
+  setFriend,
 } from "../controllers/userController.js"
 import "../auth/localStrategy.js"
 import "../auth/auth.js"
@@ -34,5 +35,7 @@ router.get("/user/details", isUserLoggedin, getDetails)
 router.get("/users/search", isUserLoggedin, getSearchResult)
 
 router.get("/user/profile/:username", isUserLoggedin, getUserDetails)
+
+router.patch("/friend/change", isUserLoggedin, setFriend)
 
 export default router

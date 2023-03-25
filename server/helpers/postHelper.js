@@ -23,6 +23,15 @@ export const isPostValid = (post) => {
   return { isValid, errors }
 }
 
+export const isPostWithImageValid = (post) => {
+  const errors = {}
+  if (!post.privacy) {
+    errors.privacy = "Please select a privacy option"
+  }
+  const isValid = !Object.keys(errors).length
+  return { isValid, errors }
+}
+
 export const getAllRelatedPosts = async (id) => {
   try {
     const posts = await postModel.aggregate([
@@ -51,10 +60,24 @@ export const getAllRelatedPosts = async (id) => {
           ],
         },
       },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
     ])
     return posts
   } catch (error) {
     console.log(error)
     throw error
   }
+}
+
+export const isCommentValid = (comment) => {
+  const errors = {}
+  if (!(comment.trim().length > 0)) {
+    errors.comment = "Please enter a valid comment"
+  }
+  const isValid = !Object.keys(errors).length
+  return { isValid, errors }
 }

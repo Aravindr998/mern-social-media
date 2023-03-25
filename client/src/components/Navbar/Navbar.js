@@ -34,6 +34,13 @@ function Navbar() {
   const [search, setSearch] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState([])
+  const handleLogout = (e) => {
+    if (e.target.innerHTML === "Logout") {
+      localStorage.removeItem(TOKEN_KEY)
+      dispatch(clearAuth())
+      navigate("/login")
+    }
+  }
   let searchResult
   if (result.length > 0) {
     searchResult = result.map((user) => {
@@ -223,7 +230,9 @@ function Navbar() {
             >
               {settings.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
+                  <Typography textAlign="center" onClick={handleLogout}>
+                    {setting}
+                  </Typography>
                 </MenuItem>
               ))}
             </Menu>

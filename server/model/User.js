@@ -43,18 +43,10 @@ const userSchema = new mongoose.Schema(
     coverPicture: {
       type: String,
     },
-    pendingRequests: [
-      {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "users",
-        },
-        createdAt: {
-          type: Date,
-          default: new Date(),
-        },
-      },
-    ],
+    pendingRequests: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "users",
+    },
     friends: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "users",
@@ -78,6 +70,10 @@ const userSchema = new mongoose.Schema(
     status: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "status",
+    },
+    pendingSentRequest: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "users",
     },
   },
   { timestamps: true }

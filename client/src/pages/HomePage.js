@@ -1,6 +1,6 @@
 import { CssBaseline, Typography } from "@mui/material"
 import { Container } from "@mui/system"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import ActivePanel from "../components/ActivePanel/ActivePanel"
 import Create from "../components/Create/Create"
@@ -11,6 +11,7 @@ import { fetchPosts } from "../features/posts/postSlice"
 
 function HomePage() {
   const posts = useSelector((state) => state.posts)
+  const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(fetchPosts())
@@ -25,6 +26,7 @@ function HomePage() {
     postFeed = posts.posts.posts.map((post) => (
       <PostFeed
         key={post._id}
+        postId={post._id}
         createdBy={post.createdBy}
         createdAt={post.createdAt}
         description={post.description}
@@ -33,6 +35,7 @@ function HomePage() {
         location={post.location}
         shared={post.shared}
         comments={post.comments}
+        liked={post.likes.includes(user._id)}
       />
     ))
   } else {

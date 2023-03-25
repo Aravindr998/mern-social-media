@@ -36,8 +36,8 @@ function LoginForm() {
       .then(({ data }) => {
         if (data.success) {
           localStorage.setItem(TOKEN_KEY, `Bearer ${data.token}`)
-          setAuth()
-          setUser(data.user)
+          dispatch(setAuth())
+          dispatch(setUser(data.user))
           navigate("/")
         }
       })
