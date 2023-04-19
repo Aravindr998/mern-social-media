@@ -15,7 +15,6 @@ export const isPostValid = (post) => {
   if (!isDescriptionValid(post.description)) {
     errors.description = "Please enter a valid description"
   }
-  console.log(post.description)
   if (!post.privacy) {
     errors.privacy = "Please select a privacy option"
   }
@@ -32,7 +31,7 @@ export const isPostWithImageValid = (post) => {
   return { isValid, errors }
 }
 
-export const getAllRelatedPosts = async (id) => {
+export const getAllRelatedPosts = async (id, skip = 0, limit = 10) => {
   try {
     const posts = await postModel.aggregate([
       {
@@ -61,9 +60,49 @@ export const getAllRelatedPosts = async (id) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "comments.userId",
+          foreignField: "_id",
+          as: "userId",
+        },
+      },
+      {
+        $set: {
+          comments: {
+            $map: {
+              input: "$comments",
+              as: "s",
+              in: {
+                $mergeObjects: [
+                  "$$s",
+                  {
+                    userId: {
+                      $filter: {
+                        input: "$userId",
+                        as: "s2",
+                        cond: {
+                          $eq: ["$$s2._id", "$$s.userId"],
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $unset: "userId",
+      },
+      {
         $sort: {
           createdAt: -1,
         },
+      },
+      {
+        $limit: 10,
       },
     ])
     return posts

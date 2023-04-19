@@ -17,7 +17,6 @@ export const validateUser = async (req, res, next) => {
     const { email, phone, username } = req.body
     const existing = await userModel.findOne({ email })
     if (existing) {
-      console.log(existing)
       return res.status(409).json({ message: "User already exists" })
     }
     const phoneExisting = await userModel.findOne({ phone })

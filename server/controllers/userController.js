@@ -80,7 +80,6 @@ export const getUserDetails = async (req, res) => {
       const friend = check.friends.includes(user._id)
       const pending = check.pendingSentRequest.includes(user._id)
       const requestReceived = check.pendingRequests.includes(user._id)
-      console.log(requestReceived)
       return res.json({
         user,
         loggedinUser: req.user,
@@ -120,7 +119,6 @@ export const setFriend = async (req, res) => {
       })
       return res.json({ success: true, message: "Add Friend" })
     } else if (user.pendingRequests.includes(friendId)) {
-      console.log("here")
       await userModel.findByIdAndUpdate(id, {
         $pull: { pendingRequests: friendId },
       })

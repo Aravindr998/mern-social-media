@@ -27,7 +27,6 @@ export const createPost = async (req, res) => {
       })
     } else {
       const { isValid, errors } = isPostValid(req.body)
-      console.log(isValid)
       if (!isValid) {
         return res.status(400).json({ success: false, errors })
       }
@@ -104,7 +103,6 @@ export const getPostOfOneUser = async (req, res) => {
 export const setLike = async (req, res) => {
   try {
     const { postId } = req.body
-    console.log(postId)
     const { id } = req.user
     const post = await postModel.findById(postId)
     if (post.likes.includes(id)) {
@@ -123,7 +121,6 @@ export const setLike = async (req, res) => {
 export const setComment = async (req, res) => {
   try {
     const { postId, comment } = req.body
-    console.log(comment)
     const value = {
       userId: req.user.id,
       text: comment,

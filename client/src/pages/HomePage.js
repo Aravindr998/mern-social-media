@@ -1,6 +1,6 @@
 import { CssBaseline, Typography } from "@mui/material"
 import { Container } from "@mui/system"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import ActivePanel from "../components/ActivePanel/ActivePanel"
 import Create from "../components/Create/Create"
@@ -16,7 +16,6 @@ function HomePage() {
   useEffect(() => {
     dispatch(fetchPosts())
   }, [])
-  console.log(posts)
   let postFeed
   if (posts.error) {
     postFeed = (
@@ -36,10 +35,17 @@ function HomePage() {
         shared={post.shared}
         comments={post.comments}
         liked={post.likes.includes(user._id)}
+        loading={posts.loading}
       />
     ))
   } else {
-    postFeed = <Typography>No posts to show</Typography>
+    if (posts.loading) {
+      postFeed = (
+        <PostFeed loading={posts.loading} description={true} media={true} />
+      )
+    } else {
+      postFeed = <Typography>No posts to show</Typography>
+    }
   }
   return (
     <>

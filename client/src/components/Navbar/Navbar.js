@@ -46,17 +46,29 @@ function Navbar() {
     searchResult = result.map((user) => {
       return (
         <React.Fragment key={user._id}>
-          <Button
-            sx={{ textTransform: "none" }}
-            variant="plain"
-            startIcon={<Avatar src={user.profilePicture} />}
+          <Box
+            sx={{
+              textTransform: "none",
+              marginLeft: "0",
+              display: "flex",
+              padding: "0.75rem",
+              alignItems: "center",
+              "&:hover": {
+                backgroundColor: "#EFEFEF",
+              },
+              borderRadius: "0.5rem",
+              cursor: "pointer",
+            }}
+            // variant="plain"
+            // fullWidth
             onClick={() => {
               console.log("entered")
               navigate(`/profile/${user.username}`)
             }}
           >
+            <Avatar src={user.profilePicture} sx={{ marginRight: "0.5rem" }} />
             {user.username}
-          </Button>
+          </Box>
           <Divider />
         </React.Fragment>
       )

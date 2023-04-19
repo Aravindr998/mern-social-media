@@ -7,10 +7,12 @@ import PostFeed from "../PostFeed/PostFeed"
 import axios from "../../axios"
 import { useSelector } from "react-redux"
 import { useParams } from "react-router-dom"
+import Skeleton from "@mui/material/Skeleton"
 
 function Profile() {
   const theme = useTheme()
   const { username } = useParams()
+  const [userLoading, setUserLoading] = useState(true)
   const [posts, setPosts] = useState([])
   const [user, setUser] = useState({})
   const [authorized, setAuthorized] = useState(false)
@@ -24,6 +26,7 @@ function Profile() {
         headers: { Authorization: auth },
       })
       .then(({ data }) => {
+        setUserLoading(false)
         setUser(data.user)
         if (data.user?._id === data.loggedinUser?.id) {
           setAuthorized(true)
@@ -40,6 +43,7 @@ function Profile() {
         }
       })
       .catch(({ response }) => {
+        setUserLoading(false)
         console.log(response)
       })
   }, [username])
@@ -133,7 +137,11 @@ function Profile() {
           }}
         >
           <Typography sx={{ fontSize: "2rem", fontWeight: 700 }}>
-            {user.firstName + " " + user.lastName}
+            {userLoading ? (
+              <Skeleton width="15rem" />
+            ) : (
+              user.firstName + " " + user.lastName
+            )}
           </Typography>
           <Typography
             sx={{
@@ -142,7 +150,7 @@ function Profile() {
               color: theme.palette.mode === "dark" ? "#777481" : "#777481",
             }}
           >
-            {user.username}
+            {userLoading ? <Skeleton width={120} /> : user.username}
           </Typography>
         </Box>
         {authorized && (

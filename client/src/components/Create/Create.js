@@ -6,6 +6,7 @@ import Avatar from "@mui/material/Avatar"
 import IconButton from "@mui/material/IconButton"
 import Typography from "@mui/material/Typography"
 import { Box } from "@mui/system"
+import CircularProgressWithLabel from "../CircularProgressWithLabel/CircularProgressWithLabel"
 import {
   Alert,
   Button,
@@ -23,10 +24,12 @@ import {
 } from "@mui/material"
 import ImageIcon from "@mui/icons-material/Image"
 import axios from "../../axios"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
+import { addPost } from "../../features/posts/postSlice"
 
 function Create() {
   const fileRef = useRef()
+  const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
   const [description, setDescription] = useState("")
   const [image, setImage] = useState("")
@@ -38,6 +41,8 @@ function Create() {
   const [file, setFile] = useState(null)
   const [privacyError, setPrivacyError] = useState("")
   const [descriptionError, setDescriptionError] = useState("")
+  const [progress, setProgress] = useState(0)
+  const [showProgress, setShowProgress] = useState(false)
   const handleClickOpen = () => {
     setOpen(true)
   }
@@ -62,11 +67,22 @@ function Create() {
       console.log("here")
       formData.append("post", file.files[0], file.files[0].name)
     }
+    setShowProgress(true)
     axios
       .post("/api/post/create", formData, {
         headers: { Authorization: auth, "Content-Type": "multipart/form-data" },
+        onUploadProgress: (ProgressEvent) => {
+          setProgress(
+            parseInt(
+              Math.round((ProgressEvent.loaded * 100) / ProgressEvent.total)
+            )
+          )
+        },
       })
       .then(({ data }) => {
+        dispatch(addPost(data.post))
+        console.log(data.post)
+        setShowProgress(false)
         setImage("")
         setLocation("")
         setDescription("")
@@ -76,6 +92,7 @@ function Create() {
         setFile(null)
       })
       .catch(({ response }) => {
+        setShowProgress(false)
         console.log(response)
         if (response.status === 400) {
           const { data } = response
@@ -109,7 +126,7 @@ function Create() {
         </CardContent>
         <Divider />
         <CardActions sx={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton aria-label="live">
+          <IconButton aria-label="live" sx={{ borderRadius: "1rem" }}>
             <Box
               component="img"
               sx={{ width: "1.5rem", marginRight: 1 }}
@@ -118,7 +135,11 @@ function Create() {
             />
             <Typography>Go Live!</Typography>
           </IconButton>
-          <IconButton aria-label="post" onClick={handleClickOpen}>
+          <IconButton
+            aria-label="post"
+            onClick={handleClickOpen}
+            sx={{ borderRadius: "1rem" }}
+          >
             <Box
               component="img"
               sx={{ width: "1.5rem", marginRight: 1 }}
@@ -127,7 +148,7 @@ function Create() {
             />
             <Typography>Photo/Video</Typography>
           </IconButton>
-          <IconButton aria-label="activity">
+          <IconButton aria-label="activity" sx={{ borderRadius: "1rem" }}>
             <Box
               component="img"
               sx={{ width: "1.5rem", marginRight: 1 }}
@@ -266,6 +287,9 @@ function Create() {
           Posted Successfully
         </Alert>
       </Snackbar>
+      <Box sx={{ position: "relative" }}>
+        {showProgress && <CircularProgressWithLabel value={progress} />}
+      </Box>
     </>
   )
 }
