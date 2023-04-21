@@ -7,6 +7,7 @@ import {
   setLike,
   setComment,
   validateComment,
+  loadPosts,
 } from "../controllers/postController.js"
 import {} from "../helpers/postHelper.js"
 import upload from "../middlewares/multerConfig.js"
@@ -24,5 +25,7 @@ router.get("/user/:username", isUserLoggedin, getPostOfOneUser)
 router.patch("/like", isUserLoggedin, setLike)
 
 router.patch("/comment", isUserLoggedin, validateComment, setComment)
+
+router.get("/load", isUserLoggedin, loadPosts)
 
 export default router

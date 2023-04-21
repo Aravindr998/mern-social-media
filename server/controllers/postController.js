@@ -5,6 +5,7 @@ import {
   getAllRelatedPosts,
   isPostWithImageValid,
   isCommentValid,
+  getTotalPostsNumber,
 } from "../helpers/postHelper.js"
 
 export const createPost = async (req, res) => {
@@ -59,9 +60,11 @@ export const validatePost = (req, res, next) => {
 export const getPosts = async (req, res) => {
   try {
     const { id } = req.user
+    const total = await getTotalPostsNumber(id)
     const posts = await getAllRelatedPosts(id)
-    res.json({ posts })
+    res.json({ posts, totalCount: total[0].totalPosts })
   } catch (error) {
+    console.log(error)
     res
       .status(500)
       .json({ message: "Something went wrong, please try again later" })
@@ -141,4 +144,19 @@ export const validateComment = (req, res, next) => {
     return res.status(400).json(errors)
   }
   next()
+}
+
+export const loadPosts = async (req, res) => {
+  const { id } = req.user
+  const { page } = req.query
+  console.log(page)
+  const skip = page * 10
+  try {
+    const posts = await getAllRelatedPosts(id, skip)
+    res.json(posts)
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
 }

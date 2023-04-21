@@ -31,7 +31,7 @@ export const isPostWithImageValid = (post) => {
   return { isValid, errors }
 }
 
-export const getAllRelatedPosts = async (id, skip = 0, limit = 10) => {
+export const getAllRelatedPosts = async (id, skip = 0) => {
   try {
     const posts = await postModel.aggregate([
       {
@@ -102,6 +102,9 @@ export const getAllRelatedPosts = async (id, skip = 0, limit = 10) => {
         },
       },
       {
+        $skip: skip,
+      },
+      {
         $limit: 10,
       },
     ])
@@ -119,4 +122,42 @@ export const isCommentValid = (comment) => {
   }
   const isValid = !Object.keys(errors).length
   return { isValid, errors }
+}
+
+export const getTotalPostsNumber = async (id) => {
+  try {
+    const count = await postModel.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: {
+          path: "$createdBy",
+        },
+      },
+      {
+        $match: {
+          $or: [
+            {
+              "createdBy._id": new mongoose.Types.ObjectId(id),
+            },
+            {
+              "createdBy.friends": new mongoose.Types.ObjectId(id),
+            },
+          ],
+        },
+      },
+      {
+        $count: "totalPosts",
+      },
+    ])
+    return count
+  } catch (error) {
+    throw error
+  }
 }
