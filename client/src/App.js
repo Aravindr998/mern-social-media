@@ -2,10 +2,10 @@ import "./App.css"
 import LoginPage from "./pages/LoginPage"
 import { createTheme, ThemeProvider } from "@mui/material/styles"
 import { defaultTheme } from "./theme/theme"
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, useParams, useLocation } from "react-router-dom"
 import SignupPage from "./pages/SignupPage"
 import OtpPage from "./pages/OtpPage"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import axios from "./axios"
 import { useDispatch, useSelector } from "react-redux"
 import { setUser } from "./features/users/userSlice"
@@ -14,6 +14,11 @@ import ProtectedRoutes from "./utils/ProtectedRoutes"
 import PublicRoutes from "./utils/PublicRoutes"
 import AddDetailsPage from "./pages/AddDetailsPage"
 import ProfilePage from "./pages/ProfilePage"
+import ConversationsPage from "./pages/ConversationsPage"
+import Chat from "./components/Chat/Chat"
+import { socket } from "./socket"
+import { addMessage } from "./features/messages/messageSlice"
+import Notification from "./components/Notification/Notification"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -21,6 +26,14 @@ const theme = createTheme(defaultTheme(mode))
 function App() {
   const dispatch = useDispatch()
   const authToken = useSelector((state) => state.auth)
+  const { pathname } = useLocation()
+  const [show, setShow] = useState(false)
+  const [content, setContent] = useState(null)
+  const [type, setType] = useState("")
+  console.log(pathname)
+  const closeNotification = () => {
+    setShow(false)
+  }
   useEffect(() => {
     if (authToken) {
       axios
@@ -31,6 +44,34 @@ function App() {
         .catch((error) => console.log(error))
     }
   })
+  useEffect(() => {
+    if (authToken) {
+      socket.connect()
+      socket.emit("setup", authToken)
+    }
+  }, [authToken])
+
+  useEffect(() => {
+    socket.on("latestMessage", (message) => {
+      if (
+        pathname.includes("conversations") &&
+        pathname.includes(message.conversation)
+      ) {
+        setShow(false)
+        setContent(null)
+        dispatch(addMessage(message))
+      } else {
+        console.log("not in conversation")
+        setShow(true)
+        setContent(message)
+        setType("conversation")
+      }
+    })
+
+    return () => {
+      socket.off("latestMessage")
+    }
+  }, [pathname])
 
   return (
     <ThemeProvider theme={theme}>
@@ -40,6 +81,9 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/details/add" element={<AddDetailsPage />} />
             <Route path="/profile/:username" element={<ProfilePage />} />
+            <Route path="/conversations" element={<ConversationsPage />}>
+              <Route path=":conversationId" element={<Chat />} />
+            </Route>
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />
@@ -47,6 +91,12 @@ function App() {
             <Route path="/signup/otp" element={<OtpPage />} />
           </Route>
         </Routes>
+        <Notification
+          message={content}
+          show={show}
+          type={type}
+          close={closeNotification}
+        />
       </div>
     </ThemeProvider>
   )

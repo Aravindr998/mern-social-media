@@ -4,16 +4,16 @@ const messageSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
     },
     content: String,
     conversation: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "conversations",
+      ref: "Conversations",
     },
     readBy: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
   },
   {

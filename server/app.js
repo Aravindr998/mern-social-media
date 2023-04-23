@@ -6,6 +6,7 @@ import db from "./config/db.config.js"
 import userRouter from "./routers/userRouter.js"
 import postRouter from "./routers/postRouter.js"
 import conversationRouter from "./routers/conversationRouter.js"
+import io from "./sockets/socket.js"
 
 const app = express()
 
@@ -15,11 +16,12 @@ app.use(express.static("./public"))
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-
+let server
 db.once("open", () => {
-  app.listen(PORT, () => {
+  server = app.listen(PORT, () => {
     console.log(`Server listening to port ${PORT}`)
   })
+  io.attach(server)
 })
 
 app.use("/api", userRouter)

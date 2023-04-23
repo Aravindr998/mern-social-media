@@ -62,7 +62,7 @@ export const getMessages = async (req, res) => {
     const { id } = req.user
     const { conversationId } = req.params
     const messages = await getAllMessages(conversationId, id)
-    res.json(messages)
+    res.json(messages[0])
   } catch (error) {
     console.log(error)
     res
@@ -82,8 +82,15 @@ export const sendMessage = async (req, res) => {
       conversation: conversationId,
     })
     await message.save()
-    res.status(201).json({ success: true })
+    await conversationModel.findByIdAndUpdate(conversationId, {
+      "latestMessage.sender": id,
+      "latestMessage.message": content,
+    })
+    await message.populate("sender")
+    console.log(message)
+    res.status(201).json(message)
   } catch (error) {
+    console.log(error)
     res
       .status(500)
       .json({ message: "Something went wrong, please try again later" })

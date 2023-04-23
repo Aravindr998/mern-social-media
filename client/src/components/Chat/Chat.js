@@ -1,0 +1,173 @@
+import React, { useEffect, useRef, useState } from "react"
+import {
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  TextField,
+  Typography,
+} from "@mui/material"
+import LeftChatBubble from "../LeftChatBubble/LeftChatBubble"
+import RightChatBubble from "../RightChatBubble/RightChatBubble"
+import VideoCallIcon from "@mui/icons-material/VideoCall"
+import CallIcon from "@mui/icons-material/Call"
+import SendIcon from "@mui/icons-material/Send"
+import { useParams } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { addMessage, fetchMessages } from "../../features/messages/messageSlice"
+import axios from "../../axios"
+import SidePopup from "../SidePopup/SidePopup"
+import { socket } from "../../socket"
+
+const Chat = () => {
+  const [content, setContent] = useState("")
+  const [showError, setShowError] = useState(false)
+  const messages = useSelector((state) => state.messages)
+  const user = useSelector((state) => state.user)
+  const auth = useSelector((state) => state.auth)
+  const chatParent = useRef()
+  const { conversationId } = useParams()
+  const dispatch = useDispatch()
+  useEffect(() => {
+    setContent("")
+  }, [conversationId])
+  useEffect(() => {
+    const domNode = chatParent.current
+    if (domNode) {
+      domNode.scrollTop = domNode.scrollHeight
+    }
+  })
+  const handleSend = () => {
+    setShowError(false)
+    axios
+      .post(
+        `/api/conversation/message/${conversationId}`,
+        { content },
+        {
+          headers: { Authorization: auth },
+        }
+      )
+      .then(({ data }) => {
+        dispatch(addMessage(data))
+        setContent("")
+        socket.emit("newMessage", data)
+      })
+      .catch((error) => {
+        console.log(error)
+        setContent("")
+        setShowError(true)
+      })
+  }
+  useEffect(() => {
+    dispatch(fetchMessages(conversationId))
+  }, [conversationId])
+  console.log(messages)
+  let senderName
+  let chatBubbles
+  let noChats
+  if (messages?.messages.users) {
+    senderName =
+      messages?.messages?.users[0]?._id !== user?._id
+        ? messages?.messages?.users[0]?.username
+        : messages?.messages?.users[1]?.username
+    if (messages?.messages?.messages.length) {
+      chatBubbles = messages?.messages?.messages?.map((item) => {
+        if (item.sender._id === user?._id) {
+          return <RightChatBubble message={item.content} key={item._id} />
+        } else {
+          return <LeftChatBubble message={item.content} key={item._id} />
+        }
+      })
+    } else {
+      noChats = "No messages to show"
+    }
+  }
+  return (
+    <Box
+      sx={{
+        width: "70%",
+        height: "90%",
+        display: { xs: "none", sm: "flex" },
+        flexDirection: "column",
+      }}
+    >
+      <Box
+        sx={{
+          width: "100%",
+          height: "10%",
+          paddingLeft: "10px",
+          display: "flex",
+          justifyContent: "space-between",
+          borderBottom: "solid 1px #DFDFDF",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Avatar />
+          <Box sx={{ paddingLeft: "10px" }}>
+            <Typography sx={{ fontWeight: "500" }}>
+              {messages?.messages?.isGroupChat
+                ? messages?.messages?.chatName
+                : senderName}
+            </Typography>
+            <Typography sx={{ fontSize: ".75rem" }}>Online</Typography>
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "12%",
+            marginRight: 2,
+          }}
+        >
+          <IconButton>
+            <VideoCallIcon color="primary" />
+          </IconButton>
+          <IconButton>
+            <CallIcon fontSize="small" color="primary" />
+          </IconButton>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          width: "100%",
+          height: "90%",
+          padding: "1rem",
+          display: "flex",
+          flexDirection: "column",
+          // justifyContent: "flex-end",
+          overflowY: "auto",
+        }}
+        ref={chatParent}
+      >
+        {chatBubbles}
+        {noChats && (
+          <Typography textAlign={"center"} fontSize={13} fontWeight={500}>
+            {noChats}
+          </Typography>
+        )}
+      </Box>
+      <Box sx={{ width: "100%", display: "flex", paddingTop: "1rem" }}>
+        <TextField
+          fullWidth
+          sx={{ marginRight: "1rem" }}
+          variant="outlined"
+          placeholder="Write Something..."
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        <Button variant="contained" onClick={handleSend}>
+          <SendIcon />
+        </Button>
+      </Box>
+      <SidePopup
+        message={"Couldn't send message. Please try again later"}
+        type={"error"}
+        show={showError}
+      />
+    </Box>
+  )
+}
+
+export default Chat
