@@ -33,7 +33,18 @@ const postSlice = createSlice({
   initialState,
   reducers: {
     addPost: (state, action) => {
-      state.posts.posts.unshift(action.payload)
+      state.posts.unshift(action.payload)
+    },
+    editPost: (state, action) => {
+      state.posts = state.posts.map((item) => {
+        if (item._id === action.payload._id) return action.payload
+        else return item
+      })
+    },
+    deletePost: (state, action) => {
+      state.posts = state.posts.filter(
+        (item) => item._id !== action.payload._id
+      )
     },
   },
   extraReducers: (builder) => {
@@ -67,4 +78,4 @@ const postSlice = createSlice({
 })
 
 export default postSlice.reducer
-export const { addPost } = postSlice.actions
+export const { addPost, editPost, deletePost } = postSlice.actions

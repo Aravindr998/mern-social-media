@@ -37,6 +37,10 @@ io.on("connection", (socket) => {
       socket.in(user._id.toString()).emit("latestMessage", message)
     })
   })
+
+  socket.on("newConversation", (userId) => {
+    socket.in(userId).emit("fetchConversation")
+  })
 })
 
 export default io

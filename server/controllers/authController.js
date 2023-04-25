@@ -7,6 +7,7 @@ import {
 } from "../helpers/authHelper.js"
 import passport from "passport"
 import { checkOTPAsync, sendOTP } from "../helpers/otpHelper.js"
+import adminModel from "../model/Admin.js"
 
 export const validateUser = async (req, res, next) => {
   const { errors, isValid } = validateRegister(req.body)
@@ -62,6 +63,23 @@ export const isUserLoggedin = (req, res, next) => {
         throw err
       }
       req.user = user
+      next()
+    } catch (error) {
+      console.log(error)
+      res.status(401).json({ notAuthenticated: true })
+    }
+  })(req, res)
+}
+
+export const isAdminLoggedin = (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, async (err, user) => {
+    try {
+      if (err || !user) {
+        throw err
+      }
+      req.user = user
+      const isAdmin = await adminModel.findById(user.id)
+      if (!isAdmin) throw "Not Authorized"
       next()
     } catch (error) {
       console.log(error)

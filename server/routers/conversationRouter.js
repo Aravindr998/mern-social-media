@@ -5,6 +5,10 @@ import {
   createNewConversation,
   getMessages,
   sendMessage,
+  getSearchResults,
+  addUserToConversation,
+  removeUser,
+  searchUsers,
 } from "../controllers/conversationController.js"
 
 const router = Router()
@@ -16,5 +20,13 @@ router.post("/create", isUserLoggedin, createNewConversation)
 router.get("/:conversationId", isUserLoggedin, getMessages)
 
 router.post("/message/:conversationId", isUserLoggedin, sendMessage)
+
+router.get("/:conversationId/search", isUserLoggedin, getSearchResults)
+
+router.put("/:conversationId/user/add", isUserLoggedin, addUserToConversation)
+
+router.put("/:conversationId/remove", isUserLoggedin, removeUser)
+
+router.get("/search/users", isUserLoggedin, searchUsers)
 
 export default router

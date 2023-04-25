@@ -5,8 +5,10 @@ import HomeIcon from "@mui/icons-material/Home"
 import ChatIcon from "@mui/icons-material/Chat"
 import NotificationsIcon from "@mui/icons-material/Notifications"
 import { Box } from "@mui/system"
+import { useNavigate } from "react-router-dom"
 
 function SidePanel() {
+  const navigate = useNavigate()
   return (
     <Card
       sx={{
@@ -21,7 +23,12 @@ function SidePanel() {
       }}
     >
       <CardContent>
-        <Box sx={{ display: "flex", marginBottom: 5 }}>
+        <Box
+          sx={{ display: "flex", marginBottom: 5, cursor: "pointer" }}
+          onClick={() => {
+            navigate("/")
+          }}
+        >
           <HomeIcon sx={{ marginRight: 1 }} />
           <Typography sx={{ fontWeight: 700 }}>Home</Typography>
         </Box>
@@ -29,7 +36,12 @@ function SidePanel() {
           <ExploreIcon sx={{ marginRight: 1 }} />
           <Typography sx={{ fontWeight: 700 }}>Discover</Typography>
         </Box>
-        <Box sx={{ display: "flex", marginBottom: 5 }}>
+        <Box
+          sx={{ display: "flex", marginBottom: 5, cursor: "pointer" }}
+          onClick={() => {
+            navigate("/conversations")
+          }}
+        >
           <ChatIcon sx={{ marginRight: 1 }} />
           <Typography sx={{ fontWeight: 700 }}>Conversations</Typography>
         </Box>

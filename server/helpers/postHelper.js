@@ -35,6 +35,11 @@ export const getAllRelatedPosts = async (id, skip = 0) => {
   try {
     const posts = await postModel.aggregate([
       {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
           from: "users",
           localField: "createdBy",
@@ -128,6 +133,11 @@ export const getTotalPostsNumber = async (id) => {
   try {
     const count = await postModel.aggregate([
       {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
           from: "users",
           localField: "createdBy",
@@ -157,6 +167,73 @@ export const getTotalPostsNumber = async (id) => {
       },
     ])
     return count
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getCommentsFromPost = async (postId, skip) => {
+  try {
+    const comments = await postModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(postId),
+        },
+      },
+      {
+        $project: {
+          comments: 1,
+          _id: 0,
+        },
+      },
+      {
+        $unwind: {
+          path: "$comments",
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: ["$$ROOT", "$comments"],
+          },
+        },
+      },
+      {
+        $project: {
+          comments: 0,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "userId",
+        },
+      },
+      {
+        $unwind: {
+          path: "$userId",
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: 10,
+      },
+      {
+        $sort: {
+          createdAt: 1,
+        },
+      },
+    ])
+    return comments
   } catch (error) {
     throw error
   }

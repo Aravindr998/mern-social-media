@@ -6,6 +6,7 @@ import db from "./config/db.config.js"
 import userRouter from "./routers/userRouter.js"
 import postRouter from "./routers/postRouter.js"
 import conversationRouter from "./routers/conversationRouter.js"
+import adminRouter from "./routers/adminRouter.js"
 import io from "./sockets/socket.js"
 
 const app = express()
@@ -25,5 +26,6 @@ db.once("open", () => {
 })
 
 app.use("/api", userRouter)
-app.use("/api/post", postRouter)
+app.use("/api/admin", adminRouter)
 app.use("/api/conversation", conversationRouter)
+app.use("/api/post", postRouter)

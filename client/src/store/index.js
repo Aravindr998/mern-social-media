@@ -4,6 +4,9 @@ import userReducer from "../features/users/userSlice"
 import postReducer from "../features/posts/postSlice"
 import conversationReducer from "../features/conversations/conversationSlice"
 import messageReducer from "../features/messages/messageSlice"
+import allUsersReducer from "../features/allUsersSlice/allUsersSlice"
+import adminAuthReducer from "../features/adminAuth/adminAuthSlice"
+import commentReducer from "../features/comments/commentSlice"
 
 const store = configureStore({
   reducer: {
@@ -12,6 +15,9 @@ const store = configureStore({
     posts: postReducer,
     conversations: conversationReducer,
     messages: messageReducer,
+    allUsers: allUsersReducer,
+    adminAuth: adminAuthReducer,
+    comments: commentReducer,
   },
 })
 

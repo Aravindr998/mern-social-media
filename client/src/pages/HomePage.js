@@ -38,22 +38,25 @@ function HomePage() {
       <Typography>Something went wrong. Please Try again later</Typography>
     )
   } else if (posts?.posts?.length) {
-    postFeed = posts.posts.map((post) => (
-      <PostFeed
-        key={post._id}
-        postId={post._id}
-        createdBy={post.createdBy}
-        createdAt={post.createdAt}
-        description={post.description}
-        media={post.media}
-        likes={post.likes.length}
-        location={post.location}
-        shared={post.shared}
-        comments={post.comments}
-        liked={post.likes.includes(user?._id)}
-        loading={posts.loading}
-      />
-    ))
+    postFeed = posts.posts.map((post) => {
+      return (
+        <PostFeed
+          key={post._id}
+          postId={post._id}
+          createdBy={post.createdBy}
+          createdAt={post.createdAt}
+          description={post.description}
+          media={post.media}
+          likes={post.likes.length}
+          location={post.location}
+          shared={post.shared}
+          comments={post.comments}
+          liked={post.likes.includes(user?._id)}
+          loading={posts.loading}
+          privacy={post.privacy}
+        />
+      )
+    })
   } else {
     if (posts.loading) {
       postFeed = (
@@ -84,6 +87,7 @@ function HomePage() {
               // paddingLeft: { xs: "2rem ", lg: "18rem !important" },
               // paddingRight: { xs: "2rem ", lg: "18rem !important" },
             }}
+            key={1}
           >
             <PostFeed loading={true} description={true} media={true} />
           </Container>

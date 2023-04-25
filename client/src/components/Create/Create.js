@@ -58,6 +58,10 @@ function Create() {
     e.preventDefault()
     setError(false)
     setSuccess(false)
+    if (!privacy) {
+      setPrivacyError("Please select a privacy")
+      return
+    }
     const formData = new FormData()
     formData.append("description", description)
     formData.append("location", location)

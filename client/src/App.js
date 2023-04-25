@@ -2,6 +2,7 @@ import "./App.css"
 import LoginPage from "./pages/LoginPage"
 import { createTheme, ThemeProvider } from "@mui/material/styles"
 import { defaultTheme } from "./theme/theme"
+import { adminTheme } from "./theme/adminTheme"
 import { Routes, Route, useParams, useLocation } from "react-router-dom"
 import SignupPage from "./pages/SignupPage"
 import OtpPage from "./pages/OtpPage"
@@ -19,9 +20,15 @@ import Chat from "./components/Chat/Chat"
 import { socket } from "./socket"
 import { addMessage } from "./features/messages/messageSlice"
 import Notification from "./components/Notification/Notification"
+import AdminLoginPage from "./pages/AdminLoginPage"
+import AdminDashboardPage from "./pages/AdminDashboardPage"
+import AdminUsersPage from "./pages/AdminUsersPage"
+import AdminPublicRoutes from "./utils/AdminPublicRoutes"
+import AdminProtectedRoutes from "./utils/AdminProtectedRoutes"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
+const themeAdmin = createTheme(adminTheme(mode))
 
 function App() {
   const dispatch = useDispatch()
@@ -97,6 +104,17 @@ function App() {
           type={type}
           close={closeNotification}
         />
+        <ThemeProvider theme={themeAdmin}>
+          <Routes>
+            <Route element={<AdminPublicRoutes />}>
+              <Route path="/admin" element={<AdminLoginPage />} />
+            </Route>
+            <Route element={<AdminProtectedRoutes />}>
+              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="/admin/users" element={<AdminUsersPage />} />
+            </Route>
+          </Routes>
+        </ThemeProvider>
       </div>
     </ThemeProvider>
   )

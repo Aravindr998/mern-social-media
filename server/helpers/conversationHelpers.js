@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import conversationModel from "../model/Conversations.js"
 import messageModel from "../model/Messages.js"
+import userModel from "../model/User.js"
 
 export const getAllRelatedConversations = async (id) => {
   try {
@@ -141,6 +142,52 @@ export const getAllMessages = async (conversationId, userId) => {
       },
     ])
     return messages
+  } catch (error) {
+    throw error
+  }
+}
+
+export const searchFromFriends = async (id, key) => {
+  try {
+    const results = await userModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { username: new RegExp(key) },
+            { firstName: new RegExp(key) },
+            { lastName: new RegExp(key) },
+          ],
+        },
+      },
+      {
+        $match: {
+          friends: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $project: {
+          password: 0,
+        },
+      },
+    ])
+    return results
+  } catch (error) {
+    throw error
+  }
+}
+
+export const removeUserFromConversation = async (
+  id,
+  userId,
+  conversationId
+) => {
+  try {
+    const conversation = await conversationModel.findById(conversationId)
+    if (conversation.groupAdmin.toString() !== id && userId !== id) return false
+    await conversationModel.findByIdAndUpdate(conversationId, {
+      $pull: { users: userId },
+    })
+    return true
   } catch (error) {
     throw error
   }

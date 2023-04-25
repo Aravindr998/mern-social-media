@@ -9,7 +9,7 @@ const conversationSchema = new mongoose.Schema(
     },
     groupAdmin: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
     },
     isDeleted: {
       type: Boolean,
@@ -17,14 +17,14 @@ const conversationSchema = new mongoose.Schema(
     },
     users: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
     latestMessage: {
       type: new mongoose.Schema(
         {
           sender: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
+            ref: "Users",
           },
           message: String,
         },

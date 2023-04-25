@@ -4,7 +4,7 @@ const postSchema = new mongoose.Schema(
   {
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+      ref: "Users",
       required: true,
     },
     description: {
@@ -30,7 +30,7 @@ const postSchema = new mongoose.Schema(
     },
     likes: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
     comments: {
       type: [
@@ -38,7 +38,7 @@ const postSchema = new mongoose.Schema(
           {
             userId: {
               type: mongoose.Schema.Types.ObjectId,
-              ref: "users",
+              ref: "Users",
             },
             text: {
               type: String,
@@ -53,7 +53,7 @@ const postSchema = new mongoose.Schema(
                   {
                     userId: {
                       type: mongoose.Schema.Types.ObjectId,
-                      ref: "users",
+                      ref: "Users",
                     },
                     text: {
                       type: String,
@@ -71,6 +71,10 @@ const postSchema = new mongoose.Schema(
           { timestamps: true }
         ),
       ],
+    },
+    reported: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Users",
     },
     privacy: {
       type: String,

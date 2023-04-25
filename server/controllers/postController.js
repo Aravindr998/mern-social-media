@@ -6,6 +6,7 @@ import {
   isPostWithImageValid,
   isCommentValid,
   getTotalPostsNumber,
+  getCommentsFromPost,
 } from "../helpers/postHelper.js"
 
 export const createPost = async (req, res) => {
@@ -39,6 +40,7 @@ export const createPost = async (req, res) => {
       })
     }
     await post.save()
+    await post.populate("createdBy")
     res.json({ success: true, post })
   } catch (error) {
     console.log(error)
@@ -62,7 +64,8 @@ export const getPosts = async (req, res) => {
     const { id } = req.user
     const total = await getTotalPostsNumber(id)
     const posts = await getAllRelatedPosts(id)
-    res.json({ posts, totalCount: total[0].totalPosts })
+    const totalCount = total[0]?.totalPosts || 0
+    res.json({ posts, totalCount })
   } catch (error) {
     console.log(error)
     res
@@ -128,8 +131,12 @@ export const setComment = async (req, res) => {
       userId: req.user.id,
       text: comment,
     }
-    await postModel.findByIdAndUpdate(postId, { $push: { comments: value } })
-    res.json({ success: true })
+    const post = await postModel.findById(postId)
+    const newComment = post.comments.create(value)
+    post.comments.push(newComment)
+    const updatedPost = await post.save()
+    await post.populate({ path: "comments.userId", select: "-password" })
+    if (updatedPost) res.json(newComment)
   } catch (error) {
     console.log(error)
     res
@@ -160,3 +167,87 @@ export const loadPosts = async (req, res) => {
       .json({ message: "Something went wrong, please try again later" })
   }
 }
+
+export const loadComments = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { postId } = req.params
+    const skip = req.query.page || 0
+    const comments = await getCommentsFromPost(postId, parseInt(skip))
+    res.json(comments)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getSinglePost = async (req, res) => {
+  try {
+    const { postId } = req.params
+    const { id } = req.user
+    const post = await postModel.findById(postId)
+    if (id !== post.createdBy.toString())
+      return res.status(403).json({ message: "User not authorized" })
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const editPost = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { postId } = req.params
+    const { privacy, location, description } = req.body
+    const post = await postModel.findById(postId)
+    if (post.createdBy.toString() !== id)
+      return res.status(403).json({ message: "User not authorized" })
+    if (post.media) {
+      const { isValid, errors } = isPostWithImageValid(req.body)
+      if (!isValid) {
+        return res.status(400).json(errors)
+      }
+    } else {
+      const { isValid, errors } = isPostValid(req.body)
+      if (!isValid) {
+        return res.status(400).json(errors)
+      }
+    }
+    post.privacy = privacy
+    post.location = location
+    post.description = description
+    await post.save()
+    await post.populate({ path: "createdBy", select: "-password" })
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const deletePost = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { postId } = req.params
+    const post = await postModel.findById(postId)
+    if (post.createdBy.toString() !== id)
+      return res.status(403).json({ message: "User not authorized" })
+    post.isDeleted = true
+    await post.save()
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const reportPost = async (req, res) => {}
