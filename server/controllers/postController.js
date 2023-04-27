@@ -7,7 +7,10 @@ import {
   isCommentValid,
   getTotalPostsNumber,
   getCommentsFromPost,
+  getPostForUserProfile,
+  getPublicPostForUserProfile,
 } from "../helpers/postHelper.js"
+import mongoose from "mongoose"
 
 export const createPost = async (req, res) => {
   try {
@@ -79,19 +82,16 @@ export const getPostOfOneUser = async (req, res) => {
     const { username } = req.params
     const user = await userModel.findById(id)
     if (user.username === username) {
-      const posts = await postModel.find({ createdBy: id })
+      const posts = await getPostForUserProfile(id)
       return res.json({ posts })
     } else {
       const otherUser = await userModel.findOne({ username })
       if (otherUser) {
         if (user.friends.includes(otherUser._id)) {
-          const posts = await postModel.find({ createdBy: otherUser._id })
+          const posts = await getPostForUserProfile(otherUser._id)
           return res.json({ posts })
         } else {
-          const posts = await postModel.find({
-            createdBy: otherUser._id,
-            privacy: "public",
-          })
+          const posts = await getPublicPostForUserProfile(otherUser._id)
           return res.json({ posts })
         }
       } else {
@@ -250,4 +250,102 @@ export const deletePost = async (req, res) => {
   }
 }
 
-export const reportPost = async (req, res) => {}
+export const reportPost = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { postId } = req.params
+    const post = await postModel.findById(postId)
+    if (post.createdBy.toString() === id)
+      res.status(403).json({ message: "Cannot report your own post" })
+    if (!post.reported.includes(new mongoose.Types.ObjectId(id)))
+      post.reported.push(id)
+    await post.save()
+    res.json({ success: true })
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getPostToShare = async (req, res) => {
+  try {
+    const { postId } = req.params
+    const post = await postModel.findById(postId)
+    await post.populate({ path: "createdBy", select: "-password" })
+    if (post.privacy === "private") {
+      res.status(403).json({ message: "Cannot share private posts" })
+    }
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const sharePost = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { isValid, errors } = isPostWithImageValid(req.body)
+    if (!isValid) return res.status(400).json(errors)
+    let { privacy, description, sharedPostId, shared } = req.body
+    if (shared) {
+      const post = await postModel.findById(sharedPostId)
+      sharedPostId = post.postId
+    }
+    const post = new postModel({
+      createdBy: id,
+      privacy,
+      description,
+      postId: sharedPostId,
+      shared: true,
+    })
+    await post.save()
+    await post.populate({ path: "createdBy", select: "-password" })
+    await post.populate({ path: "postId" })
+    await post.populate({ path: "postId.createdBy", select: "-password" })
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getSharedPost = async (req, res) => {
+  try {
+    const { postId } = req.params
+    const post = await postModel.findById(postId)
+    console.log(post)
+    res.json(post.postId)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getAllDetailsOfSinglePost = async (req, res) => {
+  try {
+    const { id } = req.user
+    const user = await userModel.findById(id)
+    const { postId } = req.params
+    const post = await postModel.findById(postId)
+    if (!post) return res.status(404).json({ message: "Page not found" })
+    if (post.shared) return res.status(301).json({ id: post.postId })
+    if (post.privacy === "private" && !user.friends.includes(post.createdBy))
+      return res.status(403).json({ message: "User not authorized" })
+    await post.populate({ path: "createdBy", select: "-password" })
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}

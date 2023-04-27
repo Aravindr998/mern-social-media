@@ -24,8 +24,13 @@ import { TOKEN_KEY } from "../../constants/constant"
 import { clearAuth } from "../../features/users/authSlice"
 import { useNavigate } from "react-router-dom"
 import { setUser } from "../../features/users/userSlice"
+import AccountCircleIcon from "@mui/icons-material/AccountCircle"
+import EditIcon from "@mui/icons-material/Edit"
+import InfoIcon from "@mui/icons-material/Info"
+import LightModeIcon from "@mui/icons-material/LightMode"
+import DarkModeIcon from "@mui/icons-material/DarkMode"
+import LogoutIcon from "@mui/icons-material/Logout"
 
-const settings = ["Profile", "Edit Profile", "About Us", "Dark Mode", "Logout"]
 function Navbar() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -34,12 +39,10 @@ function Navbar() {
   const [search, setSearch] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState([])
-  const handleLogout = (e) => {
-    if (e.target.innerHTML === "Logout") {
-      localStorage.removeItem(TOKEN_KEY)
-      dispatch(clearAuth())
-      navigate("/login")
-    }
+  const handleLogout = () => {
+    localStorage.removeItem(TOKEN_KEY)
+    dispatch(clearAuth())
+    navigate("/login")
   }
   let searchResult
   if (result.length > 0) {
@@ -240,13 +243,35 @@ function Navbar() {
               onClose={handleCloseUserMenu}
               disableScrollLock={true}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center" onClick={handleLogout}>
-                    {setting}
-                  </Typography>
-                </MenuItem>
-              ))}
+              <MenuItem
+                onClick={() => navigate(`/profile/${user?.username}`)}
+                sx={{ marginBottom: "0.3rem" }}
+              >
+                <AccountCircleIcon sx={{ marginRight: "0.75rem" }} />
+                <Typography textAlign="center">Profile</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={() => navigate("/profile/details/edit")}
+                sx={{ marginBottom: "0.3rem" }}
+              >
+                <EditIcon sx={{ marginRight: "0.75rem" }} />
+                <Typography textAlign="center">Edit Profile</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={() => navigate("/about")}
+                sx={{ marginBottom: "0.3rem" }}
+              >
+                <InfoIcon sx={{ marginRight: "0.75rem" }} />
+                <Typography textAlign="center">About Us</Typography>
+              </MenuItem>
+              <MenuItem sx={{ marginBottom: "0.3rem" }}>
+                <DarkModeIcon sx={{ marginRight: "0.75rem" }} />
+                <Typography textAlign="center">Dark Mode</Typography>
+              </MenuItem>
+              <MenuItem onClick={handleLogout} sx={{ marginBottom: "0.3rem" }}>
+                <LogoutIcon sx={{ marginRight: "0.75rem" }} />
+                <Typography textAlign="center">Logout</Typography>
+              </MenuItem>
             </Menu>
           </Box>
           <Box sx={{ display: { xs: "flex", sm: "none" } }}>

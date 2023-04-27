@@ -44,6 +44,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
   const [descriptionError, setDescriptionError] = useState("")
 
   const [error, setError] = useState("")
+  const [reported, setReported] = useState(false)
 
   const imageFormat = ["jpg", "jpeg", "png", "webp"]
   function getUrlExtension(url) {
@@ -58,6 +59,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
   const editPostHandler = async () => {
     setError("")
     setOpenEdit(true)
+    setReported(false)
     try {
       const { data } = await axios.get(`/api/post/${postId}`, {
         headers: { Authorization: auth },
@@ -88,7 +90,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
   }
   const handleSubmit = async () => {
     try {
-      const { data } = await axios.put(
+      const { data } = await axios.patch(
         `/api/post/${postId}/edit`,
         {
           privacy,
@@ -128,7 +130,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
   const handleDelete = async () => {
     setError("")
     try {
-      const { data } = await axios.put(
+      const { data } = await axios.patch(
         `/api/post/${postId}/delete`,
         {},
         { headers: { Authorization: auth } }
@@ -149,6 +151,29 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
       } else {
         console.log(error)
       }
+    }
+  }
+  const reportPostHandler = async () => {
+    try {
+      setError("")
+      setReported(false)
+      const { data } = await axios.patch(
+        `/api/post/${postId}/report`,
+        {},
+        { headers: { Authorization: auth } }
+      )
+      setError("")
+      setReported(true)
+    } catch (error) {
+      const { response } = error
+      if (response) {
+        if (response.status === 403) {
+          setError("You cannot report your own post")
+        } else {
+          setError("Something went wrong, please try again later")
+        }
+      }
+      console.log(error)
     }
   }
   return (
@@ -186,7 +211,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
                     </MenuItem>,
                   ]
                 ) : (
-                  <MenuItem>
+                  <MenuItem onClick={reportPostHandler}>
                     <ListItemIcon>
                       <ReportIcon fontSize="small" />
                     </ListItemIcon>
@@ -286,7 +311,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
                 fullWidth
                 onClick={handleSubmit}
               >
-                Post
+                Save
               </Button>
               <Button
                 fullWidth
@@ -321,6 +346,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
         </Box>
       </ClickAwayListener>
       <SidePopup message={error} type={"error"} show={!!error} />
+      <SidePopup message={"Post Reported"} type={"info"} show={reported} />
     </>
   )
 }

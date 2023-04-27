@@ -25,6 +25,7 @@ import {
   fetchMoreComments,
 } from "../../features/comments/commentSlice"
 import { ClickAwayListener } from "@mui/material"
+import ShareOptions from "../ShareOptions/ShareOptions"
 
 function PostFeed(props) {
   const comments = useSelector((state) => state.comments)
@@ -37,6 +38,7 @@ function PostFeed(props) {
   const [openMenu, setOpenMenu] = useState(false)
   const [commentNumber, setCommentNumber] = useState(0)
   const [page, setPage] = useState(1)
+  const [anchorEl, setAnchorEl] = useState(null)
 
   const dispatch = useDispatch()
   const imageFormat = ["jpg", "jpeg", "png", "webp"]
@@ -54,7 +56,8 @@ function PostFeed(props) {
   let extension
   if (typeof props.media === "string") {
     extension = getUrlExtension(props.media)
-  }
+  } else if (typeof props?.sharedPost?.media === "string")
+    extension = getUrlExtension(props.sharedPost.media)
   let isImage = imageFormat.includes(extension)
   let allComments
   if (comments.comments?.length > 0 && !comments?.loading) {
@@ -102,7 +105,7 @@ function PostFeed(props) {
   }
 
   const auth = useSelector((state) => state.auth)
-  const fromatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
+  const formatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
   const handleLike = () => {
     console.log(props.postId)
     axios
@@ -156,6 +159,12 @@ function PostFeed(props) {
     dispatch(fetchMoreComments({ postId: props.postId, page }))
     setPage((prevState) => ++prevState)
   }
+  const handleSharePost = (e) => {
+    setAnchorEl(e.currentTarget)
+  }
+  const handleShareClose = () => {
+    setAnchorEl(null)
+  }
   return (
     <>
       <ClickAwayListener onClickAway={() => setOpen(false)}>
@@ -206,14 +215,16 @@ function PostFeed(props) {
                   style={{ marginBottom: 6 }}
                 />
               ) : (
-                props?.createdBy?.username
+                <Typography fontWeight={500}>
+                  {props?.createdBy?.username}
+                </Typography>
               )
             }
             subheader={
               postLoading ? (
                 <Skeleton animation="wave" height={10} width="40%" />
               ) : (
-                fromatter.format(new Date(props?.createdAt))
+                formatter.format(new Date(props?.createdAt))
               )
             }
           />
@@ -226,6 +237,7 @@ function PostFeed(props) {
                   paddingLeft: "1rem",
                   paddingRight: "1rem",
                 }}
+                fontSize={"1rem"}
               >
                 {postLoading ? <Skeleton /> : props?.description}
               </Typography>
@@ -235,10 +247,10 @@ function PostFeed(props) {
             (postLoading ? (
               <Skeleton
                 height={290}
-                width="90%"
+                width="100%"
                 animation="wave"
                 variant="rectangular"
-                sx={{ mx: "auto", borderRadius: "1rem" }}
+                // sx={{ mx: "auto", borderRadius: "1rem" }}
               />
             ) : (
               <CardMedia
@@ -246,8 +258,56 @@ function PostFeed(props) {
                 height="400"
                 src={props?.media}
                 alt="post image"
-                sx={{ padding: "2rem", borderRadius: "3rem" }}
+                // sx={{ padding: "2rem", borderRadius: "3rem" }}
               />
+            ))}
+          {props?.shared &&
+            (postLoading ? (
+              <Skeleton
+                height={290}
+                width="100%"
+                animation="wave"
+                variant="rectangular"
+                // sx={{ mx: "auto", borderRadius: "1rem" }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  padding: "1rem",
+                  border: "solid 1px #DFDFDF",
+                  margin: "1rem",
+                  borderRadius: "1rem",
+                  cursor: "pointer",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <Avatar src={props?.sharedPost?.createdBy?.profilePicture} />
+                  <Box sx={{ marginLeft: "0.5rem" }}>
+                    <Typography fontSize="0.9rem" fontWeight={500}>
+                      {props?.sharedPost?.createdBy?.username}
+                    </Typography>
+                    <Typography fontSize="0.8rem">
+                      {formatter.format(new Date(props?.sharedPost?.createdAt))}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box>
+                  <CardMedia
+                    component={isImage ? "img" : "video"}
+                    height="400"
+                    src={props?.sharedPost?.media}
+                    alt="post image"
+                    sx={{ borderRadius: "1rem" }}
+                    // sx={{ padding: "2rem", borderRadius: "3rem" }}
+                  />
+                </Box>
+              </Box>
             ))}
           {open && (
             <Grow in={open}>
@@ -288,7 +348,11 @@ function PostFeed(props) {
           <CardActions
             sx={{ display: "flex", justifyContent: "space-between" }}
           >
-            <IconButton aria-label="like" onClick={handleLike}>
+            <IconButton
+              aria-label="like"
+              onClick={handleLike}
+              sx={{ borderRadius: "0.5rem" }}
+            >
               {!liked ? (
                 <FavoriteBorderIcon color="primary" />
               ) : (
@@ -296,13 +360,21 @@ function PostFeed(props) {
               )}
               <Typography>{!!likeCount ? likeCount : "Like"}</Typography>
             </IconButton>
-            <IconButton aria-label="comment" onClick={commentOpenHandler}>
+            <IconButton
+              aria-label="comment"
+              onClick={commentOpenHandler}
+              sx={{ borderRadius: "0.5rem" }}
+            >
               <ChatBubbleOutlineIcon color="primary" />
               <Typography>
                 {commentNumber ? commentNumber : "Comment"}
               </Typography>
             </IconButton>
-            <IconButton aria-label="share">
+            <IconButton
+              aria-label="share"
+              sx={{ borderRadius: "0.5rem" }}
+              onClick={handleSharePost}
+            >
               <ShareIcon color="primary" />
               <Typography>Share</Typography>
             </IconButton>
@@ -316,6 +388,12 @@ function PostFeed(props) {
             />
           )}
           {openMenu && <Box />}
+          <ShareOptions
+            handleShareClose={handleShareClose}
+            anchorEl={anchorEl}
+            postId={props?.postId}
+            shared={props?.shared ? true : false}
+          />
         </Card>
       </ClickAwayListener>
     </>

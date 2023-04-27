@@ -6,18 +6,20 @@ import Create from "../Create/Create"
 import PostFeed from "../PostFeed/PostFeed"
 import axios from "../../axios"
 import { useSelector } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Skeleton from "@mui/material/Skeleton"
 
 function Profile() {
   const theme = useTheme()
   const { username } = useParams()
+  const navigate = useNavigate()
   const [userLoading, setUserLoading] = useState(true)
   const [posts, setPosts] = useState([])
   const [user, setUser] = useState({})
   const [authorized, setAuthorized] = useState(false)
   const [friend, setFriend] = useState("Add Friend")
   const [request, setRequest] = useState(false)
+  const [loading, setLoading] = useState(true)
   const auth = useSelector((state) => state.auth)
   const loggedinUser = useSelector((state) => state.user)
   useEffect(() => {
@@ -54,9 +56,11 @@ function Profile() {
       })
       .then(({ data }) => {
         setPosts(data.posts)
+        setLoading(false)
       })
       .catch(({ response }) => {
         console.log(response)
+        setLoading(false)
       })
   }, [username])
   const friendHandler = () => {
@@ -94,6 +98,9 @@ function Profile() {
           shared={post.shared}
           comments={post.comments}
           liked={post.likes.includes(loggedinUser._id)}
+          privacy={post.privacy}
+          sharedPost={post.postId}
+          loading={loading}
         />
       )
     })
@@ -162,7 +169,12 @@ function Profile() {
               justifyContent: { xs: "center", lg: "flex-start" },
             }}
           >
-            <Button variant="outlined">Edit Profile</Button>
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/profile/details/edit")}
+            >
+              Edit Profile
+            </Button>
             <Button variant="contained" sx={{ marginLeft: 2 }}>
               View Friends
             </Button>

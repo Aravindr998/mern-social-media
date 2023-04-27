@@ -25,6 +25,8 @@ import AdminDashboardPage from "./pages/AdminDashboardPage"
 import AdminUsersPage from "./pages/AdminUsersPage"
 import AdminPublicRoutes from "./utils/AdminPublicRoutes"
 import AdminProtectedRoutes from "./utils/AdminProtectedRoutes"
+import EditProfilePage from "./pages/EditProfilePage"
+import SinglePostPage from "./pages/SinglePostPage"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -88,9 +90,11 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/details/add" element={<AddDetailsPage />} />
             <Route path="/profile/:username" element={<ProfilePage />} />
+            <Route path="/profile/details/edit" element={<EditProfilePage />} />
             <Route path="/conversations" element={<ConversationsPage />}>
               <Route path=":conversationId" element={<Chat />} />
             </Route>
+            <Route path="/post/:postId" element={<SinglePostPage />} />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />

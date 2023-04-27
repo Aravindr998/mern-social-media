@@ -20,7 +20,7 @@ function HomePage() {
     dispatch(fetchPosts())
   }, [])
   useEffect(() => {
-    if (posts.total === posts.posts.length) {
+    if (posts.total <= posts.posts.length) {
       setHasMore(false)
     } else {
       setHasMore(true)
@@ -54,6 +54,7 @@ function HomePage() {
           liked={post.likes.includes(user?._id)}
           loading={posts.loading}
           privacy={post.privacy}
+          sharedPost={post.postId}
         />
       )
     })

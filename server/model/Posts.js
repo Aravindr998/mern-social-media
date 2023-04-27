@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema(
     },
     postId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "posts",
+      ref: "Posts",
     },
     isDeleted: {
       type: Boolean,
@@ -84,6 +84,19 @@ const postSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
+
+postSchema.pre("find", function () {
+  this.where({ isDeleted: false })
+})
+postSchema.pre("aggregate", function () {
+  this.match({ isDeleted: false })
+})
+postSchema.pre("findOne", function () {
+  this.where({ isDeleted: false })
+})
+postSchema.pre("findOne", function () {
+  this.where({ isDeleted: false })
+})
 
 const Posts = mongoose.model("Posts", postSchema)
 

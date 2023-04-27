@@ -147,3 +147,25 @@ export const validateLoginUser = (details) => {
   const isValid = !Object.keys(errors).length
   return { isValid, errors }
 }
+
+export const validateUpdatedDetails = (user) => {
+  const errors = {}
+  if (!isNameValid(user.firstName)) {
+    errors.firstName = "Please enter a valid first name"
+  }
+  if (!isNameValid(user.lastName)) {
+    errors.lastName = "Please enter a valid last name"
+  }
+  if (!isUsernameValid(user.username)) {
+    errors.username = "Please enter a valid last name"
+  }
+  if (!isDateValid(user.date)) {
+    errors.dob = "Please enter a valid date"
+  }
+  if (!isEmailValid(user.email)) {
+    errors.email = "Please enter a valid email"
+  }
+
+  const isValid = !Object.keys(errors).length
+  return { isValid, errors }
+}

@@ -12,6 +12,11 @@ import {
   getSinglePost,
   editPost,
   deletePost,
+  reportPost,
+  getPostToShare,
+  sharePost,
+  getSharedPost,
+  getAllDetailsOfSinglePost,
 } from "../controllers/postController.js"
 import {} from "../helpers/postHelper.js"
 import upload from "../middlewares/multerConfig.js"
@@ -36,8 +41,18 @@ router.get("/:postId/comments", isUserLoggedin, loadComments)
 
 router.get("/:postId", isUserLoggedin, getSinglePost)
 
-router.put("/:postId/edit", isUserLoggedin, editPost)
+router.patch("/:postId/edit", isUserLoggedin, editPost)
 
-router.put("/:postId/delete", isUserLoggedin, deletePost)
+router.patch("/:postId/delete", isUserLoggedin, deletePost)
+
+router.patch("/:postId/report", isUserLoggedin, reportPost)
+
+router.get("/:postId/post", isUserLoggedin, getPostToShare)
+
+router.post("/share", isUserLoggedin, sharePost)
+
+router.get("/:postId/post/share", isUserLoggedin, getSharedPost)
+
+router.get("/:postId/details", isUserLoggedin, getAllDetailsOfSinglePost)
 
 export default router

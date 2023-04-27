@@ -1,5 +1,6 @@
-import { checkDetails } from "../helpers/authHelper.js"
+import { checkDetails, validateUpdatedDetails } from "../helpers/authHelper.js"
 import userModel from "../model/User.js"
+import path from "path"
 
 export const validateDetails = async (req, res, next) => {
   try {
@@ -137,6 +138,46 @@ export const setFriend = async (req, res) => {
       })
       return res.json({ success: true, message: "Request Sent" })
     }
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, Please try again later" })
+  }
+}
+
+export const editUser = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { isValid, errors } = validateUpdatedDetails(req.body)
+    console.log(errors)
+    if (!isValid) return res.status(400).json(errors)
+    const user = await userModel.findById(id)
+    const { firstName, lastName, username, email, location, date } = req.body
+    user.firstName = firstName
+    user.lastName = lastName
+    user.username = username
+    user.email = email
+    user.location = location
+    user.dob = date
+    if (req?.files?.coverPicture) {
+      // console.log(req.files.coverPicture)
+      const coverPath = req.files.coverPicture[0].path
+        .slice(7)
+        .replace(new RegExp("\\" + path.sep, "g"), "/")
+      const coverFilePath = process.env.BASE_URL + coverPath
+      user.coverPicture = coverFilePath
+    }
+    if (req?.files?.profilePicture) {
+      const profilePath = req.files.profilePicture[0].path
+        .slice(7)
+        .replace(new RegExp("\\" + path.sep, "g"), "/")
+      const profileFilePath = process.env.BASE_URL + profilePath
+      user.profilePicture = profileFilePath
+    }
+    await user.save()
+    const updatedUser = await userModel.findById(id).select("-password")
+    res.json(updatedUser)
   } catch (error) {
     console.log(error)
     res

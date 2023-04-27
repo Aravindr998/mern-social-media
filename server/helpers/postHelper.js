@@ -48,6 +48,33 @@ export const getAllRelatedPosts = async (id, skip = 0) => {
         },
       },
       {
+        $lookup: {
+          from: "posts",
+          localField: "postId",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "createdBy",
+              },
+            },
+            {
+              $unwind: "$createdBy",
+            },
+          ],
+          as: "postId",
+        },
+      },
+      {
+        $unwind: {
+          path: "$postId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $unwind: {
           path: "$createdBy",
         },
@@ -234,6 +261,147 @@ export const getCommentsFromPost = async (postId, skip) => {
       },
     ])
     return comments
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getPostForUserProfile = async (id) => {
+  try {
+    const posts = await postModel.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: "posts",
+          localField: "postId",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "createdBy",
+              },
+            },
+            {
+              $unwind: "$createdBy",
+            },
+            {
+              $project: {
+                password: 0,
+              },
+            },
+          ],
+          as: "postId",
+        },
+      },
+      {
+        $unwind: {
+          path: "$postId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                password: 0,
+              },
+            },
+          ],
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: "$createdBy",
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ])
+    return posts
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getPublicPostForUserProfile = async (id) => {
+  try {
+    const posts = await postModel.aggregate([
+      {
+        $match: {
+          createdBy: new mongoose.Types.ObjectId(id),
+          privacy: "public",
+        },
+      },
+      {
+        $lookup: {
+          from: "posts",
+          localField: "postId",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "createdBy",
+              },
+            },
+            {
+              $unwind: "$createdBy",
+            },
+            {
+              $project: {
+                password: 0,
+              },
+            },
+          ],
+          as: "postId",
+        },
+      },
+      {
+        $unwind: {
+          path: "$postId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                password: 0,
+              },
+            },
+          ],
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: "$createdBy",
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ])
+    return posts
   } catch (error) {
     throw error
   }
