@@ -4,11 +4,12 @@ import {
   Button,
   Divider,
   IconButton,
+  Link,
   TextField,
   Typography,
 } from "@mui/material"
 import axios from "../../axios"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
@@ -16,7 +17,12 @@ import FavoriteIcon from "@mui/icons-material/Favorite"
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
 import ShareIcon from "@mui/icons-material/Share"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
-import { fetchComments } from "../../features/comments/commentSlice"
+import {
+  addComment,
+  fetchComments,
+  fetchMoreComments,
+} from "../../features/comments/commentSlice"
+import ShareOptions from "../ShareOptions/ShareOptions"
 
 const SinglePostView = () => {
   const { postId } = useParams()
@@ -29,6 +35,11 @@ const SinglePostView = () => {
   const [liked, setLiked] = useState(false)
   const [likedCount, setLikedCount] = useState(0)
   const [commentCount, setCommentCount] = useState(0)
+  const [page, setPage] = useState(1)
+  const [error, setError] = useState("")
+  const [comment, setComment] = useState("")
+  const [anchorEl, setAnchorEl] = useState(null)
+  const commentRef = useRef()
   const formatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
   useEffect(() => {
     ;(async () => {
@@ -36,7 +47,6 @@ const SinglePostView = () => {
         const { data } = await axios.get(`/api/post/${postId}/details`, {
           headers: { Authorization: auth },
         })
-        console.log(data)
         setPost(data)
         setLikedCount(data.likes.length)
         setCommentCount(data.comments.length)
@@ -76,6 +86,7 @@ const SinglePostView = () => {
   }
   let allComments
   if (comments.comments?.length > 0 && !comments?.loading) {
+    console.log(comments)
     allComments = comments.comments.map((item) => {
       return (
         <>
@@ -88,7 +99,7 @@ const SinglePostView = () => {
             }}
           >
             <Box
-              key={item._id}
+              key={item?._id}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -96,12 +107,14 @@ const SinglePostView = () => {
                 marginTop: "0.3rem",
               }}
             >
-              <Avatar src={item.userId?.profilePicture} />
+              <Avatar src={item?.userId?.profilePicture} />
               <Box>
                 <Typography sx={{ marginLeft: "1rem", fontWeight: "700" }}>
-                  {item.userId.username}
+                  {item?.userId?.username}
                 </Typography>
-                <Typography sx={{ marginLeft: "1rem" }}>{item.text}</Typography>
+                <Typography sx={{ marginLeft: "1rem" }}>
+                  {item?.text}
+                </Typography>
               </Box>
             </Box>
             <IconButton aria-label="settings">
@@ -118,7 +131,34 @@ const SinglePostView = () => {
       </Box>
     )
   }
-  const handleSharePost = async () => {}
+  const handleSharePost = async (e) => {
+    setAnchorEl(e.currentTarget)
+  }
+  const handleShareClose = () => {
+    setAnchorEl(null)
+  }
+  const handleComment = async () => {
+    setError("")
+    try {
+      const { data } = await axios.patch(
+        "/api/post/comment",
+        { comment, postId },
+        { headers: { Authorization: auth } }
+      )
+      setComment("")
+      dispatch(addComment(data))
+      setCommentCount((prevState) => ++prevState)
+    } catch (error) {
+      const { response } = error
+      if (response) {
+        if (response.status === 400) {
+          setError(response.data.comment)
+        }
+      } else {
+        console.log(error)
+      }
+    }
+  }
   return (
     <Box sx={{ marginTop: "5rem", display: "flex" }}>
       <Box
@@ -131,7 +171,11 @@ const SinglePostView = () => {
           alignItems: "center",
         }}
       >
-        <Box component="img" src={post.media} />
+        <Box
+          component="img"
+          src={post.media}
+          sx={{ objectFit: "contain", maxHeight: "100%", maxWidth: "100%" }}
+        />
       </Box>
       <Box
         sx={{
@@ -139,18 +183,21 @@ const SinglePostView = () => {
           height: "calc(100vh - 5rem)",
         }}
       >
-        <Box>
-          <Avatar src={post.createdBy?.profilePicture} />
+        <Box sx={{ display: "flex", alignItems: "center", padding: "1rem" }}>
+          <Avatar
+            src={post.createdBy?.profilePicture}
+            sx={{ marginRight: "1rem" }}
+          />
           <Box>
-            <Typography>{post.createdBy?.username}</Typography>
+            <Typography fontWeight={500}>{post.createdBy?.username}</Typography>
             {post.createdAt && (
-              <Typography>
+              <Typography fontSize="0.9rem">
                 {formatter.format(new Date(post.createdAt))}
               </Typography>
             )}
           </Box>
         </Box>
-        <Box>
+        <Box sx={{ padding: "1rem" }}>
           <Typography>{post.description}</Typography>
         </Box>
         <Divider />
@@ -180,16 +227,57 @@ const SinglePostView = () => {
             <Typography>Share</Typography>
           </IconButton>
         </Box>
-        <Box sx={{ height: "60%" }}>
-          <Box sx={{ height: "100%", overflowY: "auto" }}>{allComments}</Box>
+        <Divider />
+        <Box sx={{ padding: "0.5rem", cursor: "pointer" }}>
+          {comments?.comments?.length <= commentCount && (
+            <Link
+              onClick={() => {
+                dispatch(fetchMoreComments({ postId, page }))
+                setPage((prevState) => ++prevState)
+              }}
+            >
+              Load more comments
+            </Link>
+          )}
         </Box>
-        <Box sx={{ display: "flex", padding: "1rem", alignItems: "center" }}>
-          <TextField fullWidth sx={{ margin: "0.5rem" }} />
-          <Button variant="contained" sx={{ padding: "1rem" }}>
+        <Box sx={{ height: "50%" }}>
+          <Box
+            sx={{ height: "100%", overflowY: "auto", paddingInline: "1rem" }}
+          >
+            {allComments}
+          </Box>
+        </Box>
+        <Box
+          sx={{ display: "flex", paddingInline: "1rem", alignItems: "center" }}
+        >
+          <TextField
+            fullWidth
+            sx={{ margin: "0.5rem" }}
+            label="Add Comment"
+            variant="filled"
+            value={comment}
+            onChange={(e) => {
+              setComment(e.target.value)
+              setError("")
+            }}
+            error={!!error}
+            helperText={error}
+          />
+          <Button
+            variant="contained"
+            sx={{ padding: "1rem" }}
+            onClick={handleComment}
+          >
             Send
           </Button>
         </Box>
       </Box>
+      <ShareOptions
+        handleShareClose={handleShareClose}
+        anchorEl={anchorEl}
+        postId={postId}
+        shared={false}
+      />
     </Box>
   )
 }

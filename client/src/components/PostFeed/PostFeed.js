@@ -26,8 +26,10 @@ import {
 } from "../../features/comments/commentSlice"
 import { ClickAwayListener } from "@mui/material"
 import ShareOptions from "../ShareOptions/ShareOptions"
+import { useNavigate } from "react-router-dom"
 
 function PostFeed(props) {
+  const navigate = useNavigate()
   const comments = useSelector((state) => state.comments)
   const [liked, setLiked] = useState(false)
   const [postLoading, setPostLoading] = useState(true)
@@ -258,6 +260,8 @@ function PostFeed(props) {
                 height="400"
                 src={props?.media}
                 alt="post image"
+                sx={{ cursor: "pointer" }}
+                onClick={() => navigate(`/post/${props?.postId}`)}
                 // sx={{ padding: "2rem", borderRadius: "3rem" }}
               />
             ))}
@@ -279,6 +283,7 @@ function PostFeed(props) {
                   borderRadius: "1rem",
                   cursor: "pointer",
                 }}
+                onClick={() => navigate(`/post/${props?.sharedPost?._id}`)}
               >
                 <Box
                   sx={{

@@ -66,9 +66,10 @@ export const getPosts = async (req, res) => {
   try {
     const { id } = req.user
     const total = await getTotalPostsNumber(id)
+    console.log(total.length)
     const posts = await getAllRelatedPosts(id)
     const totalCount = total[0]?.totalPosts || 0
-    res.json({ posts, totalCount })
+    res.json({ posts, totalCount: total.length })
   } catch (error) {
     console.log(error)
     res
@@ -136,7 +137,9 @@ export const setComment = async (req, res) => {
     post.comments.push(newComment)
     const updatedPost = await post.save()
     await post.populate({ path: "comments.userId", select: "-password" })
-    if (updatedPost) res.json(newComment)
+    if (updatedPost) {
+      res.json(newComment)
+    }
   } catch (error) {
     console.log(error)
     res

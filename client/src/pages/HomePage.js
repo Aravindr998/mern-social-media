@@ -16,10 +16,12 @@ function HomePage() {
   const posts = useSelector((state) => state.posts)
   const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
+  console.log(posts)
   useEffect(() => {
     dispatch(fetchPosts())
   }, [])
   useEffect(() => {
+    console.log(posts.total)
     if (posts.total <= posts.posts.length) {
       setHasMore(false)
     } else {

@@ -35,11 +35,6 @@ export const getAllRelatedPosts = async (id, skip = 0) => {
   try {
     const posts = await postModel.aggregate([
       {
-        $match: {
-          isDeleted: false,
-        },
-      },
-      {
         $lookup: {
           from: "users",
           localField: "createdBy",
@@ -158,12 +153,8 @@ export const isCommentValid = (comment) => {
 
 export const getTotalPostsNumber = async (id) => {
   try {
+    console.log(id)
     const count = await postModel.aggregate([
-      {
-        $match: {
-          isDeleted: false,
-        },
-      },
       {
         $lookup: {
           from: "users",
@@ -189,9 +180,9 @@ export const getTotalPostsNumber = async (id) => {
           ],
         },
       },
-      {
-        $count: "totalPosts",
-      },
+      // {
+      //   $count: "totalPosts",
+      // },
     ])
     return count
   } catch (error) {
