@@ -10,12 +10,18 @@ import {
   removeUser,
   searchUsers,
 } from "../controllers/conversationController.js"
+import upload from "../middlewares/groupChatConfig.js"
 
 const router = Router()
 
 router.get("/", isUserLoggedin, getAllConversations)
 
-router.post("/create", isUserLoggedin, createNewConversation)
+router.post(
+  "/create",
+  isUserLoggedin,
+  upload.single("groupImage"),
+  createNewConversation
+)
 
 router.get("/:conversationId", isUserLoggedin, getMessages)
 

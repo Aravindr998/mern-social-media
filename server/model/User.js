@@ -45,19 +45,19 @@ const userSchema = new mongoose.Schema(
     },
     pendingRequests: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
     friends: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
     blockedUsers: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
     savedPosts: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "posts",
+      ref: "Posts",
     },
     isBlocked: {
       type: Boolean,
@@ -73,7 +73,7 @@ const userSchema = new mongoose.Schema(
     },
     pendingSentRequest: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "users",
+      ref: "Users",
     },
   },
   { timestamps: true }

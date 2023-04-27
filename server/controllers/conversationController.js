@@ -6,6 +6,7 @@ import {
 } from "../helpers/conversationHelpers.js"
 import conversationModel from "../model/Conversations.js"
 import messageModel from "../model/Messages.js"
+import path from "path"
 
 export const getAllConversations = async (req, res) => {
   const { id } = req.user
@@ -23,12 +24,18 @@ export const getAllConversations = async (req, res) => {
 export const createNewConversation = async (req, res) => {
   try {
     const { id } = req.user
-    let { members } = req.body
+    let { members, isGroupChat, chatName } = req.body
+    members = JSON.parse(members)
+    console.log(members)
     members.push(id)
     let conversation
-    if (req.body.isGroupChat) {
+    if (isGroupChat) {
+      if (!chatName?.trim().length)
+        return res
+          .status(400)
+          .json({ chatName: "Conversation name cannot be empty" })
       conversation = new conversationModel({
-        chatName: req.body.chatName,
+        chatName,
         isGroupChat: true,
         groupAdmin: id,
         users: members,
@@ -48,6 +55,12 @@ export const createNewConversation = async (req, res) => {
       conversation = new conversationModel({
         users: members,
       })
+    }
+    if (req.file) {
+      let filePath =
+        process.env.BASE_URL +
+        req.file.path.slice(7).replace(new RegExp("\\" + path.sep, "g"), "/")
+      conversation.groupChatImage = filePath
     }
     await conversation.save()
     await conversation.populate("users")

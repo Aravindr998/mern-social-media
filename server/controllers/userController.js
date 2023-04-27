@@ -185,3 +185,16 @@ export const editUser = async (req, res) => {
       .json({ message: "Something went wrong, Please try again later" })
   }
 }
+
+export const getFriendsList = async (req, res) => {
+  try {
+    const { id } = req.user
+    const user = await userModel.findById(id).populate("friends")
+    res.json(user.friends)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, Please try again later" })
+  }
+}

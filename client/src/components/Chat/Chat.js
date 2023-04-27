@@ -67,11 +67,18 @@ const Chat = () => {
   let senderName
   let chatBubbles
   let noChats
+  let profilePicture
+  console.log(messages)
   if (messages?.messages.users) {
     senderName =
       messages?.messages?.users[0]?._id !== user?._id
         ? messages?.messages?.users[0]?.username
         : messages?.messages?.users[1]?.username
+    profilePicture = messages.messages?.isGroupChat
+      ? messages.messages?.groupChatImage
+      : messages?.messages?.users[0]?._id !== user?._id
+      ? messages?.messages?.users[0]?.profilePicture
+      : messages?.messages?.users[1]?.profilePicture
     if (messages?.messages?.messages.length) {
       chatBubbles = messages?.messages?.messages?.map((item, index, array) => {
         if (item.sender._id === user?._id) {
@@ -97,6 +104,7 @@ const Chat = () => {
       noChats = "No messages to show"
     }
   }
+  console.log(profilePicture)
   const profileHandler = () => {
     if (messages?.messages?.isGroupChat === false) {
       navigate(`/profile/${senderName}`)
@@ -131,7 +139,7 @@ const Chat = () => {
             sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
             onClick={profileHandler}
           >
-            <Avatar />
+            <Avatar src={profilePicture} />
             <Box sx={{ paddingLeft: "10px" }}>
               <Typography sx={{ fontWeight: "500" }}>
                 {messages?.messages?.isGroupChat

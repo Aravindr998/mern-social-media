@@ -15,6 +15,12 @@ const Conversation = ({ details }) => {
     details?.users[0]?._id !== user?._id
       ? details?.users[0]?.username
       : details?.users[1]?.username
+
+  let profilePicture = details.isGroupChat
+    ? details.groupChatImage
+    : details?.users[0]?._id !== user?._id
+    ? details?.users[0]?.profilePicture
+    : details?.users[1]?.profilePicture
   return (
     <Box
       sx={{
@@ -30,7 +36,7 @@ const Conversation = ({ details }) => {
       }}
       onClick={clickHandler}
     >
-      <Avatar />
+      <Avatar src={profilePicture} />
       <Box sx={{ marginLeft: 2 }}>
         <Typography fontWeight={500}>
           {details?.isGroupChat ? details?.chatName : senderName}

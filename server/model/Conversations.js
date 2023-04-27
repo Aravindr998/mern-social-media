@@ -31,6 +31,7 @@ const conversationSchema = new mongoose.Schema(
         { timestamps: true }
       ),
     },
+    groupChatImage: String,
   },
   {
     timestamps: true,
