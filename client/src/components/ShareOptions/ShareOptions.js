@@ -25,6 +25,7 @@ import axios from "../../axios"
 import { useDispatch, useSelector } from "react-redux"
 import SidePopup from "../SidePopup/SidePopup"
 import { addPost } from "../../features/posts/postSlice"
+import { socket } from "../../socket"
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -124,7 +125,8 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
         { privacy, description, sharedPostId, shared },
         { headers: { Authorization: auth } }
       )
-      dispatch(addPost(data))
+      dispatch(addPost(data.post))
+      socket.emit("postInteracted", data.notification)
       setOpenDialog(false)
       setOpen(false)
     } catch (error) {

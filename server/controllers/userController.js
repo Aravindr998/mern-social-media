@@ -1,4 +1,5 @@
 import { checkDetails, validateUpdatedDetails } from "../helpers/authHelper.js"
+import { getOnlineUsersFromFriends } from "../helpers/userHelper.js"
 import userModel from "../model/User.js"
 import path from "path"
 
@@ -191,6 +192,19 @@ export const getFriendsList = async (req, res) => {
     const { id } = req.user
     const user = await userModel.findById(id).populate("friends")
     res.json(user.friends)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, Please try again later" })
+  }
+}
+
+export const getOnlineUsers = async (req, res) => {
+  try {
+    const { id } = req.user
+    const onlineUsers = await getOnlineUsersFromFriends(id)
+    return res.json(onlineUsers)
   } catch (error) {
     console.log(error)
     res

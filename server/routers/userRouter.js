@@ -17,6 +17,7 @@ import {
   setFriend,
   editUser,
   getFriendsList,
+  getOnlineUsers,
 } from "../controllers/userController.js"
 import "../auth/localStrategy.js"
 import "../auth/auth.js"
@@ -52,5 +53,7 @@ router.patch(
 )
 
 router.get("/friends", isUserLoggedin, getFriendsList)
+
+router.get("/users/online", isUserLoggedin, getOnlineUsers)
 
 export default router

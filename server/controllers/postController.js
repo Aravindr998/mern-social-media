@@ -11,6 +11,7 @@ import {
   getPublicPostForUserProfile,
 } from "../helpers/postHelper.js"
 import mongoose from "mongoose"
+import notificationModel from "../model/Notifications.js"
 
 export const createPost = async (req, res) => {
   try {
@@ -44,7 +45,14 @@ export const createPost = async (req, res) => {
     }
     await post.save()
     await post.populate("createdBy")
-    res.json({ success: true, post })
+    const notification = new notificationModel({
+      type: "create",
+      postId: post._id,
+      userId: id,
+    })
+    await notification.save()
+    await notification.populate({ path: "userId", select: "-password" })
+    res.json({ success: true, post, notification })
   } catch (error) {
     console.log(error)
     res.status(500).json({
@@ -114,10 +122,24 @@ export const setLike = async (req, res) => {
     const post = await postModel.findById(postId)
     if (post.likes.includes(id)) {
       await postModel.findByIdAndUpdate(postId, { $pull: { likes: id } })
+      await notificationModel.findOneAndDelete({
+        postId,
+        userId: id,
+        interaction: "liked",
+      })
       return res.json({ success: true, amount: -1 })
     } else {
       await postModel.findByIdAndUpdate(postId, { $push: { likes: id } })
-      return res.json({ success: true, amount: 1 })
+      const notification = new notificationModel({
+        type: "post",
+        interaction: "liked",
+        postId,
+        userId: id,
+      })
+      await notification.save()
+      await notification.populate({ path: "userId", select: "-password" })
+      await notification.populate("postId")
+      return res.json({ success: true, amount: 1, notification })
     }
   } catch (error) {
     console.log(error)
@@ -128,17 +150,27 @@ export const setLike = async (req, res) => {
 export const setComment = async (req, res) => {
   try {
     const { postId, comment } = req.body
+    const { id } = req.user
     const value = {
-      userId: req.user.id,
+      userId: id,
       text: comment,
     }
     const post = await postModel.findById(postId)
     const newComment = post.comments.create(value)
     post.comments.push(newComment)
     const updatedPost = await post.save()
+    const notification = new notificationModel({
+      type: "post",
+      interaction: "commented",
+      postId,
+      userId: id,
+    })
+    await notification.save()
+    await notification.populate({ path: "userId", select: "-password" })
+    await notification.populate("postId")
     await post.populate({ path: "comments.userId", select: "-password" })
     if (updatedPost) {
-      res.json(newComment)
+      res.json({ comment: newComment, notification })
     }
   } catch (error) {
     console.log(error)
@@ -310,7 +342,16 @@ export const sharePost = async (req, res) => {
     await post.populate({ path: "createdBy", select: "-password" })
     await post.populate({ path: "postId" })
     await post.populate({ path: "postId.createdBy", select: "-password" })
-    res.json(post)
+    const notification = new notificationModel({
+      type: "post",
+      interaction: "shared",
+      postId: sharedPostId,
+      userId: id,
+    })
+    await notification.save()
+    await notification.populate("postId")
+    await notification.populate({ path: "userId", select: "-password" })
+    res.json({ post, notification })
   } catch (error) {
     console.log(error)
     res

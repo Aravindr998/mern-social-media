@@ -27,6 +27,8 @@ import AdminPublicRoutes from "./utils/AdminPublicRoutes"
 import AdminProtectedRoutes from "./utils/AdminProtectedRoutes"
 import EditProfilePage from "./pages/EditProfilePage"
 import SinglePostPage from "./pages/SinglePostPage"
+import { fetchOnlineUsers } from "./features/onlineUsersSlice/onlineUsersSlice"
+import NotificationsPage from "./pages/NotificationsPage"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -76,9 +78,20 @@ function App() {
         setType("conversation")
       }
     })
+    socket.on("checkOnlineUsers", () => {
+      dispatch(fetchOnlineUsers())
+    })
+    socket.on("fetchNewNotification", (notification) => {
+      console.log("got it")
+      setShow(true)
+      setContent(notification)
+      setType(notification.type)
+    })
 
     return () => {
+      socket.off("fetchNewNotification")
       socket.off("latestMessage")
+      socket.off("checkOnlineUsers")
     }
   }, [pathname])
 
@@ -95,6 +108,7 @@ function App() {
               <Route path=":conversationId" element={<Chat />} />
             </Route>
             <Route path="/post/:postId" element={<SinglePostPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />

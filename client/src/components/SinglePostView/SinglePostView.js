@@ -23,6 +23,7 @@ import {
   fetchMoreComments,
 } from "../../features/comments/commentSlice"
 import ShareOptions from "../ShareOptions/ShareOptions"
+import { socket } from "../../socket"
 
 const SinglePostView = () => {
   const { postId } = useParams()
@@ -80,6 +81,7 @@ const SinglePostView = () => {
       )
       setLiked((prevState) => !prevState)
       setLikedCount((prevState) => prevState + data.amount)
+      socket.emit("postInteracted", data.notification)
     } catch (error) {
       console.log(error)
     }
@@ -146,8 +148,9 @@ const SinglePostView = () => {
         { headers: { Authorization: auth } }
       )
       setComment("")
-      dispatch(addComment(data))
+      dispatch(addComment(data.comment))
       setCommentCount((prevState) => ++prevState)
+      socket.emit("postInteracted", data.notification)
     } catch (error) {
       const { response } = error
       if (response) {

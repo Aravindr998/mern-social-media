@@ -45,7 +45,12 @@ function SidePanel() {
           <ChatIcon sx={{ marginRight: 1 }} />
           <Typography sx={{ fontWeight: 700 }}>Conversations</Typography>
         </Box>
-        <Box sx={{ display: "flex", marginBottom: 5 }}>
+        <Box
+          sx={{ display: "flex", marginBottom: 5, cursor: "pointer" }}
+          onClick={() => {
+            navigate("/notifications")
+          }}
+        >
           <NotificationsIcon sx={{ marginRight: 1 }} />
           <Typography sx={{ fontWeight: 700 }}>Notifications</Typography>
         </Box>

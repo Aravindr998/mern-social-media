@@ -26,11 +26,13 @@ import ImageIcon from "@mui/icons-material/Image"
 import axios from "../../axios"
 import { useDispatch, useSelector } from "react-redux"
 import { addPost } from "../../features/posts/postSlice"
+import { socket } from "../../socket"
 
 function Create() {
   const fileRef = useRef()
   const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
+  const user = useSelector((state) => state.user)
   const [description, setDescription] = useState("")
   const [image, setImage] = useState("")
   const [error, setError] = useState(false)
@@ -85,7 +87,6 @@ function Create() {
       })
       .then(({ data }) => {
         dispatch(addPost(data.post))
-        console.log(data.post)
         setShowProgress(false)
         setImage("")
         setLocation("")
@@ -94,6 +95,7 @@ function Create() {
         setOpen(false)
         setSuccess(true)
         setFile(null)
+        socket.emit("newNotification", data.notification)
       })
       .catch(({ response }) => {
         setShowProgress(false)
@@ -113,12 +115,13 @@ function Create() {
 
   return (
     <>
-      <Card sx={{ width: { xs: "90%", sm: "50%" }, marginBottom: "1rem" }}>
+      <Card sx={{ width: { xs: "90%", lg: "50%" }, marginBottom: "1rem" }}>
         <CardContent>
           <Box sx={{ display: "flex" }}>
-            <Avatar sx={{ marginRight: "1rem" }} aria-label="recipe">
-              R
-            </Avatar>
+            <Avatar
+              sx={{ marginRight: "1rem" }}
+              src={user?.profilePicture}
+            ></Avatar>
             <TextField
               label="What's on your mind?"
               variant="filled"

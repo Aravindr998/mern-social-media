@@ -7,6 +7,8 @@ import messageReducer from "../features/messages/messageSlice"
 import allUsersReducer from "../features/allUsersSlice/allUsersSlice"
 import adminAuthReducer from "../features/adminAuth/adminAuthSlice"
 import commentReducer from "../features/comments/commentSlice"
+import onlineUsersReducer from "../features/onlineUsersSlice/onlineUsersSlice"
+import notificationReducer from "../features/notifications/notificationSlice"
 
 const store = configureStore({
   reducer: {
@@ -18,6 +20,8 @@ const store = configureStore({
     allUsers: allUsersReducer,
     adminAuth: adminAuthReducer,
     comments: commentReducer,
+    onlineUsers: onlineUsersReducer,
+    notifications: notificationReducer,
   },
 })
 

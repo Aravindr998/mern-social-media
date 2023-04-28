@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "../../axios"
-import { ADMIN_TOKEN_KEY } from "../../constants/constant"
+import { TOKEN_KEY } from "../../constants/constant"
 
 const initialState = {
   loading: false,
@@ -12,7 +12,7 @@ export const fetchComments = createAsyncThunk(
   "comments/fetchComments",
   async (postId) => {
     const { data } = await axios.get(`/api/post/${postId}/comments`, {
-      headers: { Authorization: localStorage.getItem(ADMIN_TOKEN_KEY) },
+      headers: { Authorization: localStorage.getItem(TOKEN_KEY) },
     })
     return data
   }
@@ -23,7 +23,7 @@ export const fetchMoreComments = createAsyncThunk(
   async ({ postId, page }) => {
     const { data } = await axios.get(
       `/api/post/${postId}/comments?page=${page}`,
-      { headers: { Authorization: localStorage.getItem(ADMIN_TOKEN_KEY) } }
+      { headers: { Authorization: localStorage.getItem(TOKEN_KEY) } }
     )
     return data
   }

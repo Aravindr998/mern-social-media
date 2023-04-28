@@ -19,18 +19,24 @@ import axios from "../../axios"
 import SidePopup from "../SidePopup/SidePopup"
 import { socket } from "../../socket"
 import GroupChatDetail from "../GroupChatDetails/GroupChatDetail"
+import { fetchOnlineUsers } from "../../features/onlineUsersSlice/onlineUsersSlice"
 
 const Chat = () => {
   const [content, setContent] = useState("")
   const [showError, setShowError] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
+  const [isOnline, setIsOnline] = useState(false)
   const messages = useSelector((state) => state.messages)
   const user = useSelector((state) => state.user)
   const auth = useSelector((state) => state.auth)
+  const onlineUsers = useSelector((state) => state.onlineUsers)
   const chatParent = useRef()
   const { conversationId } = useParams()
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  useEffect(() => {
+    dispatch(fetchOnlineUsers())
+  }, [])
   useEffect(() => {
     setContent("")
   }, [conversationId])
@@ -64,6 +70,7 @@ const Chat = () => {
   useEffect(() => {
     dispatch(fetchMessages(conversationId))
   }, [conversationId])
+
   let senderName
   let chatBubbles
   let noChats
@@ -104,7 +111,20 @@ const Chat = () => {
       noChats = "No messages to show"
     }
   }
-  console.log(profilePicture)
+  useEffect(() => {
+    if (messages?.messages.users) {
+      const currentUser =
+        messages?.messages?.users[0]?._id !== user?._id
+          ? messages?.messages?.users[0]?._id
+          : messages?.messages?.users[1]?._id
+      const isActive = onlineUsers?.users?.find(
+        (user) => user.userId._id === currentUser
+      )
+      if (isActive) setIsOnline(true)
+      else setIsOnline(false)
+    }
+  }, [onlineUsers, messages])
+
   const profileHandler = () => {
     if (messages?.messages?.isGroupChat === false) {
       navigate(`/profile/${senderName}`)
@@ -146,7 +166,9 @@ const Chat = () => {
                   ? messages?.messages?.chatName
                   : senderName}
               </Typography>
-              <Typography sx={{ fontSize: ".75rem" }}>Online</Typography>
+              {isOnline && (
+                <Typography sx={{ fontSize: ".75rem" }}>online</Typography>
+              )}
             </Box>
           </Box>
           <Box

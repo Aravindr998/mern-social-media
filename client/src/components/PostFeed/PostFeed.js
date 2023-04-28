@@ -27,6 +27,7 @@ import {
 import { ClickAwayListener } from "@mui/material"
 import ShareOptions from "../ShareOptions/ShareOptions"
 import { useNavigate } from "react-router-dom"
+import { socket } from "../../socket"
 
 function PostFeed(props) {
   const navigate = useNavigate()
@@ -119,6 +120,7 @@ function PostFeed(props) {
       .then(({ data }) => {
         setLiked((prevState) => !prevState)
         setLikeCount((prevState) => prevState + data.amount)
+        socket.emit("postInteracted", data.notification)
       })
       .catch((error) => {
         console.log(error)
@@ -132,9 +134,10 @@ function PostFeed(props) {
         { headers: { Authorization: auth } }
       )
       .then(({ data }) => {
-        dispatch(addComment(data))
+        dispatch(addComment(data.comment))
         setCommentText("")
         setCommentNumber((prevState) => ++prevState)
+        socket.emit("postInteracted", data.notification)
       })
       .catch(({ response }) => {
         console.log(response)
@@ -172,7 +175,7 @@ function PostFeed(props) {
       <ClickAwayListener onClickAway={() => setOpen(false)}>
         <Card
           sx={{
-            width: { xs: "90%", sm: "50%" },
+            width: { xs: "90%", lg: "50%" },
             marginBottom: "1rem",
             position: "relative",
           }}
