@@ -55,30 +55,46 @@ const Notifications = () => {
   )
   if (notifications?.notifications?.length && !notifications?.loading) {
     allNotifications = notifications?.notifications?.map((item) => {
+      let content, link, username
       if (item.type === "create") {
-        return (
-          <React.Fragment key={item._id}>
-            <Box
-              sx={{
-                padding: "1rem",
-                "&:hover": { backgroundColor: "#DFDFDF" },
-                borderRadius: "0.5rem",
-                transition: "background-color 0.3s",
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(`/post/${item.postId}`)}
-            >
-              <Typography>
-                <Typography component="span" fontWeight={700}>
-                  {item.userId.username}
-                </Typography>{" "}
-                created a new post
-              </Typography>
-            </Box>
-            <Divider />
-          </React.Fragment>
-        )
+        username = item.userId.username
+        content = "created a new post"
+        link = `/post/${item.postId}`
+      } else if (item.type === "post") {
+        username = item.userId.username
+        content = `${item.interaction} your post`
+        link = `/post/${item.postId}`
+      } else if (item.type === "friendRequest") {
+        username = item.userId.username
+        content = `sent you a friend request`
+        link = `/profile/${item.userId.username}`
+      } else if (item.type === "acceptedRequest") {
+        username = item.userId.username
+        content = `accepted your friend request`
+        link = `/profile/${item.userId.username}`
       }
+      return (
+        <React.Fragment key={item._id}>
+          <Box
+            sx={{
+              padding: "1rem",
+              "&:hover": { backgroundColor: "#DFDFDF" },
+              borderRadius: "0.5rem",
+              transition: "background-color 0.3s",
+              cursor: "pointer",
+            }}
+            onClick={() => navigate(link)}
+          >
+            <Typography>
+              <Typography component="span" fontWeight={700}>
+                {username}
+              </Typography>{" "}
+              {content}
+            </Typography>
+          </Box>
+          <Divider />
+        </React.Fragment>
+      )
     })
   } else if (!notifications?.notifications?.length && !notifications?.loading) {
     allNotifications = (
@@ -105,8 +121,10 @@ const Notifications = () => {
           padding: "0.5rem",
         }}
       >
-        <CardContent sx={{ overflowY: "auto" }}>
-          <Stack>{allNotifications}</Stack>
+        <CardContent sx={{ height: "100%" }}>
+          <Stack sx={{ height: "100%", overflowY: "auto" }}>
+            {allNotifications}
+          </Stack>
         </CardContent>
       </Card>
     </>

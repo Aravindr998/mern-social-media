@@ -25,6 +25,10 @@ const Notification = ({ message, show, type, close }) => {
     } else if (type === "post") {
       if (message.postId.shared) navigate(`/post/${message.postId.postId}`)
       else navigate(`/post/${message.postId._id}`)
+    } else if (type === "friendRequest") {
+      navigate(`/profile/${message.userId.username}`)
+    } else if (type === "acceptedRequest") {
+      navigate(`/profile/${message.userId.username}`)
     }
   }
   useEffect(() => {
@@ -37,6 +41,10 @@ const Notification = ({ message, show, type, close }) => {
       setContent(
         `${message?.userId?.username} ${message?.interaction} your post`
       )
+    } else if (type === "friendRequest") {
+      setContent(`${message?.userId?.username} sent you a friend request`)
+    } else if (type === "acceptedRequest") {
+      setContent(`${message?.userId?.username} accepted your friend request`)
     }
   }, [message])
   return (

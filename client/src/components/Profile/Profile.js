@@ -8,6 +8,7 @@ import axios from "../../axios"
 import { useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import Skeleton from "@mui/material/Skeleton"
+import { socket } from "../../socket"
 
 function Profile() {
   const theme = useTheme()
@@ -76,6 +77,12 @@ function Profile() {
             setRequest((prevState) => !prevState)
           }
           setFriend(data.message)
+          if (data.message === "Request Sent") {
+            socket.emit("friendRequest", data.notification)
+          }
+          if (data.message === "Unfriend") {
+            socket.emit("friendRequest", data.notification)
+          }
         }
       })
       .catch((error) => {

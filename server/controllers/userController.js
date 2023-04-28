@@ -1,6 +1,7 @@
 import { checkDetails, validateUpdatedDetails } from "../helpers/authHelper.js"
 import { getOnlineUsersFromFriends } from "../helpers/userHelper.js"
 import userModel from "../model/User.js"
+import notificationModel from "../model/Notifications.js"
 import path from "path"
 
 export const validateDetails = async (req, res, next) => {
@@ -129,7 +130,15 @@ export const setFriend = async (req, res) => {
       })
       await userModel.findByIdAndUpdate(id, { $push: { friends: friendId } })
       await userModel.findByIdAndUpdate(friendId, { $push: { friends: id } })
-      return res.json({ success: true, message: "Unfriend" })
+      const notification = new notificationModel({
+        type: "acceptedRequest",
+        userId: id,
+        to: friendId,
+      })
+      await notification.save()
+      await notification.populate({ path: "userId", select: "-password" })
+      await notification.populate({ path: "to", select: "-password" })
+      return res.json({ success: true, message: "Unfriend", notification })
     } else {
       await userModel.findByIdAndUpdate(id, {
         $push: { pendingSentRequest: friendId },
@@ -137,7 +146,15 @@ export const setFriend = async (req, res) => {
       await userModel.findByIdAndUpdate(friendId, {
         $push: { pendingRequests: id },
       })
-      return res.json({ success: true, message: "Request Sent" })
+      const notification = new notificationModel({
+        type: "friendRequest",
+        userId: id,
+        to: friendId,
+      })
+      await notification.save()
+      await notification.populate({ path: "userId", select: "-password" })
+      await notification.populate({ path: "to", select: "-password" })
+      return res.json({ success: true, message: "Request Sent", notification })
     }
   } catch (error) {
     console.log(error)

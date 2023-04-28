@@ -25,8 +25,74 @@ export const getNotifications = async (req, res) => {
         $unwind: "$userId",
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "to",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                password: 0,
+              },
+            },
+          ],
+          as: "to",
+        },
+      },
+      {
+        $unwind: {
+          path: "$to",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "posts",
+          localField: "postId",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                password: 0,
+              },
+            },
+          ],
+          as: "postId",
+        },
+      },
+      {
+        $unwind: {
+          path: "$postId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $match: {
-          "userId.friends": new mongoose.Types.ObjectId(id),
+          $or: [
+            {
+              $and: [
+                { "userId.friends": new mongoose.Types.ObjectId(id) },
+                { type: "create" },
+              ],
+            },
+            {
+              $and: [
+                { "to._id": new mongoose.Types.ObjectId(id) },
+                { type: { $ne: "create" } },
+              ],
+            },
+            {
+              $and: [
+                { "postId.createdBy": new mongoose.Types.ObjectId(id) },
+                { "userId._id": { $ne: new mongoose.Types.ObjectId(id) } },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
         },
       },
       {

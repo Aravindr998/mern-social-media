@@ -77,15 +77,28 @@ io.on("connection", (socket) => {
   })
 
   socket.on("postInteracted", async (notification) => {
-    console.log("here")
-    console.log(notification)
+    try {
+      console.log("here")
+      console.log(notification)
+      if (!notification) return
+      const userId = notification.postId.createdBy
+      const user = await onlineUsersModel.findOne({ userId })
+      console.log(user)
+      if (user) {
+        socket.to(user.socketId).emit("fetchNewNotification", notification)
+        console.log("emitted")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  })
+
+  socket.on("friendRequest", async (notification) => {
     if (!notification) return
-    const userId = notification.postId.createdBy
+    const userId = notification.to._id
     const user = await onlineUsersModel.findOne({ userId })
-    console.log(user)
     if (user) {
       socket.to(user.socketId).emit("fetchNewNotification", notification)
-      console.log("emitted")
     }
   })
 
