@@ -29,6 +29,7 @@ import EditProfilePage from "./pages/EditProfilePage"
 import SinglePostPage from "./pages/SinglePostPage"
 import { fetchOnlineUsers } from "./features/onlineUsersSlice/onlineUsersSlice"
 import NotificationsPage from "./pages/NotificationsPage"
+import AdminUserDetails from "./components/AdminUserDetails/AdminUserDetails"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -129,7 +130,9 @@ function App() {
             </Route>
             <Route element={<AdminProtectedRoutes />}>
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/admin/users" element={<AdminUsersPage />} />
+              <Route path="/admin/users" element={<AdminUsersPage />}>
+                <Route path=":userId" element={<AdminUserDetails />} />
+              </Route>
             </Route>
           </Routes>
         </ThemeProvider>

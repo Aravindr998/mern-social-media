@@ -68,7 +68,7 @@ const SinglePostView = () => {
         }
       }
     })()
-  }, [])
+  }, [postId])
   useEffect(() => {
     if (post?.likes?.includes(user?._id)) setLiked(true)
   }, [user, post])

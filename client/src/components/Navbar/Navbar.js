@@ -30,6 +30,8 @@ import InfoIcon from "@mui/icons-material/Info"
 import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
 import LogoutIcon from "@mui/icons-material/Logout"
+import NotificationPanel from "../NotificationPanel/NotificationPanel"
+import ChatPanel from "../ChatPanel/ChatPanel"
 
 function Navbar() {
   const navigate = useNavigate()
@@ -39,6 +41,23 @@ function Navbar() {
   const [search, setSearch] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState([])
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null)
+  const [chatAnchorEl, setChatAnchorEl] = useState(null)
+
+  const handleOpenNotification = (event) => {
+    setNotificationAnchorEl(event.currentTarget)
+  }
+  const handleCloseNotification = () => {
+    setNotificationAnchorEl(null)
+  }
+
+  const handleOpenChat = (event) => {
+    setChatAnchorEl(event.currentTarget)
+  }
+  const handleCloseChat = (event) => {
+    setChatAnchorEl(null)
+  }
+
   const handleLogout = () => {
     localStorage.removeItem(TOKEN_KEY)
     dispatch(clearAuth())
@@ -196,7 +215,7 @@ function Navbar() {
           <Box sx={{ flexGrow: 0, display: { xs: "none", sm: "flex" } }}>
             <Tooltip title="Conversations">
               <IconButton
-                onClick={handleOpenUserMenu}
+                onClick={handleOpenChat}
                 sx={{ p: 0, marginLeft: "2rem" }}
               >
                 <Avatar sx={{ backgroundColor: "white" }}>
@@ -206,7 +225,7 @@ function Navbar() {
             </Tooltip>
             <Tooltip title="Notifications">
               <IconButton
-                onClick={handleOpenUserMenu}
+                onClick={handleOpenNotification}
                 sx={{ p: 0, marginLeft: "2rem" }}
               >
                 <Avatar sx={{ backgroundColor: "white" }}>
@@ -286,6 +305,11 @@ function Navbar() {
           </Box>
         </Toolbar>
       </AppBar>
+      <NotificationPanel
+        handleNotificationClose={handleCloseNotification}
+        anchorEl={notificationAnchorEl}
+      />
+      <ChatPanel handleChatClose={handleCloseChat} anchorEl={chatAnchorEl} />
     </Box>
   )
 }

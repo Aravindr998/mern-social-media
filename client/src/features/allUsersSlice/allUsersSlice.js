@@ -19,6 +19,16 @@ export const fetchAllUsers = createAsyncThunk("allUsers/fetchAllUsers", () => {
 const allUsersSlice = createSlice({
   name: "allUsers",
   initialState,
+  reducers: {
+    editUserList: (state, action) => {
+      state.users = state.users.map((item) => {
+        if (item._id === action.payload._id) {
+          return action.payload
+        }
+        return item
+      })
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchAllUsers.pending, (state) => {
       state.loading = true
@@ -37,3 +47,4 @@ const allUsersSlice = createSlice({
 })
 
 export default allUsersSlice.reducer
+export const { editUserList } = allUsersSlice.actions
