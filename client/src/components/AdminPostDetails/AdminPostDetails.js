@@ -1,6 +1,12 @@
 import {
   Avatar,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   Link,
@@ -28,6 +34,8 @@ const AdminPostDetails = () => {
   const [anchorEl, setAnchorEl] = useState(null)
   const [anchorElComments, setAnchorElComments] = useState(null)
   const [show, setShow] = useState(false)
+  const [openConfirmation, setOpenConfirmation] = useState(false)
+  const [commentId, setCommentId] = useState("")
 
   const removePost = useOutletContext()
 
@@ -59,20 +67,22 @@ const AdminPostDetails = () => {
     })()
   }, [postId])
   const openCommentMenu = Boolean(anchorElComments)
-  const handleCommentClick = (event) => {
+  const handleCommentClick = (event, id) => {
     setAnchorElComments(event.currentTarget)
+    setCommentId(id)
   }
   const handleCommentClose = () => {
     setAnchorElComments(null)
+    setCommentId("")
   }
   const handleCommentDelete = () => {
-    setShow(true)
+    setOpenConfirmation(true)
   }
   let allComments
   if (post?.comments?.length > 0) {
     allComments = post.comments.map((item) => {
       return (
-        <>
+        <React.Fragment key={item._id}>
           <Divider />
           <Box
             sx={{
@@ -100,11 +110,14 @@ const AdminPostDetails = () => {
                 </Typography>
               </Box>
             </Box>
-            <IconButton aria-label="settings" onClick={handleCommentClick}>
+            <IconButton
+              aria-label="settings"
+              onClick={(e) => handleCommentClick(e, item._id)}
+            >
               <MoreVertIcon />
             </IconButton>
           </Box>
-        </>
+        </React.Fragment>
       )
     })
   } else {
@@ -136,6 +149,23 @@ const AdminPostDetails = () => {
   const redirectAfterDelete = (data) => {
     removePost(data)
     navigate("/admin/posts")
+  }
+  const handleCloseDelConfirmation = () => {
+    setOpenConfirmation(false)
+  }
+  const handleDeleteComment = async () => {
+    try {
+      const { data } = await axios.patch(
+        `/api/admin/post/${postId}/comments/delete`,
+        { commentId },
+        { headers: { Authorization: adminAuth } }
+      )
+      setPost(data)
+      setOpenConfirmation(false)
+      setAnchorElComments(null)
+    } catch (error) {
+      console.log(error)
+    }
   }
   return (
     <Box sx={{ marginTop: "-1.5rem", display: "flex" }}>
@@ -261,6 +291,26 @@ const AdminPostDetails = () => {
       >
         <MenuItem onClick={handleCommentDelete}>Delete Comment</MenuItem>
       </Menu>
+      <Dialog
+        open={openConfirmation}
+        onClose={handleCloseDelConfirmation}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Are you sure?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this comment? Deleted comments
+            cannot be recovered.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelConfirmation}>Cancel</Button>
+          <Button onClick={handleDeleteComment} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

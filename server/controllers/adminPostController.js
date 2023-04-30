@@ -45,3 +45,23 @@ export const getSinglePost = async (req, res) => {
       .json({ message: "Something went wrong, please try again later" })
   }
 }
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { postId } = req.params
+    const { commentId } = req.body
+    const post = await postModel.findById(postId)
+    post.comments = post.comments.filter(
+      (item) => item._id.toString() !== commentId
+    )
+    await post.save()
+    await post.populate({ path: "createdBy", select: "-password" })
+    await post.populate({ path: "comments.userId", select: "-password" })
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
