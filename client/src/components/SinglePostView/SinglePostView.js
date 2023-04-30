@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material"
 import axios from "../../axios"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
@@ -40,7 +40,6 @@ const SinglePostView = () => {
   const [error, setError] = useState("")
   const [comment, setComment] = useState("")
   const [anchorEl, setAnchorEl] = useState(null)
-  const commentRef = useRef()
   const formatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
   useEffect(() => {
     ;(async () => {

@@ -1,5 +1,6 @@
 import userModel from "../model/User.js"
 import postModel from "../model/Posts.js"
+import { getAllNotifications } from "../helpers/adminHelper.js"
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -31,7 +32,10 @@ export const blockUser = async (req, res) => {
 export const getUserDetails = async (req, res) => {
   try {
     const { id } = req.params
-    const user = await userModel.findById(id).select("-password")
+    const user = await userModel
+      .findById(id)
+      .select("-password")
+      .populate({ path: "friends", select: "-password" })
     res.json(user)
   } catch (error) {
     console.log(error)
@@ -48,6 +52,19 @@ export const getPostsOfOneUser = async (req, res) => {
       .find()
       .where({ createdBy: userId, shared: false })
     res.json(posts)
+  } catch (error) {
+    console.log(error)
+    return res
+      .status(500)
+      .json({ message: "Some error occured, Please try again later" })
+  }
+}
+
+export const getActionsOfUser = async (req, res) => {
+  try {
+    const { userId } = req.params
+    const actions = await getAllNotifications(userId)
+    res.json(actions)
   } catch (error) {
     console.log(error)
     return res

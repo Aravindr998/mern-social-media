@@ -113,7 +113,6 @@ function AdminUserList({ drawerWidth }) {
                 allUsers.users
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
-                    console.log(row)
                     return (
                       <TableRow
                         hover
@@ -122,7 +121,6 @@ function AdminUserList({ drawerWidth }) {
                         key={row._id}
                       >
                         {columns.map((column) => {
-                          console.log(column)
                           const value = row[column.id]
                           if (column.id === "action") {
                             return (

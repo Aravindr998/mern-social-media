@@ -3,7 +3,9 @@ import {
   Avatar,
   Box,
   Button,
+  Divider,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -11,11 +13,13 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material"
 import axios from "../../axios"
 import { useSelector } from "react-redux"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
+import DeleteConfirmation from "../DeleteConfirmation/DeleteConfirmation"
 
 const columns = [
   { id: "media", label: "Media", minWidth: 100 },
@@ -42,8 +46,14 @@ const AdminUserDetails = ({ drawerWidth }) => {
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
   const [user, setUser] = useState({})
   const [posts, setPosts] = useState([])
+  const [sortOrder, setSortOrder] = useState("desc")
+  const [actions, setActions] = useState([])
+  const [postToDelete, setPostToDelete] = useState("")
+  const [open, setOpen] = useState(false)
   const adminAuth = useSelector((state) => state.adminAuth)
   const { userId } = useParams()
+  const navigate = useNavigate()
+  console.log(posts)
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
   }
@@ -63,11 +73,11 @@ const AdminUserDetails = ({ drawerWidth }) => {
         console.log(error)
       }
     })()
-  }, [])
+  }, [userId])
   useEffect(() => {
     ;(async () => {
       try {
-        const { data } = await axios.get(`/api/admin/post/${userId}`, {
+        const { data } = await axios.get(`/api/admin/user/post/${userId}`, {
           headers: { Authorization: adminAuth },
         })
         setPosts(data)
@@ -75,7 +85,133 @@ const AdminUserDetails = ({ drawerWidth }) => {
         console.log(error)
       }
     })()
-  }, [])
+  }, [userId])
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const { data } = await axios.get(`/api/admin/user/actions/${userId}`, {
+          headers: { Authorization: adminAuth },
+        })
+        setActions(data)
+      } catch (error) {
+        console.log(error)
+      }
+    })()
+  }, [userId])
+
+  const imageFormat = ["jpg", "jpeg", "png", "webp"]
+
+  function getUrlExtension(url) {
+    return url.split(/[#?]/)[0].split(".").pop().trim()
+  }
+
+  const sortColumn = (id, order) => {
+    let sortFunction
+    if (id === "reports") {
+      if (sortOrder === "asc") {
+        sortFunction = (a, b) => a.reported.length - b.reported.length
+        setSortOrder("desc")
+      } else {
+        sortFunction = (a, b) => b.reported.length - a.reported.length
+        setSortOrder("asc")
+      }
+      posts.sort(sortFunction)
+    } else if (id === "likes") {
+      if (sortOrder === "asc") {
+        sortFunction = (a, b) => a.likes.length - b.likes.length
+        setSortOrder("desc")
+      } else {
+        sortFunction = (a, b) => b.likes.length - a.likes.length
+        setSortOrder("asc")
+      }
+      posts.sort(sortFunction)
+    }
+  }
+  let allActions = <Typography>No actions to show</Typography>
+  if (actions.length) {
+    allActions = actions.map((item) => {
+      console.log(item)
+      let content, link, username
+      if (item.type === "create") {
+        username = item.userId.username
+        content = "created a new post"
+        link = `/post/${item.postId}`
+      } else if (item.type === "post") {
+        username = item.userId.username
+        content = `${item.interaction} a post by ${item.postId.createdBy.username}`
+        link = `/post/${item.postId}`
+      } else if (item.type === "friendRequest") {
+        username = item.userId.username
+        content = `sent friend request to ${item.to.username}`
+        link = `/profile/${item.userId.username}`
+      } else if (item.type === "acceptedRequest") {
+        username = item.userId.username
+        content = `accepted a friend request by ${item.to.username}`
+        link = `/profile/${item.userId.username}`
+      }
+      return (
+        <React.Fragment key={item._id}>
+          <Box
+            sx={{
+              padding: "1rem",
+              "&:hover": { backgroundColor: "#DFDFDF" },
+              borderRadius: "0.5rem",
+              transition: "background-color 0.3s",
+              cursor: "pointer",
+            }}
+          >
+            <Typography>
+              <Typography component="span" fontWeight={700}>
+                {username}
+              </Typography>{" "}
+              {content}
+            </Typography>
+          </Box>
+          <Divider />
+        </React.Fragment>
+      )
+    })
+  }
+  let allFriends
+  if (user?.friends?.length) {
+    allFriends = user?.friends?.map((friend) => {
+      return (
+        <Tooltip title="View Details" placement="left">
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              padding: "1rem",
+              cursor: "pointer",
+            }}
+            onClick={() => navigate(`/admin/users/${friend._id}`)}
+          >
+            <Avatar
+              sx={{ marginRight: "0.5rem" }}
+              src={friend.profilePicture}
+            />
+            <Typography fontWeight={500}>{friend.username}</Typography>
+          </Box>
+        </Tooltip>
+      )
+    })
+  }
+
+  const handleDeleteConfirmation = async (postId) => {
+    setPostToDelete(postId)
+    setOpen(true)
+  }
+  const handleCloseConfirmation = async (postId) => {
+    setPostToDelete("")
+    setOpen(false)
+  }
+  const removePost = (data) => {
+    setPosts((prevState) => {
+      return prevState.filter((item) => item._id != data._id)
+    })
+    setOpen(false)
+  }
   return (
     <Box
       component="main"
@@ -89,7 +225,9 @@ const AdminUserDetails = ({ drawerWidth }) => {
       <Paper sx={{ width: "100%" }}>
         <Box
           sx={{
-            backgroundImage: `url(${user?.coverPicture})`,
+            backgroundImage: `url(${
+              user?.coverPicture || "/images/cover-picture.png"
+            })`,
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "50% 50%",
@@ -100,7 +238,7 @@ const AdminUserDetails = ({ drawerWidth }) => {
         >
           <Box
             component="img"
-            src={user?.profilePicture}
+            src={user?.profilePicture || "/images/avatar.jpg"}
             width="12rem"
             height="12rem"
             sx={{ objectFit: "cover" }}
@@ -127,9 +265,9 @@ const AdminUserDetails = ({ drawerWidth }) => {
           <Typography color={"GrayText"}>{user?.username}</Typography>
           <Typography>{user?.email}</Typography>
         </Box>
-        <Box sx={{ maxWidth: "100%", overflowX: "auto" }}>
+        <Box sx={{ maxWidth: "100%", overflow: "hidden" }}>
           <TableContainer sx={{ maxHeight: 440 }}>
-            <Table aria-label="sticky table">
+            <Table aria-label="table">
               <TableHead>
                 <TableRow>
                   {columns.map((column) => (
@@ -140,7 +278,9 @@ const AdminUserDetails = ({ drawerWidth }) => {
                         top: 57,
                         minWidth: column.minWidth,
                         backgroundColor: "#DFDFDF",
+                        cursor: "pointer",
                       }}
+                      onClick={() => sortColumn(column.id, sortOrder)}
                     >
                       {column.label}
                     </TableCell>
@@ -152,7 +292,12 @@ const AdminUserDetails = ({ drawerWidth }) => {
                   posts
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => {
-                      console.log(row)
+                      let extension
+                      if (typeof row.media === "string") {
+                        extension = getUrlExtension(row.media)
+                      } else if (typeof row?.sharedPost?.media === "string")
+                        extension = getUrlExtension(row.sharedPost.media)
+                      let isImage = imageFormat.includes(extension)
                       return (
                         <TableRow
                           hover
@@ -161,7 +306,6 @@ const AdminUserDetails = ({ drawerWidth }) => {
                           key={row._id}
                         >
                           {columns.map((column) => {
-                            console.log(column)
                             const value = row[column.id]
                             if (column.id === "action") {
                               return (
@@ -177,9 +321,9 @@ const AdminUserDetails = ({ drawerWidth }) => {
                                   <Button
                                     variant="contained"
                                     color="error"
-                                    // onClick={() => {
-                                    //   handleBlockUser(row._id)
-                                    // }}
+                                    onClick={() => {
+                                      handleDeleteConfirmation(row._id)
+                                    }}
                                   >
                                     Delete
                                   </Button>
@@ -203,7 +347,7 @@ const AdminUserDetails = ({ drawerWidth }) => {
                                   <Box>
                                     <Box
                                       width={"100%"}
-                                      component={"img"}
+                                      component={isImage ? "img" : "video"}
                                       src={row.media}
                                     />
                                   </Box>
@@ -220,7 +364,7 @@ const AdminUserDetails = ({ drawerWidth }) => {
                       )
                     })
                 ) : (
-                  <TableRow>No users to list</TableRow>
+                  <TableRow>No posts to list</TableRow>
                 )}
               </TableBody>
             </Table>
@@ -235,7 +379,39 @@ const AdminUserDetails = ({ drawerWidth }) => {
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
         </Box>
+        <Typography
+          fontSize={"1.5rem"}
+          fontWeight={500}
+          sx={{ padding: "1rem" }}
+        >
+          Actions
+        </Typography>
+        <Box sx={{ maxHeight: "30rem", overflowY: "auto" }}>
+          <Typography sx={{ padding: "1rem" }}>Actions done by user</Typography>
+          <Stack
+            sx={{ padding: "1rem", maxHeight: "100%", overflowY: "auto" }}
+            spacing={2}
+          >
+            {allActions}
+          </Stack>
+        </Box>
+        <Box>
+          <Typography
+            fontSize={"1.5rem"}
+            fontWeight={500}
+            sx={{ padding: "1rem" }}
+          >
+            Friends
+          </Typography>
+          <Stack>{allFriends}</Stack>
+        </Box>
       </Paper>
+      <DeleteConfirmation
+        postId={postToDelete}
+        show={open}
+        handleCloseConfirmation={handleCloseConfirmation}
+        removePost={removePost}
+      />
     </Box>
   )
 }

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import AppBar from "@mui/material/AppBar"
 import Box from "@mui/material/Box"
 import Divider from "@mui/material/Divider"
@@ -20,7 +20,7 @@ import LogoutIcon from "@mui/icons-material/Logout"
 import { useNavigate } from "react-router-dom"
 
 function AdminSidePanel({ drawerWidth }) {
-  const [mobileOpen, setMobileOpen] = React.useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
 
   const handleDrawerToggle = () => {
@@ -50,7 +50,7 @@ function AdminSidePanel({ drawerWidth }) {
           </ListItemButton>
         </ListItem>
         <Divider />
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={() => navigate("/admin/posts")}>
           <ListItemButton>
             <ListItemIcon>
               <EventNoteIcon />

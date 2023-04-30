@@ -10,6 +10,7 @@ import {
   blockUser,
   getUserDetails,
   getPostsOfOneUser,
+  getActionsOfUser,
 } from "../controllers/adminUserController.js"
 const router = Router()
 
@@ -21,6 +22,8 @@ router.patch("/user/block", isAdminLoggedin, blockUser)
 
 router.get("/user/:id", isAdminLoggedin, getUserDetails)
 
-router.get("/post/:userId", isAdminLoggedin, getPostsOfOneUser)
+router.get("/user/post/:userId", isAdminLoggedin, getPostsOfOneUser)
+
+router.get("/user/actions/:userId", isAdminLoggedin, getActionsOfUser)
 
 export default router
