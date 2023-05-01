@@ -36,6 +36,11 @@ const commentSlice = createSlice({
     addComment: (state, action) => {
       state.comments.push(action.payload)
     },
+    deleteComment: (state, action) => {
+      state.comments = state.comments.filter(
+        (item) => item._id !== action.payload._id
+      )
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchComments.pending, (state) => {
@@ -68,4 +73,4 @@ const commentSlice = createSlice({
 
 export default commentSlice.reducer
 
-export const { addComment } = commentSlice.actions
+export const { addComment, deleteComment } = commentSlice.actions

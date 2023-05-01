@@ -26,7 +26,6 @@ const ChatPanel = ({ anchorEl, handleChatClose }) => {
   useEffect(() => {
     dispatch(fetchCoversations())
   }, [])
-  console.log(conversations)
   let allConversations = (
     <Box>
       <MenuItem>

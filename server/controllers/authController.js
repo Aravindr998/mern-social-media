@@ -56,6 +56,22 @@ export const authenticate = (req, res, next) => {
   })(req, res, next)
 }
 
+export const googleAuthenticate = (req, res, next) => {
+  passport.authenticate("google", { session: false }, async (err, user) => {
+    try {
+      if (err) {
+        throw err
+      }
+      const token = createToken(user._id, user.email)
+      res.cookie("token", token)
+      res.redirect(`http://localhost:3000`)
+    } catch (error) {
+      console.log(error)
+      return res.redirect("http://localhost:3000/login?authentication=failed")
+    }
+  })(req, res)
+}
+
 export const isUserLoggedin = (req, res, next) => {
   passport.authenticate("jwt", { session: false }, async (err, user) => {
     try {
@@ -164,4 +180,18 @@ export const loginUser = (req, res) => {
       }
     }
   )(req, res)
+}
+
+export const authenticateGoogle = async (req, res) => {
+  try {
+    const token = createToken(req.user._id, req.user.email)
+    res.cookie("token", token)
+    res.redirect(`http://localhost:3000`)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const failedGoogleAuthentication = async (req, res) => {
+  res.redirect("http://localhost:3000/login?authentication=failed")
 }

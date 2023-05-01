@@ -49,6 +49,11 @@ export const getAllRelatedPosts = async (id, skip = 0) => {
           foreignField: "_id",
           pipeline: [
             {
+              $match: {
+                isDeleted: false,
+              },
+            },
+            {
               $lookup: {
                 from: "users",
                 localField: "createdBy",

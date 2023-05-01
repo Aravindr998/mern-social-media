@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography"
 import IconButton from "@mui/material/IconButton"
 import {
   Avatar,
+  Badge,
   Button,
   Card,
   CardContent,
@@ -32,19 +33,34 @@ import DarkModeIcon from "@mui/icons-material/DarkMode"
 import LogoutIcon from "@mui/icons-material/Logout"
 import NotificationPanel from "../NotificationPanel/NotificationPanel"
 import ChatPanel from "../ChatPanel/ChatPanel"
+import {
+  changeReadState,
+  fetchNotifications,
+} from "../../features/notifications/notificationSlice"
 
 function Navbar() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const auth = useSelector((state) => state.auth)
   const user = useSelector((state) => state.user)
+  const notifications = useSelector((state) => state.notifications)
   const [search, setSearch] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState([])
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null)
   const [chatAnchorEl, setChatAnchorEl] = useState(null)
+  const [unread, setUnread] = useState(0)
+  useEffect(() => {
+    dispatch(fetchNotifications())
+  }, [])
+  useEffect(() => {
+    if (notifications.readByCount !== undefined) {
+      setUnread(notifications.readByCount)
+    }
+  }, [notifications.readByCount])
 
   const handleOpenNotification = (event) => {
+    dispatch(changeReadState())
     setNotificationAnchorEl(event.currentTarget)
   }
   const handleCloseNotification = () => {
@@ -84,7 +100,6 @@ function Navbar() {
             // variant="plain"
             // fullWidth
             onClick={() => {
-              console.log("entered")
               navigate(`/profile/${user.username}`)
             }}
           >
@@ -218,9 +233,11 @@ function Navbar() {
                 onClick={handleOpenChat}
                 sx={{ p: 0, marginLeft: "2rem" }}
               >
-                <Avatar sx={{ backgroundColor: "white" }}>
-                  <ChatIcon color="primary" />
-                </Avatar>
+                <Badge color="error" badgeContent={15} max={9}>
+                  <Avatar sx={{ backgroundColor: "white" }}>
+                    <ChatIcon color="primary" />
+                  </Avatar>
+                </Badge>
               </IconButton>
             </Tooltip>
             <Tooltip title="Notifications">
@@ -228,9 +245,11 @@ function Navbar() {
                 onClick={handleOpenNotification}
                 sx={{ p: 0, marginLeft: "2rem" }}
               >
-                <Avatar sx={{ backgroundColor: "white" }}>
-                  <NotificationsIcon color="primary" />
-                </Avatar>
+                <Badge color="error" badgeContent={unread} max={9}>
+                  <Avatar sx={{ backgroundColor: "white" }}>
+                    <NotificationsIcon color="primary" />
+                  </Avatar>
+                </Badge>
               </IconButton>
             </Tooltip>
             <Tooltip title="Settings">

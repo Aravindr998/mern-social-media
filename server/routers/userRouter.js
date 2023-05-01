@@ -7,6 +7,9 @@ import {
   resendOtp,
   validateLogin,
   loginUser,
+  authenticateGoogle,
+  failedGoogleAuthentication,
+  googleAuthenticate,
 } from "../controllers/authController.js"
 import {
   validateDetails,
@@ -21,7 +24,9 @@ import {
 } from "../controllers/userController.js"
 import "../auth/localStrategy.js"
 import "../auth/auth.js"
+import "../auth/googleStrategy.js"
 import upload from "../middlewares/multerConfig.js"
+import passport from "passport"
 const router = express.Router()
 
 router.post("/register", validateUser, authenticate)
@@ -55,5 +60,14 @@ router.patch(
 router.get("/friends", isUserLoggedin, getFriendsList)
 
 router.get("/users/online", isUserLoggedin, getOnlineUsers)
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+)
+
+router.get("/auth/google/callback", googleAuthenticate)
+
+router.get("/auth/google/failure", failedGoogleAuthentication)
 
 export default router

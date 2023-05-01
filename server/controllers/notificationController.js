@@ -1,108 +1,41 @@
 import mongoose from "mongoose"
 import notificationModel from "../model/Notifications.js"
+import {
+  getAllNotifications,
+  getTotalNotificationCount,
+  getUnreadNotifications,
+} from "../helpers/notificationHelper.js"
 
 export const getNotifications = async (req, res) => {
   try {
     const { id } = req.user
-    const skip = req.query.skip || 0
-    const notifications = await notificationModel.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-              },
-            },
-          ],
-          as: "userId",
-        },
-      },
-      {
-        $unwind: "$userId",
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "to",
-          foreignField: "_id",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-              },
-            },
-          ],
-          as: "to",
-        },
-      },
-      {
-        $unwind: {
-          path: "$to",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $lookup: {
-          from: "posts",
-          localField: "postId",
-          foreignField: "_id",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-              },
-            },
-          ],
-          as: "postId",
-        },
-      },
-      {
-        $unwind: {
-          path: "$postId",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $match: {
-          $or: [
-            {
-              $and: [
-                { "userId.friends": new mongoose.Types.ObjectId(id) },
-                { type: "create" },
-              ],
-            },
-            {
-              $and: [
-                { "to._id": new mongoose.Types.ObjectId(id) },
-                { type: { $ne: "create" } },
-              ],
-            },
-            {
-              $and: [
-                { "postId.createdBy": new mongoose.Types.ObjectId(id) },
-                { "userId._id": { $ne: new mongoose.Types.ObjectId(id) } },
-              ],
-            },
-          ],
-        },
-      },
-      {
-        $sort: {
-          createdAt: -1,
-        },
-      },
-      {
-        $limit: 10,
-      },
-      {
-        $skip: skip,
-      },
-    ])
-    return res.json(notifications)
+    let skip = req.query.skip || 0
+    skip *= 10
+    console.log(skip)
+    const notifications = await getAllNotifications(id, skip)
+    const totalNotifications = await getTotalNotificationCount(id)
+    const unread = await getUnreadNotifications(id)
+    const readByCount = unread.length
+    const totalCount = totalNotifications.length
+    return res.json({ notifications, totalCount, readByCount })
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const setReadNotifications = async (req, res) => {
+  try {
+    const { id } = req.user
+    const notifications = await getUnreadNotifications(id)
+    for (let item of notifications) {
+      await notificationModel.findOneAndUpdate(item._id, {
+        $push: { readBy: id },
+      })
+    }
+    res.json({ success: true })
   } catch (error) {
     console.log(error)
     res

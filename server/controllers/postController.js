@@ -205,9 +205,9 @@ export const loadPosts = async (req, res) => {
 
 export const loadComments = async (req, res) => {
   try {
-    const { id } = req.user
     const { postId } = req.params
-    const skip = req.query.page || 0
+    let skip = req.query.page || 0
+    skip *= 10
     const comments = await getCommentsFromPost(postId, parseInt(skip))
     res.json(comments)
   } catch (error) {
@@ -386,6 +386,27 @@ export const getAllDetailsOfSinglePost = async (req, res) => {
       return res.status(403).json({ message: "User not authorized" })
     await post.populate({ path: "createdBy", select: "-password" })
     res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { postId } = req.params
+    const { commentId } = req.body
+    const post = await postModel.findById(postId)
+    const comment = post.comments.find(
+      (item) => item._id.toString() === commentId
+    )
+    if (id !== post.createdBy.toString() && comment.userId.toString() !== id)
+      return res.status(403).json({ message: "User not authorized" })
+    await postModel.findByIdAndUpdate(postId, { $pull: { comments: comment } })
+    res.json(comment)
   } catch (error) {
     console.log(error)
     res

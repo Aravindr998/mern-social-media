@@ -27,6 +27,10 @@ const notificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Users",
     },
+    readBy: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Users",
+    },
   },
   {
     timestamps: true,

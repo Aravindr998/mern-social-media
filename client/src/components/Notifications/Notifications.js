@@ -7,18 +7,45 @@ import {
   Stack,
   Typography,
 } from "@mui/material"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchNotifications } from "../../features/notifications/notificationSlice"
+import {
+  changeReadState,
+  fetchNotifications,
+  loadMoreNotifications,
+} from "../../features/notifications/notificationSlice"
 import { useNavigate } from "react-router-dom"
+import InfiniteScroll from "react-infinite-scroller"
 
 const Notifications = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const notifications = useSelector((state) => state.notifications)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [hasMore, setHasMore] = useState(true)
   useEffect(() => {
     dispatch(fetchNotifications())
   }, [])
+  useEffect(() => {
+    dispatch(changeReadState())
+  }, [])
+  useEffect(() => {
+    if (notifications.total <= notifications.notifications.length) {
+      setHasMore(false)
+    } else {
+      setHasMore(true)
+    }
+  }, [notifications.notifications])
+  const loadHandler = () => {
+    console.log("loading")
+    if (
+      !notifications.loading &&
+      pageNumber <= Math.ceil(notifications.total / 10)
+    ) {
+      dispatch(loadMoreNotifications(pageNumber))
+      setPageNumber((prevState) => ++prevState)
+    }
+  }
   let allNotifications = (
     <>
       <Box
@@ -59,11 +86,11 @@ const Notifications = () => {
       if (item.type === "create") {
         username = item.userId.username
         content = "created a new post"
-        link = `/post/${item.postId}`
+        link = `/post/${item.postId._id}`
       } else if (item.type === "post") {
         username = item.userId.username
         content = `${item.interaction} your post`
-        link = `/post/${item.postId}`
+        link = `/post/${item.postId._id}`
       } else if (item.type === "friendRequest") {
         username = item.userId.username
         content = `sent you a friend request`
@@ -122,8 +149,28 @@ const Notifications = () => {
         }}
       >
         <CardContent sx={{ height: "100%" }}>
-          <Stack sx={{ height: "100%", overflowY: "auto" }}>
-            {allNotifications}
+          <Stack sx={{ height: "100%", overflowY: "auto" }} key={1}>
+            <InfiniteScroll
+              pageStart={0}
+              loadMore={loadHandler}
+              hasMore={hasMore}
+              loader={
+                <React.Fragment key={1}>
+                  <Box
+                    sx={{
+                      padding: "1rem",
+                      borderRadius: "0.5rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Skeleton sx={{ fontSize: "1rem" }} width={"70%"} />
+                  </Box>
+                  <Divider />
+                </React.Fragment>
+              }
+            >
+              {allNotifications}
+            </InfiniteScroll>
           </Stack>
         </CardContent>
       </Card>

@@ -32,6 +32,7 @@ import NotificationsPage from "./pages/NotificationsPage"
 import AdminUserDetails from "./components/AdminUserDetails/AdminUserDetails"
 import AdminPostsPage from "./pages/AdminPostsPage"
 import AdminPostDetails from "./components/AdminPostDetails/AdminPostDetails"
+import { fetchNotifications } from "./features/notifications/notificationSlice"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -86,6 +87,7 @@ function App() {
     })
     socket.on("fetchNewNotification", (notification) => {
       console.log("got it")
+      dispatch(fetchNotifications())
       setShow(true)
       setContent(notification)
       setType(notification.type)

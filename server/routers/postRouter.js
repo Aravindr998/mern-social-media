@@ -17,6 +17,7 @@ import {
   sharePost,
   getSharedPost,
   getAllDetailsOfSinglePost,
+  deleteComment,
 } from "../controllers/postController.js"
 import {} from "../helpers/postHelper.js"
 import upload from "../middlewares/multerConfig.js"
@@ -54,5 +55,7 @@ router.post("/share", isUserLoggedin, sharePost)
 router.get("/:postId/post/share", isUserLoggedin, getSharedPost)
 
 router.get("/:postId/details", isUserLoggedin, getAllDetailsOfSinglePost)
+
+router.patch("/:postId/comments/delete", isUserLoggedin, deleteComment)
 
 export default router

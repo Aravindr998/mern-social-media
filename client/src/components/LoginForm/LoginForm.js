@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import CssBaseline from "@mui/material/CssBaseline"
 import TextField from "@mui/material/TextField"
 import Link from "@mui/material/Link"
@@ -8,7 +8,11 @@ import Typography from "@mui/material/Typography"
 import Container from "@mui/material/Container"
 import { Alert, Button, Slide } from "@mui/material"
 import GoogleIcon from "@mui/icons-material/Google"
-import { Link as RouterLink, useNavigate } from "react-router-dom"
+import {
+  Link as RouterLink,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom"
 import axios from "../../axios"
 import { TOKEN_KEY } from "../../constants/constant"
 import { setAuth } from "../../features/users/authSlice"
@@ -28,6 +32,16 @@ function LoginForm() {
     password: "",
   })
   const [error, setError] = useState("")
+
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    const status = searchParams.get("authentication")
+    if (status === "failed") {
+      setError("Google authentication failed")
+    }
+  }, [])
+
   const handleSubmit = (event) => {
     setError("")
     event.preventDefault()
@@ -74,6 +88,13 @@ function LoginForm() {
         [name]: event.target.value,
       }
     })
+  }
+  const handleGoogleAuth = async () => {
+    try {
+      window.open("http://localhost:4000/api/auth/google", "_self")
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -162,6 +183,7 @@ function LoginForm() {
             sx={{ mb: 2 }}
             size="large"
             startIcon={<GoogleIcon />}
+            onClick={handleGoogleAuth}
           >
             Sign Up With Google
           </Button>

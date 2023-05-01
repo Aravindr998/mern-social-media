@@ -15,12 +15,27 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder"
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
 import axios from "../../axios"
 import { useDispatch, useSelector } from "react-redux"
-import { Button, Divider, Grow, Link, Skeleton, TextField } from "@mui/material"
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Grow,
+  Link,
+  Menu,
+  MenuItem,
+  Skeleton,
+  TextField,
+} from "@mui/material"
 import { Box } from "@mui/system"
 import SendIcon from "@mui/icons-material/Send"
 import PostMenu from "../PostMenu/PostMenu"
 import {
   addComment,
+  deleteComment,
   fetchComments,
   fetchMoreComments,
 } from "../../features/comments/commentSlice"
@@ -32,6 +47,7 @@ import { socket } from "../../socket"
 function PostFeed(props) {
   const navigate = useNavigate()
   const comments = useSelector((state) => state.comments)
+  const user = useSelector((state) => state.user)
   const [liked, setLiked] = useState(false)
   const [postLoading, setPostLoading] = useState(true)
   const [likeCount, setLikeCount] = useState(0)
@@ -42,6 +58,9 @@ function PostFeed(props) {
   const [commentNumber, setCommentNumber] = useState(0)
   const [page, setPage] = useState(1)
   const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorElComments, setAnchorElComments] = useState(null)
+  const [openConfirmation, setOpenConfirmation] = useState(false)
+  const [commentId, setCommentId] = useState("")
 
   const dispatch = useDispatch()
   const imageFormat = ["jpg", "jpeg", "png", "webp"]
@@ -55,6 +74,10 @@ function PostFeed(props) {
   }, [props])
   function getUrlExtension(url) {
     return url.split(/[#?]/)[0].split(".").pop().trim()
+  }
+  const handleCommentClick = (event, id) => {
+    setAnchorElComments(event.currentTarget)
+    setCommentId(id)
   }
   let extension
   if (typeof props.media === "string") {
@@ -89,12 +112,20 @@ function PostFeed(props) {
                 <Typography sx={{ marginLeft: "1rem", fontWeight: "700" }}>
                   {item.userId.username}
                 </Typography>
-                <Typography sx={{ marginLeft: "1rem" }}>{item.text}</Typography>
+                <Typography sx={{ marginLeft: "1rem" }} fontSize={"0.9rem"}>
+                  {item.text}
+                </Typography>
               </Box>
             </Box>
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
-            </IconButton>
+            {(props?.createdBy?._id === user._id ||
+              item.userId._id === user._id) && (
+              <IconButton
+                aria-label="settings"
+                onClick={(e) => handleCommentClick(e, item._id)}
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+            )}
           </Box>
         </>
       )
@@ -110,7 +141,6 @@ function PostFeed(props) {
   const auth = useSelector((state) => state.auth)
   const formatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
   const handleLike = () => {
-    console.log(props.postId)
     axios
       .patch(
         "/api/post/like",
@@ -140,7 +170,6 @@ function PostFeed(props) {
         socket.emit("postInteracted", data.notification)
       })
       .catch(({ response }) => {
-        console.log(response)
         if (response.status === 400) {
           setError(response.data.comment)
         }
@@ -151,7 +180,6 @@ function PostFeed(props) {
   }
   const commentOpenHandler = () => {
     if (!open) {
-      console.log(props?.postId)
       dispatch(fetchComments(props?.postId))
     }
     setOpen((prevState) => !prevState)
@@ -160,7 +188,6 @@ function PostFeed(props) {
     if (e.key === "Enter") handleComment()
   }
   const loadMoreComments = () => {
-    console.log(page)
     dispatch(fetchMoreComments({ postId: props.postId, page }))
     setPage((prevState) => ++prevState)
   }
@@ -169,6 +196,32 @@ function PostFeed(props) {
   }
   const handleShareClose = () => {
     setAnchorEl(null)
+  }
+  const openCommentMenu = Boolean(anchorElComments)
+
+  const handleCommentClose = () => {
+    setAnchorElComments(null)
+  }
+  const handleCommentDelete = () => {
+    setOpenConfirmation(true)
+  }
+  const handleCloseDelConfirmation = () => {
+    setOpenConfirmation(false)
+  }
+  const handleDeleteComment = async () => {
+    try {
+      const { data } = await axios.patch(
+        `/api/post/${props?.postId}/comments/delete`,
+        { commentId },
+        { headers: { Authorization: auth } }
+      )
+      //Remove comment from redux state
+      dispatch(deleteComment(data))
+      setOpenConfirmation(false)
+      setAnchorElComments(null)
+    } catch (error) {
+      console.log(error)
+    }
   }
   return (
     <>
@@ -264,11 +317,14 @@ function PostFeed(props) {
                 src={props?.media}
                 alt="post image"
                 sx={{ cursor: "pointer" }}
+                type={!isImage && "video/mp4"}
                 onClick={() => navigate(`/post/${props?.postId}`)}
+                controls={!isImage}
                 // sx={{ padding: "2rem", borderRadius: "3rem" }}
               />
             ))}
           {props?.shared &&
+            props?.sharedPost?._id &&
             (postLoading ? (
               <Skeleton
                 height={290}
@@ -314,6 +370,40 @@ function PostFeed(props) {
                     sx={{ borderRadius: "1rem" }}
                     // sx={{ padding: "2rem", borderRadius: "3rem" }}
                   />
+                </Box>
+              </Box>
+            ))}
+          {props?.shared &&
+            !props?.sharedPost?._id &&
+            (postLoading ? (
+              <Skeleton
+                height={290}
+                width="100%"
+                animation="wave"
+                variant="rectangular"
+                // sx={{ mx: "auto", borderRadius: "1rem" }}
+              />
+            ) : (
+              <Box
+                sx={{
+                  padding: "1rem",
+                  border: "solid 1px #DFDFDF",
+                  margin: "1rem",
+                  borderRadius: "1rem",
+                  cursor: "pointer",
+                }}
+              >
+                <Box>
+                  <CardContent height="400" sx={{ borderRadius: "1rem" }}>
+                    <Typography fontWeight={500}>
+                      This content isn't available at the moment
+                    </Typography>
+                    <Typography fontSize={"0.9rem"}>
+                      When this happens, it's usually because the owner only
+                      shared it with a small group of people or changed who can
+                      see it, or it's been deleted.
+                    </Typography>
+                  </CardContent>
                 </Box>
               </Box>
             ))}
@@ -402,6 +492,43 @@ function PostFeed(props) {
             postId={props?.postId}
             shared={props?.shared ? true : false}
           />
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorElComments}
+            open={openCommentMenu}
+            onClose={handleCommentClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <MenuItem onClick={handleCommentDelete}>Delete Comment</MenuItem>
+          </Menu>
+          <Dialog
+            open={openConfirmation}
+            onClose={handleCloseDelConfirmation}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">{"Are you sure?"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Are you sure you want to delete this comment? Deleted comments
+                cannot be recovered.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDelConfirmation}>Cancel</Button>
+              <Button onClick={handleDeleteComment} autoFocus>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Card>
       </ClickAwayListener>
     </>

@@ -2,9 +2,16 @@ import {
   Avatar,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   IconButton,
   Link,
+  Menu,
+  MenuItem,
   TextField,
   Typography,
 } from "@mui/material"
@@ -19,11 +26,14 @@ import ShareIcon from "@mui/icons-material/Share"
 import MoreVertIcon from "@mui/icons-material/MoreVert"
 import {
   addComment,
+  deleteComment,
   fetchComments,
   fetchMoreComments,
 } from "../../features/comments/commentSlice"
 import ShareOptions from "../ShareOptions/ShareOptions"
 import { socket } from "../../socket"
+import PostMenu from "../PostMenu/PostMenu"
+import SinglePostMenu from "../SinglePostMenu/SinglePostMenu"
 
 const SinglePostView = () => {
   const { postId } = useParams()
@@ -32,6 +42,7 @@ const SinglePostView = () => {
   const user = useSelector((state) => state.user)
   const comments = useSelector((state) => state.comments)
   const dispatch = useDispatch()
+
   const [post, setPost] = useState({})
   const [liked, setLiked] = useState(false)
   const [likedCount, setLikedCount] = useState(0)
@@ -40,7 +51,17 @@ const SinglePostView = () => {
   const [error, setError] = useState("")
   const [comment, setComment] = useState("")
   const [anchorEl, setAnchorEl] = useState(null)
+  const [anchorElPostMenu, setAnchorElPostMenu] = useState(null)
+  const [anchorElComments, setAnchorElComments] = useState(null)
+  const [show, setShow] = useState(false)
+  const [openConfirmation, setOpenConfirmation] = useState(false)
+  const [commentId, setCommentId] = useState("")
+  const [openMenu, setOpenMenu] = useState(false)
+
+  const openCommentMenu = Boolean(anchorElComments)
+  // const openMenu = Boolean(anchorElPostMenu)
   const formatter = new Intl.DateTimeFormat("en-GB", { dateStyle: "full" })
+
   useEffect(() => {
     ;(async () => {
       try {
@@ -68,6 +89,7 @@ const SinglePostView = () => {
       }
     })()
   }, [postId])
+
   useEffect(() => {
     if (post?.likes?.includes(user?._id)) setLiked(true)
   }, [user, post])
@@ -85,6 +107,81 @@ const SinglePostView = () => {
       console.log(error)
     }
   }
+
+  //post handlers
+  const handleClick = (event) => {
+    setAnchorElPostMenu(event.currentTarget)
+  }
+  const handleClose = () => {
+    //here
+    setAnchorElPostMenu(null)
+  }
+
+  //comment handlers
+  const handleCommentClick = (event, id) => {
+    setAnchorElComments(event.currentTarget)
+    setCommentId(id)
+  }
+  const handleCommentClose = () => {
+    setAnchorElComments(null)
+    setCommentId("")
+  }
+  const handleCommentDelete = () => {
+    setOpenConfirmation(true)
+  }
+  const handleCloseDelConfirmation = () => {
+    setOpenConfirmation(false)
+  }
+
+  const handleDelete = () => {
+    setShow(true)
+  }
+  const handleDeleteComment = async () => {
+    try {
+      const { data } = await axios.patch(
+        `/api/post/${postId}/comments/delete`,
+        { commentId },
+        { headers: { Authorization: auth } }
+      )
+      dispatch(deleteComment(data))
+      setOpenConfirmation(false)
+      setAnchorElComments(null)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const handleComment = async () => {
+    setError("")
+    try {
+      const { data } = await axios.patch(
+        "/api/post/comment",
+        { comment, postId },
+        { headers: { Authorization: auth } }
+      )
+      setComment("")
+      dispatch(addComment(data.comment))
+      setCommentCount((prevState) => ++prevState)
+      socket.emit("postInteracted", data.notification)
+    } catch (error) {
+      const { response } = error
+      if (response) {
+        if (response.status === 400) {
+          setError(response.data.comment)
+        }
+      } else {
+        console.log(error)
+      }
+    }
+  }
+
+  //share post handler
+  const handleSharePost = async (e) => {
+    setAnchorEl(e.currentTarget)
+  }
+  const handleShareClose = () => {
+    setAnchorEl(null)
+  }
+
   let allComments
   if (comments.comments?.length > 0 && !comments?.loading) {
     console.log(comments)
@@ -118,8 +215,11 @@ const SinglePostView = () => {
                 </Typography>
               </Box>
             </Box>
-            <IconButton aria-label="settings">
-              <MoreVertIcon />
+            <IconButton
+              aria-label="settings"
+              onClick={(e) => handleCommentClick(e, item?._id)}
+            >
+              <MoreVertIcon fontSize="small" />
             </IconButton>
           </Box>
         </>
@@ -132,35 +232,30 @@ const SinglePostView = () => {
       </Box>
     )
   }
-  const handleSharePost = async (e) => {
-    setAnchorEl(e.currentTarget)
-  }
-  const handleShareClose = () => {
-    setAnchorEl(null)
-  }
-  const handleComment = async () => {
-    setError("")
+
+  //report post handlers
+  const handleReport = async () => {
     try {
       const { data } = await axios.patch(
-        "/api/post/comment",
-        { comment, postId },
+        `/api/post/${postId}/report`,
+        {},
         { headers: { Authorization: auth } }
       )
-      setComment("")
-      dispatch(addComment(data.comment))
-      setCommentCount((prevState) => ++prevState)
-      socket.emit("postInteracted", data.notification)
+      setAnchorElPostMenu(null)
+      //show snackbar
     } catch (error) {
-      const { response } = error
-      if (response) {
-        if (response.status === 400) {
-          setError(response.data.comment)
-        }
-      } else {
-        console.log(error)
-      }
+      console.log(error)
     }
   }
+
+  //post menu handlers
+  const handleClickAway = (e) => {
+    setOpenMenu(false)
+  }
+  const handleEdit = (post) => {
+    setPost(post)
+  }
+
   return (
     <Box sx={{ marginTop: "5rem", display: "flex" }}>
       <Box
@@ -185,19 +280,37 @@ const SinglePostView = () => {
           height: "calc(100vh - 5rem)",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", padding: "1rem" }}>
-          <Avatar
-            src={post.createdBy?.profilePicture}
-            sx={{ marginRight: "1rem" }}
-          />
-          <Box>
-            <Typography fontWeight={500}>{post.createdBy?.username}</Typography>
-            {post.createdAt && (
-              <Typography fontSize="0.9rem">
-                {formatter.format(new Date(post.createdAt))}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", padding: "1rem" }}>
+            <Avatar
+              src={post.createdBy?.profilePicture}
+              sx={{ marginRight: "1rem" }}
+            />
+            <Box>
+              <Typography fontWeight={500}>
+                {post.createdBy?.username}
               </Typography>
-            )}
+              {post.createdAt && (
+                <Typography fontSize="0.9rem">
+                  {formatter.format(new Date(post.createdAt))}
+                </Typography>
+              )}
+            </Box>
           </Box>
+          <IconButton
+            //  onClick={handleClick}
+            onClick={() => {
+              setOpenMenu((prevState) => !prevState)
+            }}
+          >
+            <MoreVertIcon />
+          </IconButton>
         </Box>
         <Box sx={{ padding: "1rem" }}>
           <Typography>{post.description}</Typography>
@@ -231,7 +344,7 @@ const SinglePostView = () => {
         </Box>
         <Divider />
         <Box sx={{ padding: "0.5rem", cursor: "pointer" }}>
-          {comments?.comments?.length <= commentCount && (
+          {comments?.comments?.length < commentCount && (
             <Link
               onClick={() => {
                 dispatch(fetchMoreComments({ postId, page }))
@@ -280,6 +393,74 @@ const SinglePostView = () => {
         postId={postId}
         shared={false}
       />
+      {/* <Menu
+        id="basic-menu"
+        anchorEl={anchorElPostMenu}
+        open={openMenu}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        {user?._id === post?.createdBy?._id ? (
+          <>
+            <MenuItem>Edit Post</MenuItem>
+            <MenuItem onClick={handleDelete}>Delete Post</MenuItem>
+          </>
+        ) : (
+          <MenuItem onClick={handleReport}>Report Post</MenuItem>
+        )}
+      </Menu> */}
+      <SinglePostMenu
+        handleClickAway={handleClickAway}
+        checked={openMenu}
+        postOwner={post?.createdBy?._id}
+        postId={postId}
+        handleEdit={handleEdit}
+      />
+      <Menu
+        id="basic-menu"
+        anchorEl={anchorElComments}
+        open={openCommentMenu}
+        onClose={handleCommentClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        keepMounted
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem onClick={handleCommentDelete}>Delete Comment</MenuItem>
+      </Menu>
+      <Dialog
+        open={openConfirmation}
+        onClose={handleCloseDelConfirmation}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Are you sure?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this comment? Deleted comments
+            cannot be recovered.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDelConfirmation}>Cancel</Button>
+          <Button onClick={handleDeleteComment} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

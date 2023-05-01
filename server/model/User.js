@@ -20,11 +20,9 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      required: [true, "Phone number is required"],
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
     },
     location: {
       type: String,
@@ -74,6 +72,9 @@ const userSchema = new mongoose.Schema(
     pendingSentRequest: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Users",
+    },
+    googleId: {
+      type: String,
     },
   },
   { timestamps: true }
