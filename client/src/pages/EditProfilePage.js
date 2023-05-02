@@ -1,10 +1,13 @@
 import { Container, CssBaseline } from "@mui/material"
-import React from "react"
+import React, { useEffect } from "react"
 import Navbar from "../components/Navbar/Navbar"
 import SidePanel from "../components/SidePanel/SidePanel"
 import EditProfile from "../components/EditProfile/EditProfile"
 
 const EditProfilePage = () => {
+  useEffect(() => {
+    document.title = "Vibee | Edit Profile"
+  }, [])
   return (
     <>
       <CssBaseline />

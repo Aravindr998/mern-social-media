@@ -9,6 +9,7 @@ import {
   addUserToConversation,
   removeUser,
   searchUsers,
+  editConversation,
 } from "../controllers/conversationController.js"
 import upload from "../middlewares/groupChatConfig.js"
 
@@ -34,5 +35,12 @@ router.put("/:conversationId/user/add", isUserLoggedin, addUserToConversation)
 router.put("/:conversationId/remove", isUserLoggedin, removeUser)
 
 router.get("/search/users", isUserLoggedin, searchUsers)
+
+router.patch(
+  "/:conversationId/edit",
+  isUserLoggedin,
+  upload.single("groupImage"),
+  editConversation
+)
 
 export default router

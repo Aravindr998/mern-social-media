@@ -61,7 +61,9 @@ const ChatPanel = ({ anchorEl, handleChatClose }) => {
         : details?.users[1]?.profilePicture
       return [
         <MenuItem key={details._id}>
-          <ListItemText>
+          <ListItemText
+            onClick={() => navigate(`/conversations/${details._id}`)}
+          >
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Avatar src={profilePicture} sx={{ marginRight: "0.5rem" }} />
               <Box>

@@ -11,17 +11,18 @@ import { fetchPosts, loadMorePosts } from "../features/posts/postSlice"
 import InfiniteScroll from "react-infinite-scroller"
 
 function HomePage() {
+  useEffect(() => {
+    document.title = "Vibee | Home"
+  }, [])
   const [pageNumber, setPageNumber] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const posts = useSelector((state) => state.posts)
   const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
-  console.log(posts)
   useEffect(() => {
     dispatch(fetchPosts())
   }, [])
   useEffect(() => {
-    console.log(posts.total)
     if (posts.total <= posts.posts.length) {
       setHasMore(false)
     } else {

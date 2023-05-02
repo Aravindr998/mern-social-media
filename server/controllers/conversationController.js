@@ -189,3 +189,30 @@ export const searchUsers = async (req, res) => {
       .json({ message: "Something went wrong, please try again later" })
   }
 }
+
+export const editConversation = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { conversationId } = req.params
+    const conversation = await conversationModel.findById(conversationId)
+    console.log(conversation)
+    console.log(conversationId)
+    const { chatName } = req.body
+    if (!chatName?.trim()?.length)
+      return res.status(400).json({ chatName: "Enter a valid name" })
+    conversation.chatName = chatName
+    if (req.file) {
+      let filePath =
+        process.env.BASE_URL +
+        req.file.path.slice(7).replace(new RegExp("\\" + path.sep, "g"), "/")
+      conversation.groupChatImage = filePath
+    }
+    await conversation.save()
+    res.json(conversation)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}

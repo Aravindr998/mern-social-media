@@ -1,9 +1,12 @@
 import { Card, CardContent } from "@mui/material"
 import { Container } from "@mui/system"
-import React from "react"
+import React, { useEffect } from "react"
 import OtpForm from "../components/OtpForm/OtpForm"
 
 function OtpPage() {
+  useEffect(() => {
+    document.title = "Vibee | OTP"
+  }, [])
   return (
     <>
       <Container

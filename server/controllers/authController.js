@@ -78,6 +78,8 @@ export const isUserLoggedin = (req, res, next) => {
       if (err || !user) {
         throw err
       }
+      const usr = await userModel.findById(user.id)
+      if (usr.isBlocked) return res.status(403).json({ blocked: true })
       req.user = user
       next()
     } catch (error) {
@@ -169,6 +171,9 @@ export const loginUser = (req, res) => {
         if (!user.isVerified) {
           sendOTP(user.phone)
           return res.status(403).json({ notVerified: true, user })
+        }
+        if (user.isBlocked) {
+          return res.status(401).json({ message: "User is blocked" })
         }
         const token = createToken(user.id, user.email)
         return res.json({ success: true, token, user })

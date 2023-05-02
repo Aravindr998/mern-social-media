@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import Paper from "@mui/material/Paper"
 import Table from "@mui/material/Table"
 import TableBody from "@mui/material/TableBody"
@@ -8,7 +8,7 @@ import TableHead from "@mui/material/TableHead"
 import TablePagination from "@mui/material/TablePagination"
 import TableRow from "@mui/material/TableRow"
 import { useDispatch, useSelector } from "react-redux"
-import { Avatar, Box, Button, Typography } from "@mui/material"
+import { Avatar, Box, Button, TextField, Typography } from "@mui/material"
 import {
   editUserList,
   fetchAllUsers,
@@ -39,8 +39,9 @@ const columns = [
 ]
 
 function AdminUserList({ drawerWidth }) {
-  const [page, setPage] = React.useState(0)
-  const [rowsPerPage, setRowsPerPage] = React.useState(10)
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [search, setSearch] = useState("")
   const allUsers = useSelector((state) => state.allUsers)
   const adminAuth = useSelector((state) => state.adminAuth)
   const dispatch = useDispatch()
@@ -78,6 +79,14 @@ function AdminUserList({ drawerWidth }) {
     navigate(`/admin/users/${id}`)
   }
 
+  const filteredUsers = allUsers?.users?.filter((item) => {
+    if (item.firstName.search(new RegExp(search, "i")) !== -1) {
+      return item
+    } else if (item.username.search(search, "i") !== -1) {
+      return item
+    }
+  })
+
   return (
     <Box
       component="main"
@@ -88,6 +97,19 @@ function AdminUserList({ drawerWidth }) {
         width: { sm: `calc(100% - ${drawerWidth}px)` },
       }}
     >
+      <Box
+        sx={{
+          marginBottom: "0.5rem",
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <TextField
+          placeholder="Search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </Box>
       <Paper sx={{ width: "100%" }}>
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table aria-label="sticky table">
@@ -109,8 +131,8 @@ function AdminUserList({ drawerWidth }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {allUsers.users ? (
-                allUsers.users
+              {filteredUsers ? (
+                filteredUsers
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                     return (
@@ -169,7 +191,7 @@ function AdminUserList({ drawerWidth }) {
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
-          count={allUsers?.users?.length}
+          count={filteredUsers?.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

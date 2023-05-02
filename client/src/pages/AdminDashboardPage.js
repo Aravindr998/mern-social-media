@@ -1,9 +1,12 @@
-import React from "react"
+import React, { useEffect } from "react"
 import AdminSidePanel from "../components/AdminSidePanel/AdminSidePanel"
 import AdminDashboard from "../components/AdminDashboard/AdminDashboard"
 import { Box, CssBaseline } from "@mui/material"
 
 const AdminDashboardPage = () => {
+  useEffect(() => {
+    document.title = "Admin | Dashboard"
+  }, [])
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />

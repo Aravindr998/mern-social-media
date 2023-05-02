@@ -33,6 +33,8 @@ import AdminUserDetails from "./components/AdminUserDetails/AdminUserDetails"
 import AdminPostsPage from "./pages/AdminPostsPage"
 import AdminPostDetails from "./components/AdminPostDetails/AdminPostDetails"
 import { fetchNotifications } from "./features/notifications/notificationSlice"
+import { TOKEN_KEY } from "./constants/constant"
+import { clearAuth } from "./features/users/authSlice"
 
 const mode = "light"
 const theme = createTheme(defaultTheme(mode))
@@ -45,7 +47,6 @@ function App() {
   const [show, setShow] = useState(false)
   const [content, setContent] = useState(null)
   const [type, setType] = useState("")
-  console.log(pathname)
   const closeNotification = () => {
     setShow(false)
   }
@@ -56,7 +57,15 @@ function App() {
         .then(({ data }) => {
           dispatch(setUser(data))
         })
-        .catch((error) => console.log(error))
+        .catch((error) => {
+          const { response } = error
+          if (response) {
+            if (response.status === 403 && response.data.blocked) {
+              localStorage.removeItem(TOKEN_KEY)
+              dispatch(clearAuth())
+            }
+          }
+        })
     }
   })
   useEffect(() => {
@@ -76,7 +85,6 @@ function App() {
         setContent(null)
         dispatch(addMessage(message))
       } else {
-        console.log("not in conversation")
         setShow(true)
         setContent(message)
         setType("conversation")
@@ -86,7 +94,6 @@ function App() {
       dispatch(fetchOnlineUsers())
     })
     socket.on("fetchNewNotification", (notification) => {
-      console.log("got it")
       dispatch(fetchNotifications())
       setShow(true)
       setContent(notification)

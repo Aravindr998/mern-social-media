@@ -233,7 +233,7 @@ function Navbar() {
                 onClick={handleOpenChat}
                 sx={{ p: 0, marginLeft: "2rem" }}
               >
-                <Badge color="error" badgeContent={15} max={9}>
+                <Badge color="error" badgeContent={0} max={9}>
                   <Avatar sx={{ backgroundColor: "white" }}>
                     <ChatIcon color="primary" />
                   </Avatar>

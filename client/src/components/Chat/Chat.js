@@ -166,7 +166,7 @@ const Chat = () => {
                   ? messages?.messages?.chatName
                   : senderName}
               </Typography>
-              {isOnline && (
+              {isOnline && !messages?.messages?.isGroupChat && (
                 <Typography sx={{ fontSize: ".75rem" }}>online</Typography>
               )}
             </Box>

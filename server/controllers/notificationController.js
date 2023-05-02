@@ -10,7 +10,7 @@ export const getNotifications = async (req, res) => {
   try {
     const { id } = req.user
     let skip = req.query.skip || 0
-    skip *= 10
+    skip *= 20
     console.log(skip)
     const notifications = await getAllNotifications(id, skip)
     const totalNotifications = await getTotalNotificationCount(id)

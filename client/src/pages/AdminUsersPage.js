@@ -6,6 +6,9 @@ import AdminUserDetails from "../components/AdminUserDetails/AdminUserDetails"
 import { useParams } from "react-router-dom"
 
 const AdminUsersPage = () => {
+  useEffect(() => {
+    document.title = "Admin | User Details"
+  }, [])
   const [changePage, setChangePage] = useState(false)
   const { userId } = useParams()
   useEffect(() => {

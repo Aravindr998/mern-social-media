@@ -97,7 +97,7 @@ export const getAllNotifications = async (id, skip) => {
         $skip: skip,
       },
       {
-        $limit: 10,
+        $limit: 20,
       },
     ])
     return notifications

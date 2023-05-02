@@ -47,7 +47,8 @@ const NotificationPanel = ({ anchorEl, handleNotificationClose }) => {
     </Box>
   )
   if (notifications?.notifications?.length && !notifications?.loading) {
-    allNotifications = notifications?.notifications?.map((item) => {
+    const slicedNotification = notifications.notifications.slice(0, 8)
+    allNotifications = slicedNotification?.map((item) => {
       let content, link, username
       if (item.type === "create") {
         username = item.userId.username

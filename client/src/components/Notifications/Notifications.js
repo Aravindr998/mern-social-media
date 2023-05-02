@@ -37,13 +37,14 @@ const Notifications = () => {
     }
   }, [notifications.notifications])
   const loadHandler = () => {
-    console.log("loading")
     if (
       !notifications.loading &&
       pageNumber <= Math.ceil(notifications.total / 10)
     ) {
-      dispatch(loadMoreNotifications(pageNumber))
-      setPageNumber((prevState) => ++prevState)
+      setPageNumber((prevState) => {
+        dispatch(loadMoreNotifications(prevState))
+        return ++prevState
+      })
     }
   }
   let allNotifications = (

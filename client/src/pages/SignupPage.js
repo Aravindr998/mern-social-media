@@ -1,11 +1,14 @@
 import { Box, Card, CardContent } from "@mui/material"
 import { Container } from "@mui/system"
-import React from "react"
+import React, { useEffect } from "react"
 import SignupForm from "../components/SignupForm/SignupForm"
 import TypographyBody from "../components/ui/TypographyBody"
 import TypographyTitle from "../components/ui/TypographyTitle"
 
 function SignupPage() {
+  useEffect(() => {
+    document.title = "Vibee | SignUp"
+  }, [])
   return (
     <>
       <Container

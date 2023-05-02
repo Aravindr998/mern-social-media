@@ -32,7 +32,6 @@ const Notification = ({ message, show, type, close }) => {
     }
   }
   useEffect(() => {
-    console.log("here on notification")
     if (type === "conversation") {
       setContent(`${message?.sender?.username} sent you a message`)
     } else if (type === "create") {

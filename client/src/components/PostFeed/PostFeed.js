@@ -317,7 +317,7 @@ function PostFeed(props) {
                 src={props?.media}
                 alt="post image"
                 sx={{ cursor: "pointer" }}
-                type={!isImage && "video/mp4"}
+                type={!isImage ? "video/mp4" : undefined}
                 onClick={() => navigate(`/post/${props?.postId}`)}
                 controls={!isImage}
                 // sx={{ padding: "2rem", borderRadius: "3rem" }}

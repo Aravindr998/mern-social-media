@@ -13,6 +13,7 @@ function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   useEffect(() => {
+    document.title = "Vibee | Login"
     const token = document.cookie.split("=")[1]
     console.log(token)
     if (token) {

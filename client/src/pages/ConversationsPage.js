@@ -1,10 +1,13 @@
 import { Container, CssBaseline } from "@mui/material"
-import React from "react"
+import React, { useEffect } from "react"
 import SidePanel from "../components/SidePanel/SidePanel"
 import Navbar from "../components/Navbar/Navbar"
 import AllConversations from "../components/AllConversations/AllConversations"
 
 const ConversationsPage = () => {
+  useEffect(() => {
+    document.title = "Vibee | Conversations"
+  }, [])
   return (
     <>
       <CssBaseline />
