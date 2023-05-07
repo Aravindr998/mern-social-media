@@ -35,20 +35,47 @@ import AdminPostDetails from "./components/AdminPostDetails/AdminPostDetails"
 import { fetchNotifications } from "./features/notifications/notificationSlice"
 import { TOKEN_KEY } from "./constants/constant"
 import { clearAuth } from "./features/users/authSlice"
-
-const mode = "light"
-const theme = createTheme(defaultTheme(mode))
-const themeAdmin = createTheme(adminTheme(mode))
+import DiscoverPage from "./pages/DiscoverPage"
+import FriendsPage from "./pages/FriendsPage"
+import { useMediaQuery } from "@mui/material"
+import { changeMode, setDarkMode } from "./features/appearance/appearanceSlice"
+import VideoCallPage from "./pages/VideoCallPage"
+import IncomingCall from "./components/IncomingCall/IncomingCall"
+import { addOffer } from "./features/offer/offerSlice"
+import SavedPostsPage from "./pages/SavedPostsPage"
+import ElitePlansPage from "./pages/ElitePlansPage"
 
 function App() {
   const dispatch = useDispatch()
   const authToken = useSelector((state) => state.auth)
+  const appearance = useSelector((state) => state.appearance)
+  const theme = createTheme(defaultTheme(appearance))
+  const themeAdmin = createTheme(adminTheme(appearance))
   const { pathname } = useLocation()
   const [show, setShow] = useState(false)
   const [content, setContent] = useState(null)
   const [type, setType] = useState("")
+  const [call, setCall] = useState(false)
+  const [details, setDetails] = useState({})
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
+
+  useEffect(() => {
+    if (prefersDarkMode) {
+      const mode = localStorage.getItem("preferredMode")
+      if (!mode || (mode !== "light" && mode !== "dark")) {
+        if (appearance === "light") {
+          localStorage.setItem("preferredMode", "dark")
+          dispatch(setDarkMode())
+        }
+      }
+    }
+  }, [prefersDarkMode])
+
   const closeNotification = () => {
     setShow(false)
+  }
+  const closeCall = () => {
+    setCall(false)
   }
   useEffect(() => {
     if (authToken) {
@@ -99,11 +126,24 @@ function App() {
       setContent(notification)
       setType(notification.type)
     })
+    socket.on("newCall", (data) => {
+      console.log("incoming call")
+      setDetails(data)
+      setCall(true)
+      socket.emit("callRecieved", data)
+    })
+    socket.on("newOffer", ({ from, offer }) => {
+      console.log("new offer recieved")
+      console.log(offer, "from app")
+      dispatch(addOffer(offer))
+    })
 
     return () => {
+      socket.off("newCall")
       socket.off("fetchNewNotification")
       socket.off("latestMessage")
       socket.off("checkOnlineUsers")
+      socket.off("newOffer")
     }
   }, [pathname])
 
@@ -116,11 +156,19 @@ function App() {
             <Route path="/details/add" element={<AddDetailsPage />} />
             <Route path="/profile/:username" element={<ProfilePage />} />
             <Route path="/profile/details/edit" element={<EditProfilePage />} />
+            <Route
+              path="/profile/:username/friends"
+              element={<FriendsPage />}
+            />
+            <Route path="/posts/saved" element={<SavedPostsPage />} />
+            <Route path="/elite/plans" element={<ElitePlansPage />} />
             <Route path="/conversations" element={<ConversationsPage />}>
               <Route path=":conversationId" element={<Chat />} />
             </Route>
             <Route path="/post/:postId" element={<SinglePostPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/discover" element={<DiscoverPage />} />
+            <Route path="/room/:callId" element={<VideoCallPage />} />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />
@@ -134,6 +182,7 @@ function App() {
           type={type}
           close={closeNotification}
         />
+        <IncomingCall show={call} details={details} close={closeCall} />
         <ThemeProvider theme={themeAdmin}>
           <Routes>
             <Route element={<AdminPublicRoutes />}>

@@ -25,6 +25,10 @@ import {
 import axios from "../../axios"
 import { deletePost, editPost } from "../../features/posts/postSlice"
 import SidePopup from "../SidePopup/SidePopup"
+import {
+  deleteProfilePost,
+  editProfilePost,
+} from "../../features/ProfilePosts/ProfilePosts"
 
 function PostMenu({ handleClickAway, checked, postOwner, postId }) {
   const user = useSelector((state) => state.user)
@@ -101,6 +105,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
       )
       setError("")
       dispatch(editPost(data))
+      dispatch(editProfilePost(data))
       setOpenEdit(false)
     } catch (error) {
       const { response } = error
@@ -137,6 +142,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
       )
       setError("")
       dispatch(deletePost(data))
+      dispatch(deleteProfilePost(data))
       setOpenConfirmation(false)
     } catch (error) {
       const { response } = error

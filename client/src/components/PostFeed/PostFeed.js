@@ -29,6 +29,7 @@ import {
   MenuItem,
   Skeleton,
   TextField,
+  Tooltip,
 } from "@mui/material"
 import { Box } from "@mui/system"
 import SendIcon from "@mui/icons-material/Send"
@@ -43,6 +44,8 @@ import { ClickAwayListener } from "@mui/material"
 import ShareOptions from "../ShareOptions/ShareOptions"
 import { useNavigate } from "react-router-dom"
 import { socket } from "../../socket"
+import BookmarkIcon from "@mui/icons-material/Bookmark"
+import { deletePost } from "../../features/posts/postSlice"
 
 function PostFeed(props) {
   const navigate = useNavigate()
@@ -61,9 +64,11 @@ function PostFeed(props) {
   const [anchorElComments, setAnchorElComments] = useState(null)
   const [openConfirmation, setOpenConfirmation] = useState(false)
   const [commentId, setCommentId] = useState("")
+  const [setting, setSetting] = useState(false)
 
   const dispatch = useDispatch()
   const imageFormat = ["jpg", "jpeg", "png", "webp"]
+
   useEffect(() => {
     if (!props.loading) setPostLoading(false)
     setLikeCount(props.likes)
@@ -71,6 +76,9 @@ function PostFeed(props) {
       setLiked(true)
     }
     if (props.comments) setCommentNumber(props.comments.length)
+    if (props.saved) {
+      setSetting(true)
+    }
   }, [props])
   function getUrlExtension(url) {
     return url.split(/[#?]/)[0].split(".").pop().trim()
@@ -223,6 +231,41 @@ function PostFeed(props) {
       console.log(error)
     }
   }
+
+  const handleUnsave = async () => {
+    try {
+      const { data } = await axios.patch(
+        "/api/post/unsave",
+        { postId: props.postId },
+        { headers: { Authorization: auth } }
+      )
+      dispatch(deletePost(data))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  let settings = (
+    <IconButton
+      aria-label="settings"
+      onClick={() => {
+        setOpenMenu((prevState) => !prevState)
+      }}
+    >
+      <MoreVertIcon />
+    </IconButton>
+  )
+
+  if (setting) {
+    settings = (
+      <Tooltip title="Unsave">
+        <Button onClick={handleUnsave}>
+          <BookmarkIcon />
+        </Button>
+      </Tooltip>
+    )
+  }
+
   return (
     <>
       <ClickAwayListener onClickAway={() => setOpen(false)}>
@@ -252,18 +295,7 @@ function PostFeed(props) {
                 </Avatar>
               )
             }
-            action={
-              postLoading ? null : (
-                <IconButton
-                  aria-label="settings"
-                  onClick={() => {
-                    setOpenMenu((prevState) => !prevState)
-                  }}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-              )
-            }
+            action={postLoading ? null : <> {settings}</>}
             title={
               postLoading ? (
                 <Skeleton

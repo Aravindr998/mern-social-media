@@ -6,6 +6,24 @@ export const getOnlineUsersFromFriends = async (id) => {
   try {
     const onlineUsers = await onlineUserModel.aggregate([
       {
+        $group: {
+          _id: "$userId",
+          docId: {
+            $first: "$_id",
+          },
+          socketId: {
+            $first: "$socketId",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: "$docId",
+          userId: "$_id",
+          socketId: "$socketId",
+        },
+      },
+      {
         $lookup: {
           from: "users",
           localField: "userId",

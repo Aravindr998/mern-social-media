@@ -266,7 +266,7 @@ const AdminUserDetails = ({ drawerWidth }) => {
           <Typography>{user?.email}</Typography>
         </Box>
         <Box sx={{ maxWidth: "100%", overflow: "hidden" }}>
-          <TableContainer sx={{ maxHeight: 440 }}>
+          <TableContainer sx={{ maxHeight: 3000 }}>
             <Table aria-label="table">
               <TableHead>
                 <TableRow>
@@ -386,8 +386,7 @@ const AdminUserDetails = ({ drawerWidth }) => {
         >
           Actions
         </Typography>
-        <Box sx={{ maxHeight: "30rem", overflowY: "auto" }}>
-          <Typography sx={{ padding: "1rem" }}>Actions done by user</Typography>
+        <Box sx={{ maxHeight: "30rem", overflowY: "hidden" }}>
           <Stack
             sx={{ padding: "1rem", maxHeight: "100%", overflowY: "auto" }}
             spacing={2}

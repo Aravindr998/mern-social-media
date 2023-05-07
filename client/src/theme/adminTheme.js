@@ -14,11 +14,11 @@ export const adminTheme = (mode) => {
           }
         : {
             primary: {
-              main: "#300062",
+              main: "#940000",
             },
             background: {
-              default: "#313041",
-              paper: "#4E4D56",
+              default: "#1A1818",
+              paper: "#262424",
             },
           }),
     },

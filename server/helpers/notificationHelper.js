@@ -48,13 +48,6 @@ export const getAllNotifications = async (id, skip) => {
           from: "posts",
           localField: "postId",
           foreignField: "_id",
-          pipeline: [
-            {
-              $project: {
-                password: 0,
-              },
-            },
-          ],
           as: "postId",
         },
       },

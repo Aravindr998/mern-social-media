@@ -27,6 +27,7 @@ import axios from "../../axios"
 import { useDispatch, useSelector } from "react-redux"
 import { addPost } from "../../features/posts/postSlice"
 import { socket } from "../../socket"
+import { addProfilePost } from "../../features/ProfilePosts/ProfilePosts"
 
 function Create() {
   const fileRef = useRef()
@@ -45,6 +46,7 @@ function Create() {
   const [descriptionError, setDescriptionError] = useState("")
   const [progress, setProgress] = useState(0)
   const [showProgress, setShowProgress] = useState(false)
+  const [quickDesc, setQuickDesc] = useState("")
   const handleClickOpen = () => {
     setOpen(true)
   }
@@ -87,6 +89,7 @@ function Create() {
       })
       .then(({ data }) => {
         dispatch(addPost(data.post))
+        dispatch(addProfilePost(data.post))
         setShowProgress(false)
         setImage("")
         setLocation("")
@@ -112,6 +115,27 @@ function Create() {
         }
       })
   }
+  const handleKeyDown = async (e) => {
+    if (e.key !== "Enter" || !quickDesc) return
+    try {
+      const { data } = await axios.post(
+        "/api/post/create",
+        { description: quickDesc, privacy: "public" },
+        {
+          headers: {
+            Authorization: auth,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      )
+      dispatch(addPost(data.post))
+      dispatch(addProfilePost(data.post))
+      setQuickDesc("")
+      socket.emit("newNotification", data.notification)
+    } catch (error) {
+      setError(true)
+    }
+  }
 
   return (
     <>
@@ -128,6 +152,9 @@ function Create() {
               fullWidth
               multiline
               rows={3}
+              onKeyDown={handleKeyDown}
+              value={quickDesc}
+              onChange={(e) => setQuickDesc(e.target.value)}
             />
           </Box>
         </CardContent>

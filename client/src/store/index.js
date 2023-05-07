@@ -9,6 +9,11 @@ import adminAuthReducer from "../features/adminAuth/adminAuthSlice"
 import commentReducer from "../features/comments/commentSlice"
 import onlineUsersReducer from "../features/onlineUsersSlice/onlineUsersSlice"
 import notificationReducer from "../features/notifications/notificationSlice"
+import profilePostReducer from "../features/ProfilePosts/ProfilePosts"
+import friendsReducer from "../features/friends/friendsSlice"
+import appearanceReducer from "../features/appearance/appearanceSlice"
+import offerReducer from "../features/offer/offerSlice"
+import adminDashboardReducer from "../features/adminDashboard/adminDashboardSlice"
 
 const store = configureStore({
   reducer: {
@@ -22,6 +27,11 @@ const store = configureStore({
     comments: commentReducer,
     onlineUsers: onlineUsersReducer,
     notifications: notificationReducer,
+    profilePosts: profilePostReducer,
+    friends: friendsReducer,
+    appearance: appearanceReducer,
+    offer: offerReducer,
+    adminDashboard: adminDashboardReducer,
   },
 })
 

@@ -28,6 +28,16 @@ export const loadMorePosts = createAsyncThunk(
   }
 )
 
+export const fetchSavedPosts = createAsyncThunk(
+  "posts/fetchSavedPosts",
+  async () => {
+    const { data } = await axios.get("/api/post/saved/posts", {
+      headers: { Authorization: localStorage.getItem(TOKEN_KEY) },
+    })
+    return data
+  }
+)
+
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -72,6 +82,20 @@ const postSlice = createSlice({
     })
     builder.addCase(loadMorePosts.rejected, (state, action) => {
       state.loading = false
+      state.error = action.error.message
+    })
+    builder.addCase(fetchSavedPosts.pending, (state) => {
+      state.loading = true
+    })
+    builder.addCase(fetchSavedPosts.fulfilled, (state, action) => {
+      state.loading = false
+      state.posts = action.payload
+      state.error = ""
+      // state.total = action.payload.totalCount
+    })
+    builder.addCase(fetchSavedPosts.rejected, (state, action) => {
+      state.loading = false
+      state.posts = []
       state.error = action.error.message
     })
   },

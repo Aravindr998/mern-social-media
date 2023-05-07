@@ -60,6 +60,11 @@ const EditProfile = () => {
       setSuccess(false)
       setEdit(false)
       setError(false)
+      setFirstNameError("")
+      setLastNameError("")
+      setUsernameError("")
+      setDateError("")
+      setEmailError("")
       const formData = new FormData()
       formData.append("firstName", firstName)
       formData.append("lastName", lastName)
@@ -99,9 +104,10 @@ const EditProfile = () => {
           if (data.email) setEmailError(data.email)
           if (data.dob) setDateError(data.dob)
         }
+      } else {
+        console.log(error)
+        setError(true)
       }
-      console.log(error)
-      setError(true)
     }
   }
   const handleEdit = () => {

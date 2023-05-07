@@ -414,3 +414,69 @@ export const deleteComment = async (req, res) => {
       .json({ message: "Something went wrong, please try again later" })
   }
 }
+
+export const savePost = async (req, res) => {
+  try {
+    const { id } = req.user
+    let { postId } = req.body
+    let post = await postModel.findById(postId)
+    if (post.shared) {
+      postId = post.postId
+      post = await postModel.findById(postId)
+    }
+    if (post.privacy === "private") {
+      const createdUser = await userModel.findById(post.createdBy)
+      if (!createdUser.friends.includes(new mongoose.Types.ObjectId(id))) {
+        return res.json({
+          message:
+            "Private posts can only be saved by the created user's friends",
+        })
+      }
+    }
+    const user = await userModel.findById(id)
+    if (!user.savedPosts.includes(new mongoose.Types.ObjectId(postId))) {
+      user.savedPosts.push(postId)
+      await user.save()
+    }
+    res.json({ success: true })
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getSavedPosts = async (req, res) => {
+  try {
+    console.log("here")
+    const { id } = req.user
+    const user = await userModel.findById(id)
+    await user.populate("savedPosts")
+    await user.populate("savedPosts.createdBy")
+    console.log(user.savedPosts)
+    res.json(user.savedPosts)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const unSavePost = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { postId } = req.body
+    const user = await userModel.findByIdAndUpdate(id, {
+      $pull: { savedPosts: postId },
+    })
+    const post = await postModel.findById(postId)
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}

@@ -2,6 +2,8 @@ import { Server } from "socket.io"
 import conversationModel from "../model/Conversations.js"
 import jwt from "jsonwebtoken"
 import onlineUsersModel from "../model/OnlineUsers.js"
+import userModel from "../model/User.js"
+import callModel from "../model/Call.js"
 
 const io = new Server({
   pingTimeout: 60000,
@@ -15,30 +17,28 @@ io.on("connection", (socket) => {
   socket.on("setup", async (userData) => {
     try {
       const user = jwt.verify(userData.slice(7), process.env.TOKEN_SECRET_KEY)
-      const existing = await onlineUsersModel.findOne({ userId: user.user.id })
+      const existing = await onlineUsersModel.findOne({ socketId: socket.id })
       if (existing) {
-        existing.socketId = socket.id
-        await existing.save()
-        console.log(existing)
-      } else {
-        const newUser = new onlineUsersModel({
-          userId: user.user.id,
-          socketId: socket.id,
-        })
-        await newUser.save()
-        console.log(newUser)
-        if (newUser) {
-          await newUser.populate("userId")
-          const friends = newUser.userId.friends
-          friends.forEach(async (friend) => {
-            const onlineUser = await onlineUsersModel.findOne({
-              userId: friend,
-            })
-            if (onlineUser)
-              socket.to(onlineUser.socketId).emit("checkOnlineUsers")
-          })
-        }
+        return
       }
+      //else {
+      const newUser = new onlineUsersModel({
+        userId: user.user.id,
+        socketId: socket.id,
+      })
+      await newUser.save()
+      if (newUser) {
+        await newUser.populate("userId")
+        const friends = newUser.userId.friends
+        friends.forEach(async (friend) => {
+          const onlineUser = await onlineUsersModel.findOne({
+            userId: friend,
+          })
+          if (onlineUser)
+            socket.to(onlineUser.socketId).emit("checkOnlineUsers")
+        })
+      }
+      // }
       console.log("user joined")
       socket.join(user.user.id)
     } catch (error) {
@@ -54,10 +54,7 @@ io.on("connection", (socket) => {
   socket.on("newMessage", async (message) => {
     const conversation = await conversationModel.findById(message.conversation)
     conversation.users.forEach((user) => {
-      console.log(user._id.toString())
-      console.log(message.sender._id)
       if (user._id.toString() === message.sender._id) return
-      console.log("emitting")
       socket.in(user._id.toString()).emit("latestMessage", message)
     })
   })
@@ -69,24 +66,24 @@ io.on("connection", (socket) => {
   socket.on("newNotification", async (notification) => {
     const friends = notification.userId.friends
     for (let friend of friends) {
-      const online = await onlineUsersModel.findOne({ userId: friend })
-      if (online) {
-        socket.to(online.socketId).emit("fetchNewNotification", notification)
+      const online = await onlineUsersModel.find({ userId: friend })
+      if (online.length) {
+        online.forEach((item) => {
+          socket.to(item.socketId).emit("fetchNewNotification", notification)
+        })
       }
     }
   })
 
   socket.on("postInteracted", async (notification) => {
     try {
-      console.log("here")
-      console.log(notification)
       if (!notification) return
       const userId = notification.postId.createdBy
-      const user = await onlineUsersModel.findOne({ userId })
-      console.log(user)
-      if (user) {
-        socket.to(user.socketId).emit("fetchNewNotification", notification)
-        console.log("emitted")
+      const user = await onlineUsersModel.find({ userId })
+      if (user.length) {
+        user.forEach((item) => {
+          socket.to(item.socketId).emit("fetchNewNotification", notification)
+        })
       }
     } catch (error) {
       console.log(error)
@@ -96,9 +93,92 @@ io.on("connection", (socket) => {
   socket.on("friendRequest", async (notification) => {
     if (!notification) return
     const userId = notification.to._id
-    const user = await onlineUsersModel.findOne({ userId })
-    if (user) {
-      socket.to(user.socketId).emit("fetchNewNotification", notification)
+    const user = await onlineUsersModel.find({ userId })
+    if (user.length) {
+      user.forEach((item) => {
+        socket.to(item.socketId).emit("fetchNewNotification", notification)
+      })
+    }
+  })
+
+  socket.on("videoCall", async ({ data, id }) => {
+    try {
+      const user = await userModel.findById(id)
+      if (!user.friends.includes(data.to._id))
+        return socket.emit("unauthorizedCall")
+      const callee = await onlineUsersModel.find({ userId: data.to._id })
+      if (callee.length) {
+        callee.forEach((item) => {
+          socket.to(item.socketId).emit("newCall", data)
+          console.log("emitting call")
+        })
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  })
+
+  socket.on("callRecieved", async (data) => {
+    const onlineUsers = await onlineUsersModel.find({ userId: data.from._id })
+    onlineUsers.forEach((item) => {
+      socket.to(item.socketId).emit("callForwarded")
+    })
+  })
+
+  socket.on("callAccepted", async (data) => {
+    const onlineUsers = await onlineUsersModel.find({ userId: data.from._id })
+    onlineUsers.forEach((item) => {
+      socket.to(item.socketId).emit("userJoined", socket.id)
+    })
+    const callee = await onlineUsersModel.find({ userId: data.to._id })
+    callee.forEach((item) => {
+      socket.to(item._id).emit("userJoined", socket.id)
+    })
+  })
+
+  socket.on("setOffer", async ({ callId, offer, user }) => {
+    try {
+      const call = await callModel.findById(callId)
+      if (call.from.toString() === user._id.toString()) {
+        const onlineUser = await onlineUsersModel.find({ userId: call.to })
+        onlineUser.forEach((item) => {
+          console.log("emitting new offer")
+          socket.to(item.socketId).emit("newOffer", { from: user._id, offer })
+        })
+      } else if (call.to.toString() === user._id.toString()) {
+        const onlineUser = await onlineUsersModel.find({ userId: call.from })
+        onlineUser.forEach((item) => {
+          console.log("emitting new offer")
+          socket.to(item.socketId).emit("newOffer", { from: user._id, offer })
+        })
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  })
+
+  socket.on("callConnected", async ({ ans, callId }) => {
+    try {
+      console.log("reached here")
+      console.log(ans)
+      const user = await onlineUsersModel.findOne({ socketId: socket.id })
+      const call = await callModel.findById(callId)
+      console.log(callId)
+      if (call.from.toString() === user.userId.toString()) {
+        const onlineUser = await onlineUsersModel.find({ userId: call.to })
+        onlineUser.forEach((item) => {
+          socket
+            .to(item.socketId)
+            .emit("callConnected", { from: call.from, ans })
+        })
+      } else if (call.to.toString() === user.userId.toString()) {
+        const onlineUser = await onlineUsersModel.find({ userId: call.from })
+        onlineUser.forEach((item) => {
+          socket.to(item.socketId).emit("callConnected", { from: call.to, ans })
+        })
+      }
+    } catch (error) {
+      console.log(error)
     }
   })
 
@@ -107,15 +187,16 @@ io.on("connection", (socket) => {
       const inactive = await onlineUsersModel.findOneAndDelete({
         socketId: socket.id,
       })
-      console.log(inactive)
       if (!inactive) return
       await inactive.populate("userId")
       const friends = inactive.userId.friends
-      console.log(friends)
       friends.forEach(async (friend) => {
-        const onlineUser = await onlineUsersModel.findOne({ userId: friend })
-        console.log(onlineUser)
-        if (onlineUser) socket.to(onlineUser.socketId).emit("checkOnlineUsers")
+        const onlineUser = await onlineUsersModel.find({ userId: friend })
+        if (onlineUser.length) {
+          onlineUser.forEach((item) => {
+            socket.to(item.socketId).emit("checkOnlineUsers")
+          })
+        }
       })
       console.log("user disconnected", socket.id)
     } catch (error) {

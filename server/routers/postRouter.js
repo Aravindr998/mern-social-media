@@ -18,6 +18,9 @@ import {
   getSharedPost,
   getAllDetailsOfSinglePost,
   deleteComment,
+  savePost,
+  getSavedPosts,
+  unSavePost,
 } from "../controllers/postController.js"
 import {} from "../helpers/postHelper.js"
 import upload from "../middlewares/multerConfig.js"
@@ -57,5 +60,11 @@ router.get("/:postId/post/share", isUserLoggedin, getSharedPost)
 router.get("/:postId/details", isUserLoggedin, getAllDetailsOfSinglePost)
 
 router.patch("/:postId/comments/delete", isUserLoggedin, deleteComment)
+
+router.patch("/save", isUserLoggedin, savePost)
+
+router.get("/saved/posts", isUserLoggedin, getSavedPosts)
+
+router.patch("/unsave", isUserLoggedin, unSavePost)
 
 export default router

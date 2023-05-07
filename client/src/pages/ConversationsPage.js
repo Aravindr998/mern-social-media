@@ -20,7 +20,7 @@ const ConversationsPage = () => {
           justifyContent: "center",
           alignItems: "flex-end",
           width: { sm: "100%", lg: "77%" },
-          marginTop: 12.5,
+          marginTop: 10.5,
           marginRight: 0,
           paddingLeft: "40px !important",
         }}

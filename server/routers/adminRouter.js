@@ -11,6 +11,10 @@ import {
   getUserDetails,
   getPostsOfOneUser,
   getActionsOfUser,
+  getPostofCurrentMonth,
+  getDetails,
+  getPostDetails,
+  getExcelReport,
 } from "../controllers/adminUserController.js"
 const router = Router()
 
@@ -25,5 +29,13 @@ router.get("/user/:id", isAdminLoggedin, getUserDetails)
 router.get("/user/post/:userId", isAdminLoggedin, getPostsOfOneUser)
 
 router.get("/user/actions/:userId", isAdminLoggedin, getActionsOfUser)
+
+router.get("/postdata", isAdminLoggedin, getPostofCurrentMonth)
+
+router.get("/dashboard/details", isAdminLoggedin, getDetails)
+
+router.get("/post/details/pdf", isAdminLoggedin, getPostDetails)
+
+router.get("/post/details/excel", isAdminLoggedin, getExcelReport)
 
 export default router

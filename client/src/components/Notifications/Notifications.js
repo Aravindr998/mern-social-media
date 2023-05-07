@@ -16,6 +16,7 @@ import {
 } from "../../features/notifications/notificationSlice"
 import { useNavigate } from "react-router-dom"
 import InfiniteScroll from "react-infinite-scroller"
+import { useTheme } from "@emotion/react"
 
 const Notifications = () => {
   const dispatch = useDispatch()
@@ -23,6 +24,8 @@ const Notifications = () => {
   const notifications = useSelector((state) => state.notifications)
   const [pageNumber, setPageNumber] = useState(1)
   const [hasMore, setHasMore] = useState(true)
+  const theme = useTheme()
+  const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
   useEffect(() => {
     dispatch(fetchNotifications())
   }, [])
@@ -81,6 +84,7 @@ const Notifications = () => {
       <Divider />
     </>
   )
+  console.log(notifications)
   if (notifications?.notifications?.length && !notifications?.loading) {
     allNotifications = notifications?.notifications?.map((item) => {
       let content, link, username
@@ -106,7 +110,7 @@ const Notifications = () => {
           <Box
             sx={{
               padding: "1rem",
-              "&:hover": { backgroundColor: "#DFDFDF" },
+              "&:hover": { backgroundColor: backgroundColor },
               borderRadius: "0.5rem",
               transition: "background-color 0.3s",
               cursor: "pointer",
@@ -145,7 +149,7 @@ const Notifications = () => {
       <Card
         sx={{
           width: { xs: "90%", lg: "50%" },
-          height: "82vh",
+          height: "85vh",
           padding: "0.5rem",
         }}
       >

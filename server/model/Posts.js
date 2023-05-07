@@ -88,9 +88,9 @@ const postSchema = new mongoose.Schema(
 postSchema.pre("find", function () {
   this.where({ isDeleted: false })
 })
-postSchema.pre("aggregate", function () {
-  this.match({ isDeleted: false })
-})
+// postSchema.pre("aggregate", function () {
+//   this.match({ isDeleted: false })
+// })
 postSchema.pre("findOne", function () {
   this.where({ isDeleted: false })
 })

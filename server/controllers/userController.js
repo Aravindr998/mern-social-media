@@ -168,10 +168,14 @@ export const editUser = async (req, res) => {
   try {
     const { id } = req.user
     const { isValid, errors } = validateUpdatedDetails(req.body)
-    console.log(errors)
     if (!isValid) return res.status(400).json(errors)
     const user = await userModel.findById(id)
     const { firstName, lastName, username, email, location, date } = req.body
+    const existing = await userModel.findOne({ username: username })
+    if (existing) {
+      if (existing._id.toString() !== user._id.toString())
+        return res.status(400).json({ username: "Username already exists" })
+    }
     user.firstName = firstName
     user.lastName = lastName
     user.username = username

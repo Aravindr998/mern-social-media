@@ -5,22 +5,26 @@ import React, { useEffect, useState } from "react"
 import Create from "../Create/Create"
 import PostFeed from "../PostFeed/PostFeed"
 import axios from "../../axios"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import Skeleton from "@mui/material/Skeleton"
 import { socket } from "../../socket"
+import { fetchProfilePosts } from "../../features/ProfilePosts/ProfilePosts"
+import BookmarkIcon from "@mui/icons-material/Bookmark"
 
 function Profile() {
   const theme = useTheme()
   const { username } = useParams()
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const posts = useSelector((state) => state.profilePosts)
   const [userLoading, setUserLoading] = useState(true)
-  const [posts, setPosts] = useState([])
+  // const [posts, setPosts] = useState([])
   const [user, setUser] = useState({})
   const [authorized, setAuthorized] = useState(false)
   const [friend, setFriend] = useState("Add Friend")
   const [request, setRequest] = useState(false)
-  const [loading, setLoading] = useState(true)
+  // const [loading, setLoading] = useState(true)
   const auth = useSelector((state) => state.auth)
   const loggedinUser = useSelector((state) => state.user)
   useEffect(() => {
@@ -36,39 +40,33 @@ function Profile() {
         } else {
           setAuthorized(false)
         }
+        console.log(data)
         if (data.friend) {
+          // console.log(data)
+          console.log("unfriend")
           setFriend("Unfriend")
         } else if (data.pending) {
           setFriend("Request Sent")
+        } else {
+          setFriend("Add Friend")
         }
         if (data.requestReceived) {
           setRequest(true)
         }
+        dispatch(fetchProfilePosts(username))
       })
       .catch(({ response }) => {
         setUserLoading(false)
         console.log(response)
       })
   }, [username])
-  useEffect(() => {
-    axios
-      .get(`/api/post/user/${username}`, {
-        headers: { Authorization: auth },
-      })
-      .then(({ data }) => {
-        setPosts(data.posts)
-        setLoading(false)
-      })
-      .catch(({ response }) => {
-        console.log(response)
-        setLoading(false)
-      })
-  }, [username])
+  // useEffect(() => {
+  // }, [username])
   const friendHandler = () => {
     axios
       .patch(
         "/api/friend/change",
-        { id: user._id },
+        { id: user?._id },
         { headers: { Authorization: auth } }
       )
       .then(({ data }) => {
@@ -90,8 +88,8 @@ function Profile() {
       })
   }
   let postFeed
-  if (posts.length > 0) {
-    postFeed = posts.map((post) => {
+  if (posts?.posts?.length > 0) {
+    postFeed = posts?.posts?.map((post) => {
       return (
         <PostFeed
           key={post._id}
@@ -104,10 +102,10 @@ function Profile() {
           location={post.location}
           shared={post.shared}
           comments={post.comments}
-          liked={post.likes.includes(loggedinUser._id)}
+          liked={post.likes.includes(loggedinUser?._id)}
           privacy={post.privacy}
           sharedPost={post.postId}
-          loading={loading}
+          loading={posts?.loading}
         />
       )
     })
@@ -116,7 +114,7 @@ function Profile() {
   }
   return (
     <>
-      <Box sx={{ width: { xs: "100%", sm: "50%" } }}>
+      <Box sx={{ width: { xs: "90%", lg: "50%" } }}>
         <Box sx={{ width: "100%", height: "30vh", position: "relative" }}>
           <Box
             sx={{ objectFit: "cover", width: "100%", height: "100%" }}
@@ -169,25 +167,44 @@ function Profile() {
         </Box>
         {authorized && (
           <Box
-            mt={2}
-            mb={3}
-            sx={{
-              display: "flex",
-              justifyContent: { xs: "center", lg: "flex-start" },
-            }}
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}
           >
+            <Box
+              mt={2}
+              mb={3}
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "center", lg: "flex-start" },
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={() => navigate("/profile/details/edit")}
+              >
+                Edit Profile
+              </Button>
+              <Button
+                variant="contained"
+                sx={{ marginLeft: 2 }}
+                onClick={() => navigate(`/profile/${username}/friends`)}
+              >
+                View Friends
+              </Button>
+            </Box>
             <Button
               variant="outlined"
-              onClick={() => navigate("/profile/details/edit")}
+              startIcon={<BookmarkIcon />}
+              onClick={() => {
+                navigate("/posts/saved")
+              }}
             >
-              Edit Profile
-            </Button>
-            <Button variant="contained" sx={{ marginLeft: 2 }}>
-              View Friends
+              Saved Posts
             </Button>
           </Box>
         )}
-        {!authorized && (
+        {!authorized && !userLoading ? (
           <Box
             mt={2}
             mb={3}
@@ -209,7 +226,7 @@ function Profile() {
               Block
             </Button>
           </Box>
-        )}
+        ) : null}
       </Box>
       <Create />
       {postFeed}

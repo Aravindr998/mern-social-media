@@ -81,6 +81,7 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
   const [error, setError] = useState(false)
   const [message, setMessage] = useState("")
   const [open, setOpen] = useState(false)
+  const [saved, setSaved] = useState(false)
   useEffect(() => {
     setOpen(Boolean(anchorEl))
   }, [anchorEl])
@@ -143,6 +144,21 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
       }
     }
   }
+
+  const handleSave = async () => {
+    setSaved(false)
+    try {
+      const { data } = await axios.patch(
+        "/api/post/save",
+        { postId },
+        { headers: { Authorization: auth } }
+      )
+      setSaved(true)
+      handleClose()
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <>
       <StyledMenu
@@ -163,7 +179,7 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
           Share as message
         </MenuItem>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleClose} disableRipple>
+        <MenuItem onClick={handleSave} disableRipple>
           <ArchiveIcon />
           Save
         </MenuItem>
@@ -289,6 +305,7 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
         </DialogActions>
       </Dialog>
       <SidePopup message={message} show={error} type={"error"} />
+      <SidePopup message={"Post saved"} show={saved} type={"success"} />
     </>
   )
 }

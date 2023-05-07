@@ -9,6 +9,8 @@ import conversationRouter from "./routers/conversationRouter.js"
 import notificationRouter from "./routers/notificationRouter.js"
 import adminRouter from "./routers/adminRouter.js"
 import adminPostRouter from "./routers/adminPostRouter.js"
+import callRouter from "./routers/callRouter.js"
+import paymentRouter from "./routers/paymentRoute.js"
 import io from "./sockets/socket.js"
 
 const app = express()
@@ -27,9 +29,11 @@ db.once("open", () => {
   io.attach(server)
 })
 
+app.use("/api/payment", paymentRouter)
 app.use("/api/conversation", conversationRouter)
 app.use("/api/post", postRouter)
 app.use("/api/notifications", notificationRouter)
 app.use("/api/admin/post", adminPostRouter)
 app.use("/api/admin", adminRouter)
+app.use("/api/call", callRouter)
 app.use("/api", userRouter)

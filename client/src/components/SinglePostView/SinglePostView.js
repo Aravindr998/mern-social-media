@@ -41,6 +41,7 @@ const SinglePostView = () => {
   const auth = useSelector((state) => state.auth)
   const user = useSelector((state) => state.user)
   const comments = useSelector((state) => state.comments)
+  const appearance = useSelector((state) => state.appearance)
   const dispatch = useDispatch()
 
   const [post, setPost] = useState({})
@@ -184,7 +185,6 @@ const SinglePostView = () => {
 
   let allComments
   if (comments.comments?.length > 0 && !comments?.loading) {
-    console.log(comments)
     allComments = comments.comments.map((item) => {
       return (
         <>
@@ -207,10 +207,16 @@ const SinglePostView = () => {
             >
               <Avatar src={item?.userId?.profilePicture} />
               <Box>
-                <Typography sx={{ marginLeft: "1rem", fontWeight: "700" }}>
+                <Typography
+                  sx={{ marginLeft: "1rem", fontWeight: "700" }}
+                  color={appearance === "light" ? "black" : "white"}
+                >
                   {item?.userId?.username}
                 </Typography>
-                <Typography sx={{ marginLeft: "1rem" }}>
+                <Typography
+                  sx={{ marginLeft: "1rem" }}
+                  color={appearance === "light" ? "black" : "white"}
+                >
                   {item?.text}
                 </Typography>
               </Box>
@@ -257,11 +263,17 @@ const SinglePostView = () => {
   }
 
   return (
-    <Box sx={{ marginTop: "5rem", display: "flex" }}>
+    <Box
+      sx={{
+        marginTop: { xs: "3rem", sm: "4rem" },
+        display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
+      }}
+    >
       <Box
         sx={{
-          width: "70%",
-          height: "calc(100vh - 5rem)",
+          width: { xs: "100%", sm: "70%" },
+          height: "calc(100vh - 4rem)",
           backgroundColor: "black",
           display: "flex",
           justifyContent: "center",
@@ -276,8 +288,9 @@ const SinglePostView = () => {
       </Box>
       <Box
         sx={{
-          width: "30%",
-          height: "calc(100vh - 5rem)",
+          width: { xs: "100%", sm: "30%" },
+          height: "calc(100vh - 4rem)",
+          bgcolor: (theme) => theme.palette.background.paper,
         }}
       >
         <Box
@@ -293,11 +306,17 @@ const SinglePostView = () => {
               sx={{ marginRight: "1rem" }}
             />
             <Box>
-              <Typography fontWeight={500}>
+              <Typography
+                fontWeight={500}
+                color={appearance === "light" ? "black" : "white"}
+              >
                 {post.createdBy?.username}
               </Typography>
               {post.createdAt && (
-                <Typography fontSize="0.9rem">
+                <Typography
+                  fontSize="0.9rem"
+                  color={appearance === "light" ? "black" : "white"}
+                >
                   {formatter.format(new Date(post.createdAt))}
                 </Typography>
               )}
@@ -355,7 +374,7 @@ const SinglePostView = () => {
             </Link>
           )}
         </Box>
-        <Box sx={{ height: "50%" }}>
+        <Box sx={{ height: "60%" }}>
           <Box
             sx={{ height: "100%", overflowY: "auto", paddingInline: "1rem" }}
           >

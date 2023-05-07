@@ -135,6 +135,22 @@ const Chat = () => {
   const handleClose = () => {
     setShowDetails(false)
   }
+
+  const handleVideoCall = async () => {
+    try {
+      const { data } = await axios.post(
+        "/api/call/video",
+        { conversationId },
+        { headers: { Authorization: auth } }
+      )
+      window.open(`/room/${data._id}`, "_blank", "height=400,width=600")
+      console.log(data)
+      socket.emit("videoCall", { data, id: user?._id })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <Box
@@ -180,7 +196,7 @@ const Chat = () => {
               marginRight: 2,
             }}
           >
-            <IconButton>
+            <IconButton onClick={handleVideoCall}>
               <VideoCallIcon color="primary" />
             </IconButton>
             <IconButton>

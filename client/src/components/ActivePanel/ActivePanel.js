@@ -30,7 +30,6 @@ function ActivePanel() {
   )
   if (onlineUsers?.users?.length && !onlineUsers?.loading) {
     users = onlineUsers?.users?.map((user) => {
-      console.log(user)
       return (
         <Box sx={{ display: "flex", alignItems: "center" }} key={user._id}>
           <Avatar
@@ -52,10 +51,10 @@ function ActivePanel() {
     <Card
       sx={{
         position: "fixed",
-        top: 100,
+        top: 80,
         right: 20,
         width: "23%",
-        height: "82vh",
+        height: "85vh",
         padding: "1rem",
         display: { xs: "none", lg: "block" },
       }}

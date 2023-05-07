@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import AppBar from "@mui/material/AppBar"
 import Box from "@mui/material/Box"
 import Toolbar from "@mui/material/Toolbar"
@@ -37,6 +37,8 @@ import {
   changeReadState,
   fetchNotifications,
 } from "../../features/notifications/notificationSlice"
+import { changeMode } from "../../features/appearance/appearanceSlice"
+import { useTheme } from "@emotion/react"
 
 function Navbar() {
   const navigate = useNavigate()
@@ -44,12 +46,18 @@ function Navbar() {
   const auth = useSelector((state) => state.auth)
   const user = useSelector((state) => state.user)
   const notifications = useSelector((state) => state.notifications)
+  const appearance = useSelector((state) => state.appearance)
+
   const [search, setSearch] = useState(false)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState([])
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null)
   const [chatAnchorEl, setChatAnchorEl] = useState(null)
   const [unread, setUnread] = useState(0)
+  const searchRef = useRef()
+  const theme = useTheme()
+  const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
+
   useEffect(() => {
     dispatch(fetchNotifications())
   }, [])
@@ -92,7 +100,7 @@ function Navbar() {
               padding: "0.75rem",
               alignItems: "center",
               "&:hover": {
-                backgroundColor: "#EFEFEF",
+                backgroundColor: backgroundColor,
               },
               borderRadius: "0.5rem",
               cursor: "pointer",
@@ -101,6 +109,8 @@ function Navbar() {
             // fullWidth
             onClick={() => {
               navigate(`/profile/${user.username}`)
+              setSearch(false)
+              searchRef.current.value = ""
             }}
           >
             <Avatar src={user.profilePicture} sx={{ marginRight: "0.5rem" }} />
@@ -161,6 +171,12 @@ function Navbar() {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null)
   }
+
+  const handleChangeMode = () => {
+    if (appearance === "light") localStorage.setItem("preferredMode", "dark")
+    else localStorage.setItem("preferredMode", "light")
+    dispatch(changeMode())
+  }
   return (
     <Box>
       <AppBar position="fixed" sx={{ zIndex: 2 }}>
@@ -180,8 +196,8 @@ function Navbar() {
               vibee
             </Typography>
           </Box>
-          <Box sx={{ position: "relative" }}>
-            <TextField
+          <Box sx={{ position: "relative", width: "35%" }}>
+            {/* <TextField
               margin="normal"
               fullWidth
               name={Math.random().toString()}
@@ -198,10 +214,26 @@ function Navbar() {
               }}
               onChange={handleSearch}
               // onBlur={() => setSearch(false)}
+            /> */}
+            <Box
+              component={"input"}
+              onChange={handleSearch}
+              placeholder="Search"
+              sx={{
+                padding: "1rem",
+                borderRadius: "2rem",
+                width: "100%",
+                border: "none",
+                "&:focus": {
+                  outline: "none",
+                },
+                display: { xs: "none", sm: "flex" },
+              }}
+              ref={searchRef}
             />
             {search && (
               <>
-                <Card sx={{ position: "absolute", left: 0, right: 0, top: 75 }}>
+                <Card sx={{ position: "absolute", left: 0, right: 0, top: 50 }}>
                   <CardContent>
                     {loading ? (
                       <Button loading="true" variant="plain">
@@ -302,7 +334,10 @@ function Navbar() {
                 <InfoIcon sx={{ marginRight: "0.75rem" }} />
                 <Typography textAlign="center">About Us</Typography>
               </MenuItem>
-              <MenuItem sx={{ marginBottom: "0.3rem" }}>
+              <MenuItem
+                sx={{ marginBottom: "0.3rem" }}
+                onClick={handleChangeMode}
+              >
                 <DarkModeIcon sx={{ marginRight: "0.75rem" }} />
                 <Typography textAlign="center">Dark Mode</Typography>
               </MenuItem>

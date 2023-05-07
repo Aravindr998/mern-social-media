@@ -103,7 +103,7 @@ function HomePage() {
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: 12.5,
+            marginTop: 10,
             // paddingLeft: { xs: "2rem ", lg: "18rem !important" },
             // paddingRight: { xs: "2rem ", lg: "18rem !important" },
           }}

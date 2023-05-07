@@ -18,13 +18,24 @@ import EventNoteIcon from "@mui/icons-material/EventNote"
 import PermMediaIcon from "@mui/icons-material/PermMedia"
 import LogoutIcon from "@mui/icons-material/Logout"
 import { useNavigate } from "react-router-dom"
+import MUISwitch from "../ui/MUISwitch"
+import { useDispatch } from "react-redux"
+import { ADMIN_TOKEN_KEY } from "../../constants/constant"
+import { clearAdminAuth } from "../../features/adminAuth/adminAuthSlice"
 
 function AdminSidePanel({ drawerWidth }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+    dispatch(clearAdminAuth())
+    navigate("/admin")
   }
 
   const drawer = (
@@ -68,7 +79,7 @@ function AdminSidePanel({ drawerWidth }) {
           </ListItemButton>
         </ListItem>
         <Divider />
-        <ListItem disablePadding>
+        <ListItem disablePadding onClick={handleLogout}>
           <ListItemButton>
             <ListItemIcon>
               <LogoutIcon />
@@ -100,9 +111,19 @@ function AdminSidePanel({ drawerWidth }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Admin
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Typography variant="h6" noWrap component="div">
+              Admin
+            </Typography>
+            <MUISwitch />
+          </Box>
         </Toolbar>
       </AppBar>
       <Box

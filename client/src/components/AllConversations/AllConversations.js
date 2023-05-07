@@ -236,7 +236,7 @@ const AllConversations = () => {
             size="medium"
             color="primary"
             aria-label="add"
-            sx={{ position: "fixed", bottom: 35, right: 35 }}
+            sx={{ position: "fixed", bottom: 45, right: 35 }}
             onClick={handleClickOpen}
           >
             <AddIcon />

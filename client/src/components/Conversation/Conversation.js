@@ -3,6 +3,7 @@ import { Avatar, Box, Typography } from "@mui/material"
 import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { socket } from "../../socket"
+import { useTheme } from "@emotion/react"
 
 const Conversation = ({ details }) => {
   const user = useSelector((state) => state.user)
@@ -21,6 +22,8 @@ const Conversation = ({ details }) => {
     : details?.users[0]?._id !== user?._id
     ? details?.users[0]?.profilePicture
     : details?.users[1]?.profilePicture
+  const theme = useTheme()
+  const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
   return (
     <Box
       sx={{
@@ -29,7 +32,7 @@ const Conversation = ({ details }) => {
         padding: "0.5rem",
         borderBottom: "solid 1px #DFDFDF",
         "&:hover": {
-          backgroundColor: "#DFDFDF",
+          backgroundColor: backgroundColor,
         },
         cursor: "pointer",
         transition: "background-color 0.3s",

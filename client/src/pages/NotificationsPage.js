@@ -21,7 +21,7 @@ const NotificationsPage = () => {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          marginTop: 12.5,
+          marginTop: 10,
         }}
       >
         <Notifications />
