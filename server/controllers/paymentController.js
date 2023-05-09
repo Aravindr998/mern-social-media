@@ -37,6 +37,11 @@ export const initiatePayment = async (req, res) => {
     startDate.setUTCSeconds(subscription.current_period_start)
     const endDate = new Date(0)
     endDate.setUTCSeconds(subscription.current_period_end)
+    const existingPayment = await paymentModel.findOne({ userId: id })
+    if (existingPayment) {
+      existingPayment.isDeleted = true
+      await existingPayment.save()
+    }
     const payment = new paymentModel({
       userId: id,
       subscriptionId: subscription.id,
@@ -114,7 +119,11 @@ export const denySubscription = async (req, res) => {
     user.subscriptionStatus = "inactive"
     user.elite = false
     user.eliteVerified = "rejected"
-    const payment = await paymentModel.findOne({ userId })
+    const payment = await paymentModel.findOne({
+      userId,
+      isDeleted: false,
+      refundId: { $exists: false },
+    })
     const subscription = await stripe.subscriptions.cancel(
       payment.subscriptionId
     )
@@ -215,4 +224,32 @@ export const handleWebHooks = async (req, res) => {
       console.log(`Unhandled event type ${event.type}`)
   }
   res.send()
+}
+
+export const getPaymentDetails = async (req, res) => {
+  try {
+    const payments = await paymentModel
+      .find()
+      .populate({ path: "userId", select: "-password" })
+    console.log(payments)
+    return res.json(payments)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const cancelRejection = async (req, res) => {
+  console.log("here")
+  try {
+    const { userId } = req.body
+    console.log(userId)
+    const user = await userModel.findById(userId)
+    if (!user) return res.status(400).json({ message: "Invalid user id" })
+    await userModel.findByIdAndUpdate(userId, { $unset: { eliteVerified: "" } })
+    const users = await getUnverifiedSubscriptions()
+    console.log(users)
+    return res.json(users)
+  } catch (error) {
+    console.log(error)
+  }
 }

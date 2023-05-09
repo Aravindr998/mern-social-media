@@ -18,31 +18,13 @@ import { Outlet, useNavigate, useParams } from "react-router-dom"
 import { Avatar, Button } from "@mui/material"
 
 function descendingComparator(a, b, orderBy) {
-  if (orderBy === "reports") {
-    if (b.reported.length < a.reported.length) {
-      return -1
-    }
-    if (b.reported.length > a.reported.length) {
-      return 1
-    }
-    return 0
-  } else if (orderBy === "likes") {
-    if (b[orderBy].length < a[orderBy].length) {
-      return -1
-    }
-    if (b[orderBy].length > a[orderBy].length) {
-      return 1
-    }
-    return 0
-  } else {
-    if (b[orderBy] < a[orderBy]) {
-      return -1
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1
-    }
-    return 0
+  if (b[orderBy] < a[orderBy]) {
+    return -1
   }
+  if (b[orderBy] > a[orderBy]) {
+    return 1
+  }
+  return 0
 }
 
 function getComparator(order, orderBy) {
@@ -149,16 +131,14 @@ EnhancedTableHead.propTypes = {
 const AdminElite = ({ drawerWidth }) => {
   const adminAuth = useSelector((state) => state.adminAuth)
   const navigate = useNavigate()
-  const { postId } = useParams()
-  const [order, setOrder] = useState("asc")
-  const [orderBy, setOrderBy] = useState("reports")
+  const [order, setOrder] = useState("desc")
+  const [orderBy, setOrderBy] = useState("createdAt")
   const [selected, setSelected] = useState([])
   const [page, setPage] = useState(0)
-  const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [posts, setPosts] = useState([])
-  const [postToDelete, setPostToDelete] = useState("")
-  const [open, setOpen] = useState(false)
+
+  console.log(posts)
 
   useEffect(() => {
     ;(async () => {
@@ -198,8 +178,6 @@ const AdminElite = ({ drawerWidth }) => {
     setPage(0)
   }
 
-  const isSelected = (name) => selected.indexOf(name) !== -1
-
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - posts.length) : 0
@@ -212,21 +190,6 @@ const AdminElite = ({ drawerWidth }) => {
       ),
     [order, orderBy, page, rowsPerPage, posts]
   )
-  const handleCloseConfirmation = async (postId) => {
-    setPostToDelete("")
-    setOpen(false)
-  }
-  const removePost = useCallback((data) => {
-    setPosts((prevState) => {
-      return prevState.filter((item) => item._id != data._id)
-    })
-    setOpen(false)
-  })
-  const imageFormat = ["jpg", "jpeg", "png", "webp"]
-
-  function getUrlExtension(url) {
-    return url.split(/[#?]/)[0].split(".").pop().trim()
-  }
 
   const handleAccept = async (userId) => {
     try {
@@ -254,6 +217,32 @@ const AdminElite = ({ drawerWidth }) => {
     }
   }
 
+  const handleCancel = async (userId) => {
+    try {
+      const { data } = await axios.patch(
+        "/api/payment/admin/subscription/cancel",
+        { userId },
+        { headers: { Authorization: adminAuth } }
+      )
+      setPosts(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const cancelRejection = async (userId) => {
+    try {
+      const { data } = await axios.patch(
+        "/api/payment/rejection/cancel",
+        { userId },
+        { headers: { Authorization: adminAuth } }
+      )
+      setPosts(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <Box
@@ -265,30 +254,36 @@ const AdminElite = ({ drawerWidth }) => {
           width: { sm: `calc(100% - ${drawerWidth}px)` },
         }}
       >
-        {postId ? (
-          <Outlet context={removePost} />
-        ) : (
-          <Box sx={{ width: "100%" }}>
-            <Paper sx={{ width: "100%", mb: 2 }}>
-              <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={dense ? "small" : "medium"}
-                >
-                  <EnhancedTableHead
-                    numSelected={selected.length}
-                    order={order}
-                    orderBy={orderBy}
-                    onSelectAllClick={handleSelectAllClick}
-                    onRequestSort={handleRequestSort}
-                    rowCount={posts.length}
-                  />
-                  <TableBody>
-                    {visibleRows.map((row, index) => {
-                      const labelId = `enhanced-table-checkbox-${index}`
+        <Box sx={{ width: "100%" }}>
+          <Paper sx={{ width: "100%", mb: 2 }}>
+            <TableContainer>
+              <Table
+                sx={{ minWidth: 750 }}
+                aria-labelledby="tableTitle"
+                size={"medium"}
+              >
+                <EnhancedTableHead
+                  numSelected={selected.length}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={handleRequestSort}
+                  rowCount={posts.length}
+                />
+                <TableBody>
+                  {visibleRows.map((row, index) => {
+                    const labelId = `enhanced-table-checkbox-${index}`
 
-                      let actions = (
+                    let actions = (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-start",
+                        }}
+                      ></Box>
+                    )
+                    if (row.eliteVerified === "pending") {
+                      actions = (
                         <Box
                           sx={{
                             display: "flex",
@@ -296,123 +291,114 @@ const AdminElite = ({ drawerWidth }) => {
                           }}
                         >
                           <Button
-                            variant="outlined"
+                            variant="contained"
                             color="info"
                             onClick={() => {
-                              navigate(`/admin/posts/${row._id}`)
+                              handleAccept(row._id)
                             }}
                           >
-                            View Details
+                            Accept
                           </Button>
                           <Button
                             variant="contained"
                             color="error"
                             sx={{ marginLeft: "1rem" }}
                             onClick={() => {
-                              setOpen(true)
-                              setPostToDelete(row._id)
+                              handleDeny(row._id)
                             }}
                           >
-                            Delete
+                            Deny
                           </Button>
                         </Box>
                       )
-                      if (row.eliteVerified === "pending") {
-                        actions = (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "flex-start",
+                    } else if (row.eliteVerified === "verified") {
+                      actions = (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Button onClick={() => handleCancel(row._id)}>
+                            Cancel
+                          </Button>
+                        </Box>
+                      )
+                    } else if (row.eliteVerified === "rejected") {
+                      actions = (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Button
+                            variant="outlined"
+                            color="success"
+                            onClick={() => {
+                              cancelRejection(row._id)
                             }}
                           >
-                            <Button
-                              variant="contained"
-                              color="info"
-                              onClick={() => {
-                                handleAccept(row._id)
-                              }}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              variant="contained"
-                              color="error"
-                              sx={{ marginLeft: "1rem" }}
-                              onClick={() => {
-                                handleDeny(row._id)
-                              }}
-                            >
-                              Deny
-                            </Button>
-                          </Box>
-                        )
-                      } else if (row.eliteVerified === "verified") {
-                        actions = (
-                          <Box>
-                            <Button>Cancel</Button>
-                          </Box>
-                        )
-                      } else if (row.eliteVerified === "rejected") {
-                        actions = (
-                          <Box>
-                            <Button disabled={true}>Rejected</Button>
-                          </Box>
-                        )
-                      }
+                            Cancel Rejection
+                          </Button>
+                          <Button disabled={true}>Rejected</Button>
+                        </Box>
+                      )
+                    }
 
-                      return (
-                        <TableRow
-                          hover
-                          key={row.profilePicture}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          <TableCell id={labelId}>
-                            <Avatar src={row.profilePicture} />
-                          </TableCell>
-                          <TableCell>{row.username}</TableCell>
-                          <TableCell align="left">
-                            <Typography
-                              fontWeight={500}
-                              sx={{
-                                "&:hover": { textDecoration: "underline" },
-                              }}
-                            >
-                              {row.payment.status}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="left">
-                            {new Date(row.payment.createdAt)
+                    return (
+                      <TableRow
+                        hover
+                        key={row.profilePicture}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <TableCell id={labelId}>
+                          <Avatar src={row.profilePicture} />
+                        </TableCell>
+                        <TableCell>{row.username}</TableCell>
+                        <TableCell align="left">
+                          <Typography
+                            fontWeight={500}
+                            sx={{
+                              "&:hover": { textDecoration: "underline" },
+                            }}
+                          >
+                            {row.payment?.status}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="left">
+                          {row.payment?.createdAt &&
+                            new Date(row.payment?.createdAt)
                               .toString()
                               .slice(0, 16)}
-                          </TableCell>
-                          <TableCell align="right">{actions}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                    {emptyRows > 0 && (
-                      <TableRow
-                        style={{
-                          height: (dense ? 33 : 53) * emptyRows,
-                        }}
-                      >
-                        <TableCell colSpan={6} />
+                        </TableCell>
+                        <TableCell align="right">{actions}</TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={posts.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Paper>
-          </Box>
-        )}
+                    )
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow
+                      style={{
+                        height: 53 * emptyRows,
+                      }}
+                    >
+                      <TableCell colSpan={6} />
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={posts.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
+        </Box>
       </Box>
     </>
   )

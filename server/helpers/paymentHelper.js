@@ -25,12 +25,23 @@ export const getUnverifiedSubscriptions = async () => {
           from: "payments",
           localField: "_id",
           foreignField: "userId",
+          pipeline: [
+            {
+              $match: {
+                refundId: {
+                  $exists: false,
+                },
+                isDeleted: false,
+              },
+            },
+          ],
           as: "payment",
         },
       },
       {
         $unwind: {
           path: "$payment",
+          preserveNullAndEmptyArrays: true,
         },
       },
       {

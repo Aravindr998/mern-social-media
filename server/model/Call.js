@@ -18,6 +18,10 @@ const callSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Conversations",
     },
+    isLive: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

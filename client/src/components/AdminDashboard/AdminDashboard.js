@@ -8,7 +8,7 @@ const AdminDashboard = ({ drawerWidth }) => {
   const [totalPosts, setTotalPosts] = useState(0)
   const [totalMedia, setTotalMedia] = useState(0)
   const [totalUsers, setTotalUsers] = useState(0)
-  const [activeUsers, setActiveUsers] = useState(0)
+  const [eliteUsers, setEliteUsers] = useState(0)
   const adminAuth = useSelector((state) => state.adminAuth)
   const date = useSelector((state) => state.adminDashboard)
   useEffect(() => {
@@ -20,7 +20,7 @@ const AdminDashboard = ({ drawerWidth }) => {
         setTotalMedia(data.totalMedia)
         setTotalUsers(data.totalUsers)
         setTotalPosts(data.totalPosts)
-        setActiveUsers(data.activeUsers)
+        setEliteUsers(data.eliteUsers)
       } catch (error) {
         console.log(error)
       }
@@ -147,13 +147,13 @@ const AdminDashboard = ({ drawerWidth }) => {
         >
           <Box
             component={"img"}
-            src="/images/onlineuser.png"
+            src="/images/verified.png"
             width={"4rem"}
             marginRight={"1rem"}
           />
           <Box textAlign={"center"}>
-            <Typography fontWeight={700}>Active Users</Typography>
-            <Typography>{activeUsers}</Typography>
+            <Typography fontWeight={700}>Elite Users</Typography>
+            <Typography>{eliteUsers}</Typography>
           </Box>
         </Card>
       </Box>
@@ -170,7 +170,7 @@ const AdminDashboard = ({ drawerWidth }) => {
             alignItems: "center",
           }}
         >
-          <Typography>Download User Reports</Typography>
+          <Typography>Download Post Reports</Typography>
           <Box sx={{ display: "flex" }}>
             <Button variant="contained" onClick={handleDownloadAsPDF}>
               Download as PDF

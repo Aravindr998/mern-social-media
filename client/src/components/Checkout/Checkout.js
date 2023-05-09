@@ -85,7 +85,7 @@ const Checkout = () => {
           const user = await axios.get("/api/user/details", {
             headers: { Authorization: auth },
           })
-          dispatch(setUser(user))
+          dispatch(setUser(user.data))
           handleSuccessOpen()
           setLoading(false)
         }

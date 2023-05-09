@@ -29,8 +29,8 @@ const IncomingCall = ({ show, details, close }) => {
   }, [show])
   useEffect(() => {
     if (details) {
-      setProfilePicture(details?.to?.profilePicture)
-      setUsername(details?.to?.username)
+      setProfilePicture(details?.from?.profilePicture)
+      setUsername(details?.from?.username)
     }
   }, [details])
 

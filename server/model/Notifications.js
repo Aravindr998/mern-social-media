@@ -11,6 +11,7 @@ const notificationSchema = new mongoose.Schema(
         "acceptedRequest",
         "create",
         "payment",
+        "live",
       ],
       required: true,
     },
@@ -37,6 +38,10 @@ const notificationSchema = new mongoose.Schema(
     readBy: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Users",
+    },
+    roomId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Call",
     },
   },
   {

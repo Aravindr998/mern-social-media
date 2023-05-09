@@ -1,5 +1,5 @@
 import { useTheme } from "@emotion/react"
-import { Button, Typography } from "@mui/material"
+import { Button, Tooltip, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import React, { useEffect, useState } from "react"
 import Create from "../Create/Create"
@@ -11,6 +11,7 @@ import Skeleton from "@mui/material/Skeleton"
 import { socket } from "../../socket"
 import { fetchProfilePosts } from "../../features/ProfilePosts/ProfilePosts"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
+import VerifiedIcon from "@mui/icons-material/Verified"
 
 function Profile() {
   const theme = useTheme()
@@ -148,13 +149,23 @@ function Profile() {
             alignItems: { xs: "center", lg: "flex-start" },
           }}
         >
-          <Typography sx={{ fontSize: "2rem", fontWeight: 700 }}>
-            {userLoading ? (
-              <Skeleton width="15rem" />
-            ) : (
-              user.firstName + " " + user.lastName
+          <Box display={"flex"} alignItems={"center"}>
+            <Typography sx={{ fontSize: "2rem", fontWeight: 700 }}>
+              {userLoading ? (
+                <Skeleton width="15rem" />
+              ) : (
+                user.firstName + " " + user.lastName
+              )}
+            </Typography>
+            {user?.elite && (
+              <Tooltip title="Verfied">
+                <VerifiedIcon
+                  sx={{ marginLeft: "0.5rem", cursor: "pointer" }}
+                  color="primary"
+                />
+              </Tooltip>
             )}
-          </Typography>
+          </Box>
           <Typography
             sx={{
               fontSize: "1rem",

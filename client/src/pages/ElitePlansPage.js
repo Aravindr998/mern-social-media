@@ -66,6 +66,7 @@ const ElitePlansPage = () => {
       console.log(error)
     }
   }
+  console.log(user)
   let elite = (
     <Card sx={{ width: { xs: "100%", lg: "50%" }, padding: "1rem" }}>
       <Box

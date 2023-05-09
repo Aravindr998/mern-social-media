@@ -29,6 +29,10 @@ const Notification = ({ message, show, type, close }) => {
       navigate(`/profile/${message.userId.username}`)
     } else if (type === "acceptedRequest") {
       navigate(`/profile/${message.userId.username}`)
+    } else if (type === "live") {
+      window.open(`/live/${message.roomId}`, "_blank", "height=400,width=600")
+    } else if (type === "payment") {
+      navigate("/elite/plans")
     }
   }
   useEffect(() => {
@@ -44,6 +48,12 @@ const Notification = ({ message, show, type, close }) => {
       setContent(`${message?.userId?.username} sent you a friend request`)
     } else if (type === "acceptedRequest") {
       setContent(`${message?.userId?.username} accepted your friend request`)
+    } else if (type === "live") {
+      setContent(`${message?.userId?.username} started a live stream`)
+    } else if (type === "payment") {
+      setContent(
+        "Your subscription is about to expire. If autopay is configured, you will be automatically charged"
+      )
     }
   }, [message])
   return (

@@ -66,14 +66,23 @@ const NotificationPanel = ({ anchorEl, handleNotificationClose }) => {
         username = item.userId.username
         content = `accepted your friend request`
         link = `/profile/${item.userId.username}`
+      } else if (item.type === "live") {
+        username = item.userId.username
+        content = `started a live stream`
+        link = `/room/${item.roomId}`
+      } else if (item.type === "payment") {
+        content = `Your subscription is about to expire. If autopay is configured, you will be automatically charged`
+        link = `/elite/plans`
       }
       return [
         <MenuItem onClick={() => navigate(link)} key={item._id}>
           <ListItemText>
             <Typography>
-              <Typography component="span" fontWeight={700}>
-                {username}
-              </Typography>{" "}
+              {username && (
+                <Typography component="span" fontWeight={700}>
+                  {username}
+                </Typography>
+              )}{" "}
               {content}
             </Typography>
           </ListItemText>

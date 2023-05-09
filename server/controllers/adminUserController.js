@@ -6,7 +6,7 @@ import {
   getTotalMedia,
   getTotalPosts,
   getTotalUsers,
-  getActiveUsers,
+  getEliteUsers,
   getAllPostDetails,
 } from "../helpers/adminHelper.js"
 import { jsPDF } from "jspdf"
@@ -106,8 +106,8 @@ export const getDetails = async (req, res) => {
     const totalUsers = await getTotalUsers()
     const totalPosts = await getTotalPosts()
     const totalMedia = await getTotalMedia()
-    const activeUsers = await getActiveUsers()
-    res.json({ totalUsers, totalPosts, totalMedia, activeUsers })
+    const eliteUsers = await getEliteUsers()
+    res.json({ totalUsers, totalPosts, totalMedia, eliteUsers })
   } catch (error) {
     console.log(error)
     return res

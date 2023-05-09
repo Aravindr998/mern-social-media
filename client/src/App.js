@@ -45,6 +45,9 @@ import { addOffer } from "./features/offer/offerSlice"
 import SavedPostsPage from "./pages/SavedPostsPage"
 import ElitePlansPage from "./pages/ElitePlansPage"
 import AdminElitePage from "./pages/AdminElitePage"
+import AdminPaymentsPage from "./pages/AdminPaymentsPage"
+import VideoCall from "./components/VideoCall/VideoCall"
+import LiveStream from "./components/LiveStream/LiveStream"
 
 function App() {
   const dispatch = useDispatch()
@@ -168,8 +171,9 @@ function App() {
             </Route>
             <Route path="/post/:postId" element={<SinglePostPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/room/:roomId" element={<VideoCall />} />
+            <Route path="/live/:roomId" element={<LiveStream />} />
             <Route path="/discover" element={<DiscoverPage />} />
-            <Route path="/room/:callId" element={<VideoCallPage />} />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />
@@ -201,6 +205,7 @@ function App() {
                 />
               </Route>
               <Route path="/admin/elite" element={<AdminElitePage />} />
+              <Route path="/admin/payments" element={<AdminPaymentsPage />} />
             </Route>
           </Routes>
         </ThemeProvider>

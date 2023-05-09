@@ -149,10 +149,10 @@ export const getTotalMedia = async () => {
     throw error
   }
 }
-export const getActiveUsers = async () => {
+export const getEliteUsers = async () => {
   try {
-    const activeUsers = await onlineUserModel.find()
-    return activeUsers.length
+    const eliteUsers = await userModel.find({ elite: true })
+    return eliteUsers.length
   } catch (error) {
     throw error
   }

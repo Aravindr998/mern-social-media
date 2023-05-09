@@ -46,6 +46,7 @@ import { useNavigate } from "react-router-dom"
 import { socket } from "../../socket"
 import BookmarkIcon from "@mui/icons-material/Bookmark"
 import { deletePost } from "../../features/posts/postSlice"
+import VerifiedIcon from "@mui/icons-material/Verified"
 
 function PostFeed(props) {
   const navigate = useNavigate()
@@ -305,9 +306,24 @@ function PostFeed(props) {
                   style={{ marginBottom: 6 }}
                 />
               ) : (
-                <Typography fontWeight={500}>
-                  {props?.createdBy?.username}
-                </Typography>
+                <Box
+                  display={"flex"}
+                  sx={{ cursor: "pointer" }}
+                  onClick={() =>
+                    navigate(`/profile/${props?.createdBy?.username}`)
+                  }
+                >
+                  <Typography fontWeight={500}>
+                    {props?.createdBy?.username}
+                  </Typography>
+                  {props?.createdBy?.elite && (
+                    <Tooltip title="Verified">
+                      <Typography marginLeft={"0.3rem"}>
+                        {<VerifiedIcon fontSize="small" color="primary" />}
+                      </Typography>
+                    </Tooltip>
+                  )}
+                </Box>
               )
             }
             subheader={

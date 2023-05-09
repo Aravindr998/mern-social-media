@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import callModel from "../model/Call.js"
 import conversationModel from "../model/Conversations.js"
+import notificationModel from "../model/Notifications.js"
 
 export const createVideoCall = async (req, res) => {
   try {
@@ -45,6 +46,43 @@ export const getCallDetails = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" })
     }
     res.json(call)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const createLiveStream = async (req, res) => {
+  try {
+    const { id } = req.user
+    const live = new callModel({
+      from: id,
+      isLive: true,
+    })
+    await live.save()
+    const notification = new notificationModel({
+      type: "live",
+      userId: id,
+      roomId: live._id,
+    })
+    await notification.save()
+    await notification.populate({ path: "userId", select: "-password" })
+    res.json({ live, notification })
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getLiveDetails = async (req, res) => {
+  try {
+    const { roomId } = req.params
+    const live = await callModel.findById(roomId)
+    res.json(live)
   } catch (error) {
     console.log(error)
     res

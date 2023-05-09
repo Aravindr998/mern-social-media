@@ -80,15 +80,6 @@ export const getUserDetails = async (req, res) => {
     const { username } = req.params
     const user = await userModel.findOne({ username })
     if (user) {
-      if (user.elite) {
-        const payment = await paymentModel.findOne({ userId: user._id })
-        if (!payment) {
-          user.elite = false
-          user.subscriptionStatus = "inactive"
-          delete user.eliteVerified
-          await user.save()
-        }
-      }
       const check = await userModel.findById(req.user.id)
       const friend = check.friends.includes(user._id)
       const pending = check.pendingSentRequest.includes(user._id)

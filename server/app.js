@@ -13,6 +13,7 @@ import callRouter from "./routers/callRouter.js"
 import paymentRouter from "./routers/paymentRouter.js"
 import webhookRouter from "./routers/webhookRouter.js"
 import io from "./sockets/socket.js"
+import "./cron/nodeCron.js"
 
 const app = express()
 

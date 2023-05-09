@@ -78,6 +78,12 @@ export const getAllNotifications = async (id, skip) => {
                 { "userId._id": { $ne: new mongoose.Types.ObjectId(id) } },
               ],
             },
+            {
+              $and: [
+                { "userId.friends": new mongoose.Types.ObjectId(id) },
+                { type: "live" },
+              ],
+            },
           ],
         },
       },

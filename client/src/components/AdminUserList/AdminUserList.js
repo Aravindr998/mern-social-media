@@ -122,7 +122,6 @@ function AdminUserList({ drawerWidth }) {
                     style={{
                       top: 57,
                       minWidth: column.minWidth,
-                      backgroundColor: "#DFDFDF",
                     }}
                   >
                     {column.label}

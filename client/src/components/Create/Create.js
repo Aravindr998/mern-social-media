@@ -28,10 +28,12 @@ import { useDispatch, useSelector } from "react-redux"
 import { addPost } from "../../features/posts/postSlice"
 import { socket } from "../../socket"
 import { addProfilePost } from "../../features/ProfilePosts/ProfilePosts"
+import { useNavigate } from "react-router-dom"
 
 function Create() {
   const fileRef = useRef()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const auth = useSelector((state) => state.auth)
   const user = useSelector((state) => state.user)
   const [description, setDescription] = useState("")
@@ -137,6 +139,20 @@ function Create() {
     }
   }
 
+  const handleLiveStream = async () => {
+    try {
+      const { data } = await axios.post(
+        "/api/call/live",
+        {},
+        { headers: { Authorization: auth } }
+      )
+      socket.emit("newNotification", data.notification)
+      window.open(`/live/${data.live._id}`, "_blank", "height=400,width=600")
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <Card sx={{ width: { xs: "90%", lg: "50%" }, marginBottom: "1rem" }}>
@@ -160,7 +176,11 @@ function Create() {
         </CardContent>
         <Divider />
         <CardActions sx={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton aria-label="live" sx={{ borderRadius: "1rem" }}>
+          <IconButton
+            aria-label="live"
+            sx={{ borderRadius: "1rem" }}
+            onClick={handleLiveStream}
+          >
             <Box
               component="img"
               sx={{ width: "1.5rem", marginRight: 1 }}

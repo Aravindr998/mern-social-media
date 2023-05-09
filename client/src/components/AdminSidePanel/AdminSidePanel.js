@@ -18,6 +18,7 @@ import EventNoteIcon from "@mui/icons-material/EventNote"
 import PermMediaIcon from "@mui/icons-material/PermMedia"
 import VerifiedIcon from "@mui/icons-material/Verified"
 import LogoutIcon from "@mui/icons-material/Logout"
+import PaymentsIcon from "@mui/icons-material/Payments"
 import { useNavigate } from "react-router-dom"
 import MUISwitch from "../ui/MUISwitch"
 import { useDispatch } from "react-redux"
@@ -71,21 +72,21 @@ function AdminSidePanel({ drawerWidth }) {
           </ListItemButton>
         </ListItem>
         <Divider />
-        <ListItem disablePadding>
-          <ListItemButton>
-            <ListItemIcon>
-              <PermMediaIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Media"} />
-          </ListItemButton>
-        </ListItem>
-        <Divider />
         <ListItem disablePadding onClick={() => navigate("/admin/elite")}>
           <ListItemButton>
             <ListItemIcon>
               <VerifiedIcon />
             </ListItemIcon>
             <ListItemText primary={"Elite"} />
+          </ListItemButton>
+        </ListItem>
+        <Divider />
+        <ListItem disablePadding onClick={() => navigate("/admin/payments")}>
+          <ListItemButton>
+            <ListItemIcon>
+              <PaymentsIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Payments"} />
           </ListItemButton>
         </ListItem>
         <Divider />

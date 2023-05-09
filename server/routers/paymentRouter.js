@@ -11,7 +11,8 @@ import {
   denySubscription,
   getSubscriptionDetails,
   cancelSubscription,
-  handleWebHooks,
+  getPaymentDetails,
+  cancelRejection,
 } from "../controllers/paymentController.js"
 
 const router = Router()
@@ -33,5 +34,11 @@ router.patch("/subscription/deny", isAdminLoggedin, denySubscription)
 router.get("/subscription/details", isUserLoggedin, getSubscriptionDetails)
 
 router.patch("/subscription/cancel", isUserLoggedin, cancelSubscription)
+
+router.get("/details", isAdminLoggedin, getPaymentDetails)
+
+router.patch("/admin/subscription/cancel", isAdminLoggedin, denySubscription)
+
+router.patch("/rejection/cancel", isAdminLoggedin, cancelRejection)
 
 export default router
