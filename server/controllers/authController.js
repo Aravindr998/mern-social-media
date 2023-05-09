@@ -8,6 +8,7 @@ import {
 import passport from "passport"
 import { checkOTPAsync, sendOTP } from "../helpers/otpHelper.js"
 import adminModel from "../model/Admin.js"
+import paymentModel from "../model/Payment.js"
 
 export const validateUser = async (req, res, next) => {
   const { errors, isValid } = validateRegister(req.body)
@@ -80,6 +81,15 @@ export const isUserLoggedin = (req, res, next) => {
       }
       const usr = await userModel.findById(user.id)
       if (usr.isBlocked) return res.status(403).json({ blocked: true })
+      if (usr.elite) {
+        const payment = await paymentModel.findOne({ userId: usr._id })
+        if (!payment) {
+          usr.elite = false
+          usr.subscriptionStatus = "inactive"
+          delete usr.eliteVerified
+          await usr.save()
+        }
+      }
       req.user = user
       next()
     } catch (error) {

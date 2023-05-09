@@ -44,6 +44,7 @@ import IncomingCall from "./components/IncomingCall/IncomingCall"
 import { addOffer } from "./features/offer/offerSlice"
 import SavedPostsPage from "./pages/SavedPostsPage"
 import ElitePlansPage from "./pages/ElitePlansPage"
+import AdminElitePage from "./pages/AdminElitePage"
 
 function App() {
   const dispatch = useDispatch()
@@ -199,6 +200,7 @@ function App() {
                   element={<AdminPostDetails />}
                 />
               </Route>
+              <Route path="/admin/elite" element={<AdminElitePage />} />
             </Route>
           </Routes>
         </ThemeProvider>

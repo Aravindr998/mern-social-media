@@ -10,7 +10,8 @@ import notificationRouter from "./routers/notificationRouter.js"
 import adminRouter from "./routers/adminRouter.js"
 import adminPostRouter from "./routers/adminPostRouter.js"
 import callRouter from "./routers/callRouter.js"
-import paymentRouter from "./routers/paymentRoute.js"
+import paymentRouter from "./routers/paymentRouter.js"
+import webhookRouter from "./routers/webhookRouter.js"
 import io from "./sockets/socket.js"
 
 const app = express()
@@ -19,8 +20,6 @@ const PORT = process.env.PORT || 4000
 
 app.use(express.static("./public"))
 app.use(cors())
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
 let server
 db.once("open", () => {
   server = app.listen(PORT, () => {
@@ -28,6 +27,11 @@ db.once("open", () => {
   })
   io.attach(server)
 })
+
+app.use("/webhook", webhookRouter)
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
 
 app.use("/api/payment", paymentRouter)
 app.use("/api/conversation", conversationRouter)

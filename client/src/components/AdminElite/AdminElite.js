@@ -15,8 +15,7 @@ import { visuallyHidden } from "@mui/utils"
 import axios from "../../axios"
 import { useSelector } from "react-redux"
 import { Outlet, useNavigate, useParams } from "react-router-dom"
-import { Button } from "@mui/material"
-import DeleteConfirmation from "../DeleteConfirmation/DeleteConfirmation"
+import { Avatar, Button } from "@mui/material"
 
 function descendingComparator(a, b, orderBy) {
   if (orderBy === "reports") {
@@ -66,25 +65,25 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: "media",
+    id: "profilePicture",
     numeric: false,
     disablePadding: false,
     maxWidth: 100,
-    label: "Media",
+    label: "Profile Picture",
   },
   {
-    id: "description",
+    id: "username",
     numeric: false,
     disablePadding: false,
     maxWidth: 100,
-    label: "Description",
+    label: "Username",
   },
   {
-    id: "createdBy",
+    id: "subscriptionStatus",
     numeric: false,
     disablePadding: false,
     maxWidth: 100,
-    label: "Created By",
+    label: "Subscription Status",
   },
   {
     id: "createdAt",
@@ -92,20 +91,6 @@ const headCells = [
     disablePadding: false,
     maxWidth: 100,
     label: "Created At",
-  },
-  {
-    id: "likes",
-    numeric: true,
-    disablePadding: false,
-    maxWidth: 100,
-    label: "Likes",
-  },
-  {
-    id: "reports",
-    numeric: true,
-    disablePadding: false,
-    maxWidth: 100,
-    label: "Reports",
   },
   {
     id: "actions",
@@ -161,7 +146,7 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 }
 
-const AdminPosts = ({ drawerWidth }) => {
+const AdminElite = ({ drawerWidth }) => {
   const adminAuth = useSelector((state) => state.adminAuth)
   const navigate = useNavigate()
   const { postId } = useParams()
@@ -178,10 +163,11 @@ const AdminPosts = ({ drawerWidth }) => {
   useEffect(() => {
     ;(async () => {
       try {
-        const { data } = await axios.get("/api/admin/post", {
+        const { data } = await axios.get("/api/payment/subscription/all", {
           headers: { Authorization: adminAuth },
         })
         setPosts(data)
+        console.log(data)
       } catch (error) {
         console.log(error)
       }
@@ -241,6 +227,33 @@ const AdminPosts = ({ drawerWidth }) => {
   function getUrlExtension(url) {
     return url.split(/[#?]/)[0].split(".").pop().trim()
   }
+
+  const handleAccept = async (userId) => {
+    try {
+      const { data } = await axios.patch(
+        `/api/payment/subscription/confirm`,
+        { userId },
+        { headers: { Authorization: adminAuth } }
+      )
+      setPosts(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleDeny = async (userId) => {
+    try {
+      const { data } = await axios.patch(
+        `/api/payment/subscription/deny`,
+        { userId },
+        { headers: { Authorization: adminAuth } }
+      )
+      setPosts(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <Box
@@ -274,76 +287,105 @@ const AdminPosts = ({ drawerWidth }) => {
                   <TableBody>
                     {visibleRows.map((row, index) => {
                       const labelId = `enhanced-table-checkbox-${index}`
-                      let extension
-                      if (typeof row.media === "string") {
-                        extension = getUrlExtension(row.media)
-                      } else if (typeof row?.sharedPost?.media === "string")
-                        extension = getUrlExtension(row.sharedPost.media)
-                      let isImage = imageFormat.includes(extension)
+
+                      let actions = (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "flex-start",
+                          }}
+                        >
+                          <Button
+                            variant="outlined"
+                            color="info"
+                            onClick={() => {
+                              navigate(`/admin/posts/${row._id}`)
+                            }}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            sx={{ marginLeft: "1rem" }}
+                            onClick={() => {
+                              setOpen(true)
+                              setPostToDelete(row._id)
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      )
+                      if (row.eliteVerified === "pending") {
+                        actions = (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "flex-start",
+                            }}
+                          >
+                            <Button
+                              variant="contained"
+                              color="info"
+                              onClick={() => {
+                                handleAccept(row._id)
+                              }}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              variant="contained"
+                              color="error"
+                              sx={{ marginLeft: "1rem" }}
+                              onClick={() => {
+                                handleDeny(row._id)
+                              }}
+                            >
+                              Deny
+                            </Button>
+                          </Box>
+                        )
+                      } else if (row.eliteVerified === "verified") {
+                        actions = (
+                          <Box>
+                            <Button>Cancel</Button>
+                          </Box>
+                        )
+                      } else if (row.eliteVerified === "rejected") {
+                        actions = (
+                          <Box>
+                            <Button disabled={true}>Rejected</Button>
+                          </Box>
+                        )
+                      }
+
                       return (
                         <TableRow
                           hover
-                          key={row.media}
+                          key={row.profilePicture}
                           sx={{ cursor: "pointer" }}
                         >
                           <TableCell id={labelId}>
-                            <Box
-                              width={"10rem"}
-                              component={isImage ? "img" : "video"}
-                              src={row.media}
-                            />
+                            <Avatar src={row.profilePicture} />
                           </TableCell>
-                          <TableCell>{row.description}</TableCell>
+                          <TableCell>{row.username}</TableCell>
                           <TableCell align="left">
                             <Typography
                               fontWeight={500}
                               sx={{
                                 "&:hover": { textDecoration: "underline" },
                               }}
-                              onClick={() => {
-                                navigate(`/admin/users/${row.createdBy._id}`)
-                              }}
                             >
-                              {row.createdBy.username}
+                              {row.payment.status}
                             </Typography>
                           </TableCell>
                           <TableCell align="left">
-                            {new Date(row.createdAt).toString().slice(0, 16)}
+                            {new Date(row.payment.createdAt)
+                              .toString()
+                              .slice(0, 16)}
                           </TableCell>
-                          <TableCell align="right">
-                            {row.likes.length}
-                          </TableCell>
-                          <TableCell align="right">
-                            {row.reported.length}
-                          </TableCell>
-                          <TableCell align="right">
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Button
-                                variant="outlined"
-                                color="info"
-                                onClick={() => {
-                                  navigate(`/admin/posts/${row._id}`)
-                                }}
-                              >
-                                View Details
-                              </Button>
-                              <Button
-                                variant="contained"
-                                color="error"
-                                onClick={() => {
-                                  setOpen(true)
-                                  setPostToDelete(row._id)
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            </Box>
-                          </TableCell>
+                          <TableCell align="right">{actions}</TableCell>
                         </TableRow>
                       )
                     })}
@@ -372,14 +414,8 @@ const AdminPosts = ({ drawerWidth }) => {
           </Box>
         )}
       </Box>
-      <DeleteConfirmation
-        show={open}
-        postId={postToDelete}
-        handleCloseConfirmation={handleCloseConfirmation}
-        removePost={removePost}
-      />
     </>
   )
 }
 
-export default AdminPosts
+export default AdminElite

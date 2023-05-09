@@ -76,6 +76,22 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
     },
+    eliteVerified: {
+      type: String,
+      enum: ["pending", "verified", "rejected"],
+    },
+    elite: {
+      type: Boolean,
+      default: false,
+    },
+    eliteStartDate: {
+      type: Date,
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ["inactive", "active", "cancelled"],
+      default: "inactive",
+    },
   },
   { timestamps: true }
 )

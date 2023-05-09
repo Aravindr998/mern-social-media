@@ -35,6 +35,11 @@ export const getAllRelatedPosts = async (id, skip = 0) => {
   try {
     const posts = await postModel.aggregate([
       {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
           from: "users",
           localField: "createdBy",
@@ -161,6 +166,11 @@ export const getTotalPostsNumber = async (id) => {
     console.log(id)
     const count = await postModel.aggregate([
       {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
         $lookup: {
           from: "users",
           localField: "createdBy",
@@ -267,6 +277,11 @@ export const getPostForUserProfile = async (id) => {
     const posts = await postModel.aggregate([
       {
         $match: {
+          isDeleted: false,
+        },
+      },
+      {
+        $match: {
           createdBy: new mongoose.Types.ObjectId(id),
         },
       },
@@ -335,6 +350,11 @@ export const getPostForUserProfile = async (id) => {
 export const getPublicPostForUserProfile = async (id) => {
   try {
     const posts = await postModel.aggregate([
+      {
+        $match: {
+          isDeleted: false,
+        },
+      },
       {
         $match: {
           createdBy: new mongoose.Types.ObjectId(id),
