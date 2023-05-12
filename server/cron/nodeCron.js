@@ -23,11 +23,12 @@ cron.schedule("0 */10 * * * *", async () => {
         (subscription.status === "canceled" && date < new Date())
       ) {
         const userId = item.userId
-        const user = await userModel.findById(userId)
-        user.elite = false
-        user.subscriptionStatus = "inactive"
-        delete user.eliteVerified
-        await user.save()
+        await userModel.findByIdAndUpdate(userId, {
+          $set: { elite: false, subscriptionStatus: "inactive" },
+        })
+        await userModel.findByIdAndUpdate(userId, {
+          $unset: { eliteVerified: "" },
+        })
       }
     }
   } catch (error) {

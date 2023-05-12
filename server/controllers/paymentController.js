@@ -144,7 +144,11 @@ export const denySubscription = async (req, res) => {
 export const getSubscriptionDetails = async (req, res) => {
   try {
     const { id } = req.user
-    const payment = await paymentModel.findOne({ userId: id })
+    const payment = await paymentModel.findOne({
+      userId: id,
+      isDeleted: false,
+      refundId: { $exists: false },
+    })
     res.json(payment)
   } catch (error) {
     console.log(error)

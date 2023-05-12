@@ -11,14 +11,17 @@ import {
 import { useDispatch, useSelector } from "react-redux"
 import { fetchFriends } from "../../features/friends/friendsSlice"
 import { useNavigate } from "react-router-dom"
+import { useTheme } from "@emotion/react"
 
 const Friends = () => {
   const dispatch = useDispatch()
   const friends = useSelector((state) => state.friends)
   const navigate = useNavigate()
+  const theme = useTheme()
   useEffect(() => {
     dispatch(fetchFriends())
   }, [])
+  const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
   let allFriends = (
     <>
       <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
@@ -50,7 +53,7 @@ const Friends = () => {
             alignItems: "center",
             width: "100%",
             cursor: "pointer",
-            "&:hover": { backgroundColor: "#DFDFDF" },
+            "&:hover": { backgroundColor },
             padding: "0.5rem",
             borderRadius: "0.5rem",
             transition: "background-color 0.3s",

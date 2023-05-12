@@ -38,6 +38,25 @@ export const fetchSavedPosts = createAsyncThunk(
   }
 )
 
+export const fetchDiscoverPosts = createAsyncThunk(
+  "posts/fetchDiscoverPosts",
+  async () => {
+    const { data } = await axios.get("/api/post/discover/posts", {
+      headers: { Authorization: localStorage.getItem(TOKEN_KEY) },
+    })
+    return data
+  }
+)
+
+export const loadMoreDiscoverPosts = createAsyncThunk(
+  "posts/loadMoreDiscoverPosts",
+  async (skip) => {
+    const { data } = await axios.get(`/api/post/discover/posts?skip=${skip}`, {
+      headers: { Authorization: localStorage.getItem(TOKEN_KEY) },
+    })
+    return data
+  }
+)
 const postSlice = createSlice({
   name: "posts",
   initialState,
@@ -96,6 +115,32 @@ const postSlice = createSlice({
     builder.addCase(fetchSavedPosts.rejected, (state, action) => {
       state.loading = false
       state.posts = []
+      state.error = action.error.message
+    })
+    builder.addCase(fetchDiscoverPosts.pending, (state) => {
+      state.loading = true
+    })
+    builder.addCase(fetchDiscoverPosts.fulfilled, (state, action) => {
+      state.loading = false
+      state.posts = action.payload.posts
+      state.error = ""
+      state.total = action.payload.totalCount
+    })
+    builder.addCase(fetchDiscoverPosts.rejected, (state, action) => {
+      state.loading = false
+      state.posts = []
+      state.error = action.error.message
+    })
+    builder.addCase(loadMoreDiscoverPosts.pending, (state) => {
+      state.loading = true
+    })
+    builder.addCase(loadMoreDiscoverPosts.fulfilled, (state, action) => {
+      state.loading = false
+      state.posts = [...state.posts, ...action.payload.posts]
+      state.error = ""
+    })
+    builder.addCase(loadMoreDiscoverPosts.rejected, (state, action) => {
+      state.loading = false
       state.error = action.error.message
     })
   },

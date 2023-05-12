@@ -422,3 +422,108 @@ export const getPublicPostForUserProfile = async (id) => {
     throw error
   }
 }
+
+export const getPostsInDiscover = async (id, skip) => {
+  try {
+    const posts = await postModel.aggregate([
+      {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
+        $match: {
+          privacy: "public",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: {
+          path: "$createdBy",
+        },
+      },
+      {
+        $match: {
+          "createdBy.friends": {
+            $nin: [new mongoose.Types.ObjectId(id)],
+          },
+        },
+      },
+      {
+        $match: {
+          "createdBy._id": {
+            $nin: [new mongoose.Types.ObjectId(id)],
+          },
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: 10,
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ])
+    return posts
+  } catch (error) {
+    throw error
+  }
+}
+
+export const getTotalNumberPostsInDiscover = async (id) => {
+  try {
+    const posts = await postModel.aggregate([
+      {
+        $match: {
+          isDeleted: false,
+        },
+      },
+      {
+        $match: {
+          privacy: "public",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdBy",
+        },
+      },
+      {
+        $unwind: {
+          path: "$createdBy",
+        },
+      },
+      {
+        $match: {
+          "createdBy.friends": {
+            $nin: [new mongoose.Types.ObjectId(id)],
+          },
+        },
+      },
+      {
+        $match: {
+          "createdBy._id": {
+            $nin: [new mongoose.Types.ObjectId(id)],
+          },
+        },
+      },
+    ])
+    return posts.length
+  } catch (error) {
+    throw error
+  }
+}

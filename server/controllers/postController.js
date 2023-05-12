@@ -9,6 +9,8 @@ import {
   getCommentsFromPost,
   getPostForUserProfile,
   getPublicPostForUserProfile,
+  getTotalNumberPostsInDiscover,
+  getPostsInDiscover,
 } from "../helpers/postHelper.js"
 import mongoose from "mongoose"
 import notificationModel from "../model/Notifications.js"
@@ -478,5 +480,18 @@ export const unSavePost = async (req, res) => {
     res
       .status(500)
       .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const getDiscoverPosts = async (req, res) => {
+  try {
+    const { id } = req.user
+    let skip = req.query.skip || 0
+    skip *= 10
+    const posts = await getPostsInDiscover(id, skip)
+    const totalCount = await getTotalNumberPostsInDiscover(id)
+    res.json({ posts, totalCount })
+  } catch (error) {
+    console.log(error)
   }
 }

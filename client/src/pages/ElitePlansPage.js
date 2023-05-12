@@ -2,9 +2,6 @@ import {
   Box,
   Button,
   Card,
-  CardActions,
-  CardContent,
-  CardHeader,
   Container,
   CssBaseline,
   Dialog,
@@ -12,8 +9,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Grid,
-  Slide,
   Stack,
   Typography,
 } from "@mui/material"
@@ -95,7 +90,7 @@ const ElitePlansPage = () => {
           /month
         </Typography>
       </Box>
-      <Box textAlign={"center"}>
+      <Box>
         <Typography fontSize={"1.5rem"} fontWeight={500}>
           Perks
         </Typography>

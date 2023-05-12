@@ -11,10 +11,13 @@ import {
   Card,
   CardContent,
   Divider,
+  Grow,
   Menu,
   MenuItem,
+  Stack,
   TextField,
   Tooltip,
+  useMediaQuery,
 } from "@mui/material"
 import ChatIcon from "@mui/icons-material/Chat"
 import NotificationsIcon from "@mui/icons-material/Notifications"
@@ -47,6 +50,7 @@ function Navbar() {
   const user = useSelector((state) => state.user)
   const notifications = useSelector((state) => state.notifications)
   const appearance = useSelector((state) => state.appearance)
+  const matches = useMediaQuery("(min-width: 600px)")
 
   const [search, setSearch] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -54,6 +58,9 @@ function Navbar() {
   const [notificationAnchorEl, setNotificationAnchorEl] = useState(null)
   const [chatAnchorEl, setChatAnchorEl] = useState(null)
   const [unread, setUnread] = useState(0)
+  const [checked, setChecked] = useState(false)
+  const [height, setHeight] = useState("0rem")
+  const [padding, setPadding] = useState("0rem")
   const searchRef = useRef()
   const theme = useTheme()
   const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
@@ -66,6 +73,15 @@ function Navbar() {
       setUnread(notifications.readByCount)
     }
   }, [notifications.readByCount])
+
+  useEffect(() => {
+    if (matches) {
+      setHeight("0rem")
+      setChecked(false)
+      setPadding("0rem")
+    }
+    setSearch(false)
+  }, [matches])
 
   const handleOpenNotification = (event) => {
     dispatch(changeReadState())
@@ -177,6 +193,17 @@ function Navbar() {
     else localStorage.setItem("preferredMode", "light")
     dispatch(changeMode())
   }
+
+  const handleOpenMenu = () => {
+    if (height === "0rem") {
+      setPadding("1rem")
+      setHeight("16rem")
+    } else {
+      setPadding("0rem")
+      setHeight("0rem")
+    }
+    setChecked((prevState) => !prevState)
+  }
   return (
     <Box>
       <AppBar position="fixed" sx={{ zIndex: 2 }}>
@@ -233,7 +260,15 @@ function Navbar() {
             />
             {search && (
               <>
-                <Card sx={{ position: "absolute", left: 0, right: 0, top: 50 }}>
+                <Card
+                  sx={{
+                    position: "absolute",
+                    left: { xs: -185, sm: 0 },
+                    right: { xs: -165, sm: 0 },
+                    top: { xs: 95, sm: 50 },
+                    zIndex: 10,
+                  }}
+                >
                   <CardContent>
                     {loading ? (
                       <Button loading="true" variant="plain">
@@ -353,11 +388,91 @@ function Navbar() {
               edge="start"
               color="inherit"
               aria-label="menu"
+              onClick={handleOpenMenu}
             >
               <MenuIcon />
             </IconButton>
           </Box>
         </Toolbar>
+        <Grow in={checked}>
+          <Box
+            width={"100%"}
+            padding={padding}
+            sx={{ height, transition: "height 0.3s" }}
+          >
+            <TextField
+              fullWidth
+              variant="standard"
+              placeholder="Search"
+              sx={{ paddingBlock: "1rem" }}
+              onChange={handleSearch}
+              ref={searchRef}
+            />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                gap: "1rem",
+                justifyContent: "center",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => navigate("/conversations")}
+              >
+                <IconButton sx={{ p: 0 }}>
+                  <Badge color="error" badgeContent={0} max={9}>
+                    <Avatar sx={{ backgroundColor: "white" }}>
+                      <ChatIcon color="primary" />
+                    </Avatar>
+                  </Badge>
+                </IconButton>
+                <Typography fontWeight={500}>Conversations</Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => navigate("/notifications")}
+              >
+                <IconButton sx={{ p: 0 }}>
+                  <Badge color="error" badgeContent={unread} max={9}>
+                    <Avatar sx={{ backgroundColor: "white" }}>
+                      <NotificationsIcon color="primary" />
+                    </Avatar>
+                  </Badge>
+                </IconButton>
+                <Typography fontWeight={500}>Notifications</Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  cursor: "pointer",
+                }}
+              >
+                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                  <Avatar
+                    sx={{ bgcolor: "gray" }}
+                    alt={user?.firstName}
+                    src={user?.profilePicture}
+                  />
+                </IconButton>
+                <Typography fontWeight={500}>Profile</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Grow>
       </AppBar>
       <NotificationPanel
         handleNotificationClose={handleCloseNotification}

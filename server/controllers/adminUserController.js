@@ -152,9 +152,9 @@ export const getPostDetails = async (req, res) => {
 
 export const getExcelReport = async (req, res) => {
   try {
-    console.log("here")
     const year = new Date().getFullYear()
     const month = req.query.month || new Date().getMonth()
+    console.log(month)
     const postDetails = await getAllPostDetails(year, month)
     let data = [["Date", "Posts with media", "Posts without media"]]
     for (let item of postDetails) {

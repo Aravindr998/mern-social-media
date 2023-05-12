@@ -187,22 +187,24 @@ const Chat = () => {
               )}
             </Box>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              width: "12%",
-              marginRight: 2,
-            }}
-          >
-            <IconButton onClick={handleVideoCall}>
-              <VideoCallIcon color="primary" />
-            </IconButton>
-            <IconButton>
-              <CallIcon fontSize="small" color="primary" />
-            </IconButton>
-          </Box>
+          {!messages?.messages?.isGroupChat && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "12%",
+                marginRight: 2,
+              }}
+            >
+              <IconButton onClick={handleVideoCall}>
+                <VideoCallIcon color="primary" />
+              </IconButton>
+              <IconButton>
+                <CallIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          )}
         </Box>
         <Box
           sx={{

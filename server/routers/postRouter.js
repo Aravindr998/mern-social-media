@@ -21,6 +21,7 @@ import {
   savePost,
   getSavedPosts,
   unSavePost,
+  getDiscoverPosts,
 } from "../controllers/postController.js"
 import {} from "../helpers/postHelper.js"
 import upload from "../middlewares/multerConfig.js"
@@ -66,5 +67,7 @@ router.patch("/save", isUserLoggedin, savePost)
 router.get("/saved/posts", isUserLoggedin, getSavedPosts)
 
 router.patch("/unsave", isUserLoggedin, unSavePost)
+
+router.get("/discover/posts", isUserLoggedin, getDiscoverPosts)
 
 export default router
