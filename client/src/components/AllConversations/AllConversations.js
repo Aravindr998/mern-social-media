@@ -14,6 +14,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material"
 import Conversation from "../Conversation/Conversation"
 import { useDispatch, useSelector } from "react-redux"
@@ -33,6 +34,8 @@ const AllConversations = () => {
   const { conversationId } = useParams()
   const conversations = useSelector((state) => state.conversations)
   const auth = useSelector((state) => state.auth)
+  const matches = useMediaQuery("(max-width: 600px)")
+
   const [search, setSearch] = useState("")
   const [result, setResult] = useState([])
   const [open, setOpen] = useState(false)
@@ -40,9 +43,23 @@ const AllConversations = () => {
   const [members, setMembers] = useState([])
   const [name, setName] = useState("")
   const [image, setImage] = useState("/images/user.png")
+  const [show, setShow] = useState(false)
   const fileRef = useRef()
 
   const [nameError, setNameError] = useState("")
+
+  useEffect(() => {
+    if (matches) {
+      if (!conversationId) {
+        setShow(true)
+      } else {
+        setShow(false)
+      }
+    } else {
+      setShow(true)
+    }
+  }, [matches, conversationId])
+  console.log(show)
 
   useEffect(() => {
     ;(async () => {
@@ -192,56 +209,60 @@ const AllConversations = () => {
         }}
       >
         {conversationId ? <Outlet /> : <SelectChat />}
-        <Box
-          sx={{
-            width: { xs: "100%", sm: "30%" },
-            height: "90%",
-            borderLeft: "solid 1px #DFDFDF",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              marginBottom: "1rem",
-              position: "relative",
-            }}
-          >
-            <TextField
-              placeholder="New Conversation"
-              sx={{ width: "90%" }}
-              variant="standard"
-              value={search}
-              onChange={handleSearch}
-            />
-            {search && (
+        {show && (
+          <>
+            <Box
+              sx={{
+                width: { xs: "100%", sm: "30%" },
+                height: "90%",
+                borderLeft: "solid 1px #DFDFDF",
+              }}
+            >
               <Box
                 sx={{
-                  position: "absolute",
-                  backgroundColor: "white",
-                  top: 32,
-                  left: 0,
-                  right: 0,
-                  zIndex: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  marginBottom: "1rem",
+                  position: "relative",
                 }}
               >
-                {searchResult}
+                <TextField
+                  placeholder="New Conversation"
+                  sx={{ width: "90%" }}
+                  variant="standard"
+                  value={search}
+                  onChange={handleSearch}
+                />
+                {search && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      backgroundColor: "white",
+                      top: 32,
+                      left: 0,
+                      right: 0,
+                      zIndex: 2,
+                    }}
+                  >
+                    {searchResult}
+                  </Box>
+                )}
               </Box>
-            )}
-          </Box>
-          {conversationsList}
-        </Box>
-        <Tooltip title="Create Group Conversation" placement="left">
-          <Fab
-            size="medium"
-            color="primary"
-            aria-label="add"
-            sx={{ position: "fixed", bottom: 45, right: 35 }}
-            onClick={handleClickOpen}
-          >
-            <AddIcon />
-          </Fab>
-        </Tooltip>
+              {conversationsList}
+            </Box>
+            <Tooltip title="Create Group Conversation" placement="left">
+              <Fab
+                size="medium"
+                color="primary"
+                aria-label="add"
+                sx={{ position: "fixed", bottom: 45, right: 35 }}
+                onClick={handleClickOpen}
+              >
+                <AddIcon />
+              </Fab>
+            </Tooltip>
+          </>
+        )}
       </Paper>
       <Dialog
         open={open}

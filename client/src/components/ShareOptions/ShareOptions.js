@@ -3,9 +3,11 @@ import {
   Avatar,
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Divider,
   FormControl,
@@ -13,6 +15,7 @@ import {
   Menu,
   MenuItem,
   Select,
+  Stack,
   TextField,
   Typography,
   alpha,
@@ -26,6 +29,7 @@ import { useDispatch, useSelector } from "react-redux"
 import SidePopup from "../SidePopup/SidePopup"
 import { addPost } from "../../features/posts/postSlice"
 import { socket } from "../../socket"
+import { fetchCoversations } from "../../features/conversations/conversationSlice"
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -72,6 +76,8 @@ const StyledMenu = styled((props) => (
 
 const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
   const auth = useSelector((state) => state.auth)
+  const conversations = useSelector((state) => state.conversations)
+  const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
   const [openDialog, setOpenDialog] = useState(false)
   const [description, setDescription] = useState("")
@@ -82,6 +88,8 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
   const [message, setMessage] = useState("")
   const [open, setOpen] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [openConversation, setOpenConversation] = useState(false)
+  const [checked, setChecked] = useState([])
   useEffect(() => {
     setOpen(Boolean(anchorEl))
   }, [anchorEl])
@@ -159,6 +167,43 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
       console.log(error)
     }
   }
+  const handleShareAsMessage = async () => {
+    try {
+      setOpenConversation(true)
+      dispatch(fetchCoversations())
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const handleCloseConversation = async () => {
+    setOpenConversation(false)
+    setChecked([])
+  }
+  const handleCheckboxChange = (e) => {
+    if (e.target.checked) {
+      setChecked((prevState) => {
+        return [...prevState, e.target.value]
+      })
+    } else {
+      setChecked((prevState) =>
+        prevState.filter((value) => value !== e.target.value)
+      )
+    }
+  }
+  const handleSharePostLink = async () => {
+    try {
+      const { data } = await axios.patch(
+        "/api/conversation/share",
+        { checked, postId },
+        { headers: { Authorization: auth } }
+      )
+      handleCloseConversation()
+      data.forEach((item) => socket.emit("newMessage", item))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       <StyledMenu
@@ -174,7 +219,7 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
           <PostAddIcon />
           Share as post
         </MenuItem>
-        <MenuItem onClick={handleClose} disableRipple>
+        <MenuItem onClick={handleShareAsMessage} disableRipple>
           <ThreePIcon />
           Share as message
         </MenuItem>
@@ -306,6 +351,63 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
       </Dialog>
       <SidePopup message={message} show={error} type={"error"} />
       <SidePopup message={"Post saved"} show={saved} type={"success"} />
+      <Dialog
+        open={openConversation}
+        onClose={handleCloseConversation}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Select A Conversation"}
+        </DialogTitle>
+        <DialogContent>
+          <Box>
+            <Stack spacing={2}>
+              {conversations?.conversations?.map((details) => {
+                let senderName =
+                  details?.users[0]?._id !== user?._id
+                    ? details?.users[0]?.username
+                    : details?.users[1]?.username
+                let profilePicture = details.isGroupChat
+                  ? details.groupChatImage
+                  : details?.users[0]?._id !== user?._id
+                  ? details?.users[0]?.profilePicture
+                  : details?.users[1]?.profilePicture
+                return (
+                  <Box display={"flex"} justifyContent={"space-between"}>
+                    <Box
+                      key={details._id}
+                      display={"flex"}
+                      alignItems={"center"}
+                    >
+                      <Avatar
+                        src={profilePicture}
+                        sx={{ marginRight: "0.75rem" }}
+                      />
+                      <Typography fontWeight={500}>
+                        {details?.isGroupChat ? details?.chatName : senderName}
+                      </Typography>
+                    </Box>
+                    <Checkbox
+                      color="primary"
+                      onChange={handleCheckboxChange}
+                      value={details._id}
+                    />
+                  </Box>
+                )
+              })}
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConversation} color="error">
+            Cancel
+          </Button>
+          <Button onClick={handleSharePostLink} autoFocus>
+            Share
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

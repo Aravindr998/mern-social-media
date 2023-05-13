@@ -47,6 +47,10 @@ import AdminElitePage from "./pages/AdminElitePage"
 import AdminPaymentsPage from "./pages/AdminPaymentsPage"
 import VideoCall from "./components/VideoCall/VideoCall"
 import LiveStream from "./components/LiveStream/LiveStream"
+import EnterEmailPage from "./pages/EnterEmailPage"
+import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword"
+import ConfirmPasswordPage from "./pages/ConfirmPasswordPage"
+import EmailOtpPage from "./pages/EmailOtpPage"
 
 function App() {
   const dispatch = useDispatch()
@@ -178,6 +182,12 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/signup/otp" element={<OtpPage />} />
+            <Route path="/login/identify" element={<EnterEmailPage />} />
+            <Route path="/login/email/otp/:userId" element={<EmailOtpPage />} />
+            <Route
+              path="/login/password/confirm"
+              element={<ConfirmPasswordPage />}
+            />
           </Route>
         </Routes>
         <Notification

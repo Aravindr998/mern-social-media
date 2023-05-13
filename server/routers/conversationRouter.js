@@ -10,6 +10,7 @@ import {
   removeUser,
   searchUsers,
   editConversation,
+  sharePostAsMessage,
 } from "../controllers/conversationController.js"
 import upload from "../middlewares/groupChatConfig.js"
 
@@ -42,5 +43,7 @@ router.patch(
   upload.single("groupImage"),
   editConversation
 )
+
+router.patch("/share", isUserLoggedin, sharePostAsMessage)
 
 export default router

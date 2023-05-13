@@ -10,6 +10,10 @@ import {
   authenticateGoogle,
   failedGoogleAuthentication,
   googleAuthenticate,
+  verifyUser,
+  checkToken,
+  checkTempToken,
+  resendEmailOtp,
 } from "../controllers/authController.js"
 import {
   validateDetails,
@@ -21,6 +25,8 @@ import {
   editUser,
   getFriendsList,
   getOnlineUsers,
+  getUser,
+  changePassword,
 } from "../controllers/userController.js"
 import "../auth/localStrategy.js"
 import "../auth/auth.js"
@@ -69,5 +75,15 @@ router.get(
 router.get("/auth/google/callback", googleAuthenticate)
 
 router.get("/auth/google/failure", failedGoogleAuthentication)
+
+router.get("/email/identify", getUser)
+
+router.patch("/email/otp/verify", verifyUser)
+
+router.get("/email/otp/resend", resendEmailOtp)
+
+router.patch("/user/password", checkToken, changePassword)
+
+router.get("/verify", checkTempToken)
 
 export default router

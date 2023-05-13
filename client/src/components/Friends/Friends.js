@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Card,
   CardContent,
@@ -7,21 +7,41 @@ import {
   Box,
   Avatar,
   Typography,
+  Button,
 } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchFriends } from "../../features/friends/friendsSlice"
+import {
+  fetchFriends,
+  removeFriends,
+} from "../../features/friends/friendsSlice"
 import { useNavigate } from "react-router-dom"
 import { useTheme } from "@emotion/react"
+import axios from "../../axios"
 
 const Friends = () => {
   const dispatch = useDispatch()
   const friends = useSelector((state) => state.friends)
   const navigate = useNavigate()
   const theme = useTheme()
+  const auth = useSelector((state) => state.auth)
   useEffect(() => {
     dispatch(fetchFriends())
   }, [])
   const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
+
+  const handleUnfriend = async (friendId) => {
+    console.log(friendId)
+    try {
+      await axios.patch(
+        "/api/friend/change",
+        { id: friendId },
+        { headers: { Authorization: auth } }
+      )
+      dispatch(removeFriends(friendId))
+    } catch (error) {
+      console.log(error)
+    }
+  }
   let allFriends = (
     <>
       <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
@@ -57,14 +77,32 @@ const Friends = () => {
             padding: "0.5rem",
             borderRadius: "0.5rem",
             transition: "background-color 0.3s",
+            justifyContent: "space-between",
           }}
-          onClick={() => navigate(`/profile/${friend.username}`)}
           key={friend._id}
         >
-          <Avatar sx={{ marginRight: "0.5rem" }} src={friend.profilePicture} />
-          <Typography fontSize={"0.9rem"} fontWeight={500}>
-            {friend.username}
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
+            onClick={() => navigate(`/profile/${friend.username}`)}
+          >
+            <Avatar
+              sx={{ marginRight: "0.5rem" }}
+              src={friend.profilePicture}
+            />
+            <Typography fontSize={"0.9rem"} fontWeight={500}>
+              {friend.username}
+            </Typography>
+          </Box>
+          <Button
+            color="error"
+            variant="outlined"
+            onClick={() => handleUnfriend(friend._id)}
+          >
+            Unfriend
+          </Button>
         </Box>
       )
     })

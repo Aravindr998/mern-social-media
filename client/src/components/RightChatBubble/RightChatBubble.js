@@ -1,9 +1,13 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Box, Typography } from "@mui/material"
 import { useTheme } from "@emotion/react"
+import { Link, useNavigate } from "react-router-dom"
+import { baseURL } from "../../constants/constant"
 
-const RightChatBubble = ({ message }) => {
+const RightChatBubble = ({ message, link }) => {
   const theme = useTheme()
+  const navigate = useNavigate()
+
   return (
     <Box
       sx={{
@@ -12,17 +16,50 @@ const RightChatBubble = ({ message }) => {
         justifyContent: "flex-end",
       }}
     >
-      <Typography
-        sx={{
-          backgroundColor: theme.palette.primary.main,
-          display: "inline",
-          padding: "0.5rem 1rem 0.5rem 1rem",
-          borderRadius: "0.5rem",
-          color: "white",
-        }}
-      >
-        {message}
-      </Typography>
+      {!link ? (
+        <Box
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            display: "inline-block",
+            borderRadius: "0.5rem",
+            padding: "0.5rem 1rem 0.5rem 1rem",
+          }}
+        >
+          <Typography
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              display: "inline",
+              color: "white",
+            }}
+          >
+            {message}
+          </Typography>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            display: "inline-block",
+            borderRadius: "0.5rem",
+            padding: "0.5rem 1rem 0.5rem 1rem",
+          }}
+        >
+          <Typography
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              display: "inline",
+              color: "white",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              navigate(message)
+            }}
+          >
+            {`${baseURL}${message}`}
+          </Typography>
+        </Box>
+      )}
     </Box>
   )
 }

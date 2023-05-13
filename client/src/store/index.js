@@ -14,6 +14,7 @@ import friendsReducer from "../features/friends/friendsSlice"
 import appearanceReducer from "../features/appearance/appearanceSlice"
 import offerReducer from "../features/offer/offerSlice"
 import adminDashboardReducer from "../features/adminDashboard/adminDashboardSlice"
+import tempAuthReducer from "../features/tempAuth/tempAuth"
 
 const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ const store = configureStore({
     appearance: appearanceReducer,
     offer: offerReducer,
     adminDashboard: adminDashboardReducer,
+    tempAuth: tempAuthReducer,
   },
 })
 

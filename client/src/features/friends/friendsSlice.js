@@ -21,6 +21,13 @@ export const fetchFriends = createAsyncThunk(
 const friendsSlice = createSlice({
   name: "friends",
   initialState,
+  reducers: {
+    removeFriends: (state, action) => {
+      state.friends = state.friends.filter(
+        (item) => item._id.toString() !== action.payload.toString()
+      )
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(fetchFriends.pending, (state) => {
       state.loading = true
@@ -39,3 +46,5 @@ const friendsSlice = createSlice({
 })
 
 export default friendsSlice.reducer
+
+export const { removeFriends } = friendsSlice.actions

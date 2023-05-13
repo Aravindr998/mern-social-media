@@ -15,6 +15,10 @@ const messageSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Users",
     },
+    isLink: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

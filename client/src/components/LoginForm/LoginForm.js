@@ -163,7 +163,11 @@ function LoginForm() {
             helperText={validate.password}
           />
           <Grid item xs>
-            <Link href="#" variant="body2" sx={{ fontWeight: "500" }}>
+            <Link
+              variant="body2"
+              sx={{ fontWeight: "500", cursor: "pointer" }}
+              onClick={() => navigate("/login/identify")}
+            >
               Forgot password?
             </Link>
           </Grid>

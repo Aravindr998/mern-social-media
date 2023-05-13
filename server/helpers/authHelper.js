@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken"
+import nodemailer from "nodemailer"
 
 const isNameValid = (value) => {
   const name = value?.trim()
@@ -166,6 +167,44 @@ export const validateUpdatedDetails = (user) => {
     errors.email = "Please enter a valid email"
   }
 
+  const isValid = !Object.keys(errors).length
+  return { isValid, errors }
+}
+
+export const sendMail = async (mail, otp) => {
+  try {
+    let transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD,
+      },
+    })
+    let detail = {
+      from: process.env.NODEMAILER_EMAIL,
+      to: mail,
+      subject: "VIBEE OTP",
+      text: `Your OTP for resetting password is ${otp}`,
+    }
+    console.log("sending")
+    let info = await transporter.sendMail(detail)
+    console.log("Message sent: %s", info.messageId)
+    return info
+  } catch (error) {
+    throw error
+  }
+}
+
+export const validatePassword = (user) => {
+  const errors = {}
+  if (!isPasswordValid(user.password)) {
+    errors.password = "Please enter a valid password"
+  }
+  if (!isPasswordValid(user.confirmPassword)) {
+    errors.confirmPassword = "Please enter a valid password"
+  } else if (!isMatch(user.password, user.confirmPassword)) {
+    errors.confirmPassword = "Passwords do not match"
+  }
   const isValid = !Object.keys(errors).length
   return { isValid, errors }
 }

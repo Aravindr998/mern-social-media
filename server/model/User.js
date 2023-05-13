@@ -92,6 +92,9 @@ const userSchema = new mongoose.Schema(
       enum: ["inactive", "active", "cancelled"],
       default: "inactive",
     },
+    otp: {
+      type: String,
+    },
   },
   { timestamps: true }
 )

@@ -20,6 +20,7 @@ import SidePopup from "../SidePopup/SidePopup"
 import { socket } from "../../socket"
 import GroupChatDetail from "../GroupChatDetails/GroupChatDetail"
 import { fetchOnlineUsers } from "../../features/onlineUsersSlice/onlineUsersSlice"
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 
 const Chat = () => {
   const [content, setContent] = useState("")
@@ -89,7 +90,13 @@ const Chat = () => {
     if (messages?.messages?.messages.length) {
       chatBubbles = messages?.messages?.messages?.map((item, index, array) => {
         if (item.sender._id === user?._id) {
-          return <RightChatBubble message={item.content} key={item._id} />
+          return (
+            <RightChatBubble
+              message={item.content}
+              key={item._id}
+              link={item.isLink}
+            />
+          )
         } else {
           return (
             <React.Fragment key={item._id}>
@@ -102,7 +109,11 @@ const Chat = () => {
                   {item.sender.username}
                 </Typography>
               )}
-              <LeftChatBubble message={item.content} key={item._id} />
+              <LeftChatBubble
+                message={item.content}
+                key={item._id}
+                link={item.isLink}
+              />
             </React.Fragment>
           )
         }
@@ -155,9 +166,9 @@ const Chat = () => {
     <>
       <Box
         sx={{
-          width: "70%",
+          width: { xs: "100%", sm: "70%" },
           height: "90%",
-          display: { xs: "none", sm: "flex" },
+          display: "flex",
           flexDirection: "column",
         }}
       >
@@ -167,44 +178,56 @@ const Chat = () => {
             height: "10%",
             paddingLeft: "10px",
             display: "flex",
-            justifyContent: "space-between",
+            // justifyContent: "space-between",
             borderBottom: "solid 1px #DFDFDF",
           }}
         >
+          <IconButton onClick={() => navigate("/conversations")}>
+            <ArrowBackIcon />
+          </IconButton>
           <Box
-            sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
-            onClick={profileHandler}
+            sx={{
+              width: "100%",
+              paddingLeft: "10px",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
           >
-            <Avatar src={profilePicture} />
-            <Box sx={{ paddingLeft: "10px" }}>
-              <Typography sx={{ fontWeight: "500" }}>
-                {messages?.messages?.isGroupChat
-                  ? messages?.messages?.chatName
-                  : senderName}
-              </Typography>
-              {isOnline && !messages?.messages?.isGroupChat && (
-                <Typography sx={{ fontSize: ".75rem" }}>online</Typography>
-              )}
-            </Box>
-          </Box>
-          {!messages?.messages?.isGroupChat && (
             <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                width: "12%",
-                marginRight: 2,
-              }}
+              sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+              onClick={profileHandler}
             >
-              <IconButton onClick={handleVideoCall}>
-                <VideoCallIcon color="primary" />
-              </IconButton>
-              <IconButton>
-                <CallIcon fontSize="small" color="primary" />
-              </IconButton>
+              <Avatar src={profilePicture} />
+              <Box sx={{ paddingLeft: "10px" }}>
+                <Typography sx={{ fontWeight: "500" }}>
+                  {messages?.messages?.isGroupChat
+                    ? messages?.messages?.chatName
+                    : senderName}
+                </Typography>
+                {isOnline && !messages?.messages?.isGroupChat && (
+                  <Typography sx={{ fontSize: ".75rem" }}>online</Typography>
+                )}
+              </Box>
             </Box>
-          )}
+            {!messages?.messages?.isGroupChat && (
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "12%",
+                  marginRight: 2,
+                }}
+              >
+                <IconButton onClick={handleVideoCall}>
+                  <VideoCallIcon color="primary" />
+                </IconButton>
+                <IconButton>
+                  <CallIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
         </Box>
         <Box
           sx={{

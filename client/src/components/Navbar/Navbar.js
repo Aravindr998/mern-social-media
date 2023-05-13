@@ -35,6 +35,8 @@ import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
 import LogoutIcon from "@mui/icons-material/Logout"
 import NotificationPanel from "../NotificationPanel/NotificationPanel"
+import ExploreIcon from "@mui/icons-material/Explore"
+import VerifiedIcon from "@mui/icons-material/Verified"
 import ChatPanel from "../ChatPanel/ChatPanel"
 import {
   changeReadState,
@@ -197,9 +199,11 @@ function Navbar() {
   const handleOpenMenu = () => {
     if (height === "0rem") {
       setPadding("1rem")
-      setHeight("16rem")
+      setHeight("23rem")
     } else {
-      setPadding("0rem")
+      setTimeout(() => {
+        setPadding("0rem")
+      }, 100)
       setHeight("0rem")
     }
     setChecked((prevState) => !prevState)
@@ -394,81 +398,119 @@ function Navbar() {
             </IconButton>
           </Box>
         </Toolbar>
-        <Grow in={checked}>
-          <Box
-            width={"100%"}
-            padding={padding}
-            sx={{ height, transition: "height 0.3s" }}
-          >
-            <TextField
-              fullWidth
-              variant="standard"
-              placeholder="Search"
-              sx={{ paddingBlock: "1rem" }}
-              onChange={handleSearch}
-              ref={searchRef}
-            />
+        <Grow
+          in={checked}
+          style={{ transformOrigin: "0 0 0" }}
+          {...(checked ? { timeout: 1000 } : {})}
+        >
+          <Box>
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: "1rem",
-                justifyContent: "center",
-              }}
+              width={"100%"}
+              padding={padding}
+              sx={{ height, transition: "height 0.3s" }}
             >
+              <TextField
+                fullWidth
+                variant="standard"
+                placeholder="Search"
+                sx={{ paddingBlock: "1rem" }}
+                onChange={handleSearch}
+                ref={searchRef}
+              />
               <Box
                 sx={{
                   display: "flex",
-                  alignItems: "center",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
                   gap: "1rem",
-                  cursor: "pointer",
+                  justifyContent: "center",
                 }}
-                onClick={() => navigate("/conversations")}
               >
-                <IconButton sx={{ p: 0 }}>
-                  <Badge color="error" badgeContent={0} max={9}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => navigate("/conversations")}
+                >
+                  <IconButton sx={{ p: 0 }}>
+                    <Badge color="error" badgeContent={0} max={9}>
+                      <Avatar sx={{ backgroundColor: "white" }}>
+                        <ChatIcon color="primary" />
+                      </Avatar>
+                    </Badge>
+                  </IconButton>
+                  <Typography fontWeight={500}>Conversations</Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => navigate("/notifications")}
+                >
+                  <IconButton sx={{ p: 0 }}>
+                    <Badge color="error" badgeContent={unread} max={9}>
+                      <Avatar sx={{ backgroundColor: "white" }}>
+                        <NotificationsIcon color="primary" />
+                      </Avatar>
+                    </Badge>
+                  </IconButton>
+                  <Typography fontWeight={500}>Notifications</Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => navigate("/discover")}
+                >
+                  <IconButton sx={{ p: 0 }}>
                     <Avatar sx={{ backgroundColor: "white" }}>
-                      <ChatIcon color="primary" />
+                      <ExploreIcon color="primary" />
                     </Avatar>
-                  </Badge>
-                </IconButton>
-                <Typography fontWeight={500}>Conversations</Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                  cursor: "pointer",
-                }}
-                onClick={() => navigate("/notifications")}
-              >
-                <IconButton sx={{ p: 0 }}>
-                  <Badge color="error" badgeContent={unread} max={9}>
+                  </IconButton>
+                  <Typography fontWeight={500}>Discover</Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => navigate("/elite/plan")}
+                >
+                  <IconButton sx={{ p: 0 }}>
                     <Avatar sx={{ backgroundColor: "white" }}>
-                      <NotificationsIcon color="primary" />
+                      <VerifiedIcon color="primary" />
                     </Avatar>
-                  </Badge>
-                </IconButton>
-                <Typography fontWeight={500}>Notifications</Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "1rem",
-                  cursor: "pointer",
-                }}
-              >
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  <Avatar
-                    sx={{ bgcolor: "gray" }}
-                    alt={user?.firstName}
-                    src={user?.profilePicture}
-                  />
-                </IconButton>
-                <Typography fontWeight={500}>Profile</Typography>
+                  </IconButton>
+                  <Typography fontWeight={500}>Vibee Elite</Typography>
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "1rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <Avatar
+                      sx={{ bgcolor: "gray" }}
+                      alt={user?.firstName}
+                      src={user?.profilePicture}
+                    />
+                  </IconButton>
+                  <Typography fontWeight={500}>Profile</Typography>
+                </Box>
               </Box>
             </Box>
           </Box>

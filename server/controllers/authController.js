@@ -4,11 +4,13 @@ import {
   validateRegister,
   createToken,
   validateLoginUser,
+  sendMail,
 } from "../helpers/authHelper.js"
 import passport from "passport"
 import { checkOTPAsync, sendOTP } from "../helpers/otpHelper.js"
 import adminModel from "../model/Admin.js"
 import paymentModel from "../model/Payment.js"
+import jwt from "jsonwebtoken"
 
 export const validateUser = async (req, res, next) => {
   const { errors, isValid } = validateRegister(req.body)
@@ -64,7 +66,7 @@ export const googleAuthenticate = (req, res, next) => {
         throw err
       }
       const token = createToken(user._id, user.email)
-      res.cookie("token", token)
+      res.cookie("googleToken", token)
       res.redirect(`http://localhost:3000`)
     } catch (error) {
       console.log(error)
@@ -191,7 +193,7 @@ export const loginUser = (req, res) => {
 export const authenticateGoogle = async (req, res) => {
   try {
     const token = createToken(req.user._id, req.user.email)
-    res.cookie("token", token)
+    res.cookie("googleToken", token)
     res.redirect(`http://localhost:3000`)
   } catch (error) {
     console.log(error)
@@ -200,4 +202,79 @@ export const authenticateGoogle = async (req, res) => {
 
 export const failedGoogleAuthentication = async (req, res) => {
   res.redirect("http://localhost:3000/login?authentication=failed")
+}
+
+export const verifyUser = async (req, res) => {
+  try {
+    const { userId, otp } = req.body
+    const user = await userModel.findById(userId)
+    if (!user) return res.status(401).json({ message: "Invalid user id" })
+    console.log(user.otp)
+    console.log(otp)
+    if (otp == user.otp) {
+      await userModel.findByIdAndUpdate(userId, { $unset: { otp } })
+      const details = { email: user.email }
+      const token = jwt.sign(details, process.env.TOKEN_SECRET_KEY)
+      res.json({ success: true, token })
+    } else {
+      res.status(400).json({ success: false })
+    }
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
+}
+
+export const checkToken = async (req, res, next) => {
+  try {
+    const accessToken = req.headers["authorization"]
+    console.log(accessToken)
+    if (!accessToken) {
+      return res.status(401).json({ message: "Invalid access token" })
+    }
+    const token = accessToken.split(" ")[1]
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET_KEY)
+    req.user = verified
+    next()
+  } catch (error) {
+    console.log(error)
+    res.status(401).json({ message: "Token is not valid" })
+  }
+}
+
+export const checkTempToken = async (req, res) => {
+  try {
+    const accessToken = req.headers["Authorization"]
+    if (!accessToken) {
+      console.log("no access token")
+      return res.status(401).json({ message: "Invalid access token" })
+    }
+    const token = accessToken.split(" ")[1]
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET_KEY)
+    req.user = verified
+    res.json({ success: true })
+  } catch (error) {
+    console.log(error)
+    res.status(401).json({ message: "Token is not valid" })
+  }
+}
+
+export const resendEmailOtp = async (req, res) => {
+  try {
+    const { userId } = req.query
+    const user = await userModel.findById(userId)
+    if (!user) return res.status(401).json({ message: "Invalid user id" })
+    const otp = Math.floor(100000 + Math.random() * 900000)
+    user.otp = otp
+    await user.save()
+    await sendMail(user.email, otp)
+    res.json({ success: true })
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, please try again later" })
+  }
 }

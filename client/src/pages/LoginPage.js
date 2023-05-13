@@ -14,11 +14,16 @@ function LoginPage() {
   const dispatch = useDispatch()
   useEffect(() => {
     document.title = "Vibee | Login"
-    const token = document.cookie.split("=")[1]
+    const token = document.cookie
+      ?.split("; ")
+      ?.find((row) => row.startsWith("googleToken"))
+      ?.split("=")[1]
     console.log(token)
     if (token) {
+      console.log("recieved token")
       localStorage.setItem(TOKEN_KEY, `Bearer ${token}`)
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+      document.cookie =
+        "googleToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
       dispatch(setAuth())
       navigate("/")
     }

@@ -216,3 +216,33 @@ export const editConversation = async (req, res) => {
       .json({ message: "Something went wrong, please try again later" })
   }
 }
+
+export const sharePostAsMessage = async (req, res) => {
+  try {
+    const { id } = req.user
+    const { checked, postId } = req.body
+    const content = `/post/${postId}`
+    const data = []
+    for (let conversationId of checked) {
+      const conversation = await conversationModel.findById(conversationId)
+      if (!conversation.users.includes(id))
+        return res.status(403).json({ message: "Not in the group" })
+      const message = new messageModel({
+        sender: id,
+        content,
+        conversation: conversationId,
+        isLink: true,
+      })
+      await message.save()
+      await conversationModel.findByIdAndUpdate(conversationId, {
+        "latestMessage.sender": id,
+        "latestMessage.message": content,
+      })
+      await message.populate("sender")
+      data.push(message)
+    }
+    res.status(201).json(data)
+  } catch (error) {
+    console.log(error)
+  }
+}

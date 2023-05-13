@@ -1,9 +1,15 @@
-import { checkDetails, validateUpdatedDetails } from "../helpers/authHelper.js"
+import {
+  checkDetails,
+  sendMail,
+  validateUpdatedDetails,
+  validatePassword,
+} from "../helpers/authHelper.js"
 import { getOnlineUsersFromFriends } from "../helpers/userHelper.js"
 import userModel from "../model/User.js"
 import notificationModel from "../model/Notifications.js"
 import paymentModel from "../model/Payment.js"
 import path from "path"
+import jwt from "jsonwebtoken"
 
 export const validateDetails = async (req, res, next) => {
   try {
@@ -105,8 +111,10 @@ export const setFriend = async (req, res) => {
   try {
     const { id } = req.user
     const friendId = req.body.id
+    console.log(id, friendId)
     const user = await userModel.findById(id)
     if (user.friends.includes(friendId)) {
+      console.log("here")
       await userModel.findByIdAndUpdate(id, {
         $pull: { friends: friendId },
       })
@@ -227,6 +235,52 @@ export const getOnlineUsers = async (req, res) => {
     const { id } = req.user
     const onlineUsers = await getOnlineUsersFromFriends(id)
     return res.json(onlineUsers)
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, Please try again later" })
+  }
+}
+
+export const getUser = async (req, res) => {
+  try {
+    const { email } = req.query
+    if (
+      !email.trim() ||
+      !/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
+    )
+      return res.status(400).json({ email: "Please provide a valid email" })
+    const user = await userModel.findOne({ email })
+    if (!user)
+      return res
+        .status(400)
+        .json({ email: "The email provided is not registered" })
+    const otp = Math.floor(100000 + Math.random() * 900000)
+    user.otp = otp
+    await user.save()
+    sendMail(email, otp)
+    res.json({ id: user._id })
+  } catch (error) {
+    console.log(error)
+    res
+      .status(500)
+      .json({ message: "Something went wrong, Please try again later" })
+  }
+}
+
+export const changePassword = async (req, res) => {
+  try {
+    const { email } = req.user
+    console.log(req.user)
+    const { password } = req.body
+    const { isValid, errors } = validatePassword(req.body)
+    if (!isValid) return res.status(400).json(errors)
+    const user = await userModel.findOne({ email })
+    if (!user) return res.status(401).json({ message: "Invalid token" })
+    user.password = password
+    await user.save()
+    res.json({ success: true })
   } catch (error) {
     console.log(error)
     res
