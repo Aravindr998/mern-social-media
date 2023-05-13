@@ -18,7 +18,6 @@ function CircularProgressWithLabel(props) {
         zIndex: 2000,
       }}
     >
-      <CircularProgress variant="determinate" {...props} />
       <Box
         sx={{
           top: 0,
@@ -31,6 +30,12 @@ function CircularProgressWithLabel(props) {
           justifyContent: "center",
         }}
       >
+        <CircularProgress
+          sx={{
+            position: "absolute",
+          }}
+          size={70}
+        />
         <Typography
           variant="caption"
           component="div"

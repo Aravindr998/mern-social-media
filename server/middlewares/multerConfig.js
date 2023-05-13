@@ -1,6 +1,8 @@
 import multer from "multer"
 import path from "path"
 
+const maxSize = 10 * 1000 * 1000
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./public/posts")
@@ -13,6 +15,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
+  limits: { fileSize: maxSize },
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|webp|mp4|avi|mov|flv|wmv/
     const extname = filetypes.test(

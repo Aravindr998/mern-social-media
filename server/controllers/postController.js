@@ -14,6 +14,8 @@ import {
 } from "../helpers/postHelper.js"
 import mongoose from "mongoose"
 import notificationModel from "../model/Notifications.js"
+import { v2 as cloudinary } from "cloudinary"
+import { promises as fs } from "fs"
 
 export const createPost = async (req, res) => {
   try {
@@ -24,13 +26,28 @@ export const createPost = async (req, res) => {
       if (!isValid) {
         return res.status(400).json({ success: false, errors })
       }
-      const path = req.file.path.slice(7)
-      const filePath = process.env.BASE_URL + path
+      // const path = req.file.path.slice(7)
+      // const filePath = process.env.BASE_URL + path
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      })
+      const data = await cloudinary.uploader.upload(req.file.path, {
+        public_id: "post",
+        resource_type: "auto",
+      })
+      console.log(data)
+      try {
+        await fs.unlink(req.file.path)
+      } catch (error) {
+        console.log(error)
+      }
       post = new postModel({
         createdBy: id,
         description: req.body.description,
         location: req.body.location,
-        media: filePath,
+        media: data.secure_url,
         privacy: req.body.privacy,
       })
     } else {

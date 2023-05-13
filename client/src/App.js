@@ -51,6 +51,9 @@ import EnterEmailPage from "./pages/EnterEmailPage"
 import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword"
 import ConfirmPasswordPage from "./pages/ConfirmPasswordPage"
 import EmailOtpPage from "./pages/EmailOtpPage"
+import PageNotFound from "./pages/PageNotFound"
+import ContentNotAvailable from "./pages/ContentNotAvailable"
+import PageNotFoundAdmin from "./pages/PageNotFoundAdmin"
 
 function App() {
   const dispatch = useDispatch()
@@ -177,6 +180,10 @@ function App() {
             <Route path="/room/:roomId" element={<VideoCall />} />
             <Route path="/live/:roomId" element={<LiveStream />} />
             <Route path="/discover" element={<DiscoverPage />} />
+            <Route
+              path="/content/not/available"
+              element={<ContentNotAvailable />}
+            />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />
@@ -216,6 +223,7 @@ function App() {
               <Route path="/admin/elite" element={<AdminElitePage />} />
               <Route path="/admin/payments" element={<AdminPaymentsPage />} />
             </Route>
+            <Route path="*" element={<PageNotFound />} />
           </Routes>
         </ThemeProvider>
       </div>

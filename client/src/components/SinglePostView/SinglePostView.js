@@ -78,11 +78,11 @@ const SinglePostView = () => {
         if (response) {
           if (response.status === 404) {
             console.log("requested post does not exist")
-            //redirect to page not found
+            navigate("/asdfas")
           } else if (response.status === 301) {
             navigate(`/post/${response.data.id}`)
           } else {
-            //redirect to content isn't availabe
+            navigate("/content/not/available")
           }
         } else {
           console.log(error)

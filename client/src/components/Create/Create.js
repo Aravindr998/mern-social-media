@@ -49,6 +49,7 @@ function Create() {
   const [progress, setProgress] = useState(0)
   const [showProgress, setShowProgress] = useState(false)
   const [quickDesc, setQuickDesc] = useState("")
+  const [fileType, setFileType] = useState("img")
   const handleClickOpen = () => {
     setOpen(true)
   }
@@ -202,14 +203,18 @@ function Create() {
             />
             <Typography>Photo/Video</Typography>
           </IconButton>
-          <IconButton aria-label="activity" sx={{ borderRadius: "1rem" }}>
+          <IconButton
+            aria-label="activity"
+            sx={{ borderRadius: "1rem" }}
+            onClick={() => navigate("/discover")}
+          >
             <Box
               component="img"
               sx={{ width: "1.5rem", marginRight: 1 }}
               alt="Live"
-              src="/images/winking-face.png"
+              src="/images/discover.png"
             />
-            <Typography>Feeling/Activity</Typography>
+            <Typography>Discover</Typography>
           </IconButton>
         </CardActions>
       </Card>
@@ -285,13 +290,18 @@ function Create() {
                 onChange={(e) => {
                   setImage(URL.createObjectURL(e.target.files[0]))
                   setFile(fileRef.current)
+                  if (e.target.files[0].type.split("/").shift() === "image") {
+                    setFileType("img")
+                  } else {
+                    setFileType("video")
+                  }
                 }}
               />
             </Button>
           ) : (
             <Box
               sx={{ width: "100%", height: "15rem", mt: 2, mb: 2 }}
-              component="img"
+              component={fileType}
               src={image}
             />
           )}
