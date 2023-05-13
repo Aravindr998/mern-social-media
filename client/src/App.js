@@ -61,12 +61,14 @@ function App() {
   const appearance = useSelector((state) => state.appearance)
   const theme = createTheme(defaultTheme(appearance))
   const themeAdmin = createTheme(adminTheme(appearance))
+  const location = useLocation()
   const { pathname } = useLocation()
   const [show, setShow] = useState(false)
   const [content, setContent] = useState(null)
   const [type, setType] = useState("")
   const [call, setCall] = useState(false)
   const [details, setDetails] = useState({})
+  const [currentTheme, setCurrentTheme] = useState(theme)
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)")
 
   useEffect(() => {
@@ -80,6 +82,14 @@ function App() {
       }
     }
   }, [prefersDarkMode])
+
+  useEffect(() => {
+    if (location.pathname.includes("/admin")) {
+      setCurrentTheme(themeAdmin)
+    } else {
+      setCurrentTheme(theme)
+    }
+  }, [location.pathname, appearance])
 
   const closeNotification = () => {
     setShow(false)
@@ -158,7 +168,7 @@ function App() {
   }, [pathname])
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={currentTheme}>
       <div className="App">
         <Routes>
           <Route element={<ProtectedRoutes />}>
@@ -196,6 +206,24 @@ function App() {
               element={<ConfirmPasswordPage />}
             />
           </Route>
+          <Route element={<AdminPublicRoutes />}>
+            <Route path="/admin" element={<AdminLoginPage />} />
+          </Route>
+          <Route element={<AdminProtectedRoutes />}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />}>
+              <Route path=":userId" element={<AdminUserDetails />} />
+            </Route>
+            <Route path="/admin/posts" element={<AdminPostsPage />}>
+              <Route
+                path="/admin/posts/:postId"
+                element={<AdminPostDetails />}
+              />
+            </Route>
+            <Route path="/admin/elite" element={<AdminElitePage />} />
+            <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+          </Route>
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
         <Notification
           message={content}
@@ -204,28 +232,6 @@ function App() {
           close={closeNotification}
         />
         <IncomingCall show={call} details={details} close={closeCall} />
-        <ThemeProvider theme={themeAdmin}>
-          <Routes>
-            <Route element={<AdminPublicRoutes />}>
-              <Route path="/admin" element={<AdminLoginPage />} />
-            </Route>
-            <Route element={<AdminProtectedRoutes />}>
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/admin/users" element={<AdminUsersPage />}>
-                <Route path=":userId" element={<AdminUserDetails />} />
-              </Route>
-              <Route path="/admin/posts" element={<AdminPostsPage />}>
-                <Route
-                  path="/admin/posts/:postId"
-                  element={<AdminPostDetails />}
-                />
-              </Route>
-              <Route path="/admin/elite" element={<AdminElitePage />} />
-              <Route path="/admin/payments" element={<AdminPaymentsPage />} />
-            </Route>
-            <Route path="*" element={<PageNotFound />} />
-          </Routes>
-        </ThemeProvider>
       </div>
     </ThemeProvider>
   )

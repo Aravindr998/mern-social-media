@@ -136,6 +136,13 @@ io.on("connection", (socket) => {
     })
   })
 
+  socket.on("callRejected", async (data) => {
+    const onlineUsers = await onlineUsersModel.find({ userId: data.from._id })
+    onlineUsers.forEach((item) => {
+      socket.to(item.socketId).emit("callRejected")
+    })
+  })
+
   socket.on("setOffer", async ({ callId, offer, user }) => {
     try {
       const call = await callModel.findById(callId)

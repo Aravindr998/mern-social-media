@@ -23,9 +23,11 @@ export const getAllConversations = async (req, res) => {
 
 export const createNewConversation = async (req, res) => {
   try {
+    console.log("here")
     const { id } = req.user
     let { members, isGroupChat, chatName } = req.body
-    members = JSON.parse(members)
+    console.log(members)
+    if (isGroupChat) members = JSON.parse(members)
     console.log(members)
     members.push(id)
     let conversation

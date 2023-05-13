@@ -93,6 +93,7 @@ const AllConversations = () => {
       .catch((error) => console.log(error))
   }
   const startConversation = (userId) => {
+    console.log(userId)
     axios
       .post(
         "/api/conversation/create",

@@ -48,6 +48,10 @@ const IncomingCall = ({ show, details, close }) => {
     window.open(`/room/${details._id}`, "_blank", "height=400,width=600")
     socket.emit("callAccepted", details)
   }
+  const rejectCallHandler = () => {
+    handleClose()
+    socket.emit("callRejected", details)
+  }
 
   return (
     <Dialog
@@ -89,7 +93,7 @@ const IncomingCall = ({ show, details, close }) => {
             </Fab>
           </Tooltip>
           <Tooltip title="Reject Call">
-            <Fab color="error">
+            <Fab color="error" onClick={rejectCallHandler}>
               <CallEndIcon />
             </Fab>
           </Tooltip>

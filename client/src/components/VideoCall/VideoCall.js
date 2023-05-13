@@ -1,11 +1,21 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt"
 import { useSelector } from "react-redux"
+import { socket } from "../../socket"
 
 const VideoCall = () => {
   const user = useSelector((state) => state.user)
   const { roomId } = useParams()
+
+  useEffect(() => {
+    socket.on("callRejected", () => {
+      window.close()
+    })
+    return () => {
+      socket.off("callRejected")
+    }
+  }, [])
 
   console.log(process.env.REACT_APP_ZEGOCLOUD_APPID)
 
