@@ -5,9 +5,7 @@ import {
   loadMoreDiscoverPosts,
 } from "../../features/posts/postSlice"
 import PostFeed from "../PostFeed/PostFeed"
-import { Container, CssBaseline, Typography } from "@mui/material"
-import Navbar from "../Navbar/Navbar"
-import SidePanel from "../SidePanel/SidePanel"
+import { Container, Typography } from "@mui/material"
 import InfiniteScroll from "react-infinite-scroller"
 
 const Discover = () => {

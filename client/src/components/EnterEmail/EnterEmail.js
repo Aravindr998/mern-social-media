@@ -1,3 +1,4 @@
+import React, { useState } from "react"
 import {
   Box,
   Button,
@@ -7,17 +8,11 @@ import {
   Typography,
 } from "@mui/material"
 import axios from "../../axios"
-import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useDispatch } from "react-redux"
-import { setTempAuth } from "../../features/tempAuth/tempAuth"
 
 const EnterEmail = () => {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
   const [email, setEmail] = useState("")
-  const [error, setError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
   const [emailError, setEmailError] = useState("")
   const handleChange = (e) => {
     setEmailError("")

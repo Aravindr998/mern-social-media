@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React from "react"
 import { Box, Typography } from "@mui/material"
 import { useTheme } from "@emotion/react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { baseURL } from "../../constants/constant"
 
 const RightChatBubble = ({ message, link }) => {

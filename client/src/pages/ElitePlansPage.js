@@ -15,8 +15,7 @@ import {
 import React, { useEffect, useState } from "react"
 import Navbar from "../components/Navbar/Navbar"
 import VerifiedIcon from "@mui/icons-material/Verified"
-import { useTheme } from "@emotion/react"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import SidePanel from "../components/SidePanel/SidePanel"
 import ActivePanel from "../components/ActivePanel/ActivePanel"
 import { loadStripe } from "@stripe/stripe-js"
@@ -24,7 +23,6 @@ import { Elements } from "@stripe/react-stripe-js"
 import { STRIPE_PUBLISHABLE_KEY } from "../constants/constant"
 import Checkout from "../components/Checkout/Checkout"
 import axios from "../axios"
-import { setUser } from "../features/users/userSlice"
 
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY)
 const ElitePlansPage = () => {
@@ -32,7 +30,6 @@ const ElitePlansPage = () => {
   const [sub, setSub] = useState({})
   const user = useSelector((state) => state.user)
   const auth = useSelector((state) => state.auth)
-  const dispatch = useDispatch()
   useEffect(() => {
     ;(async () => {
       try {

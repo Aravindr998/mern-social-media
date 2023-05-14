@@ -14,7 +14,6 @@ import {
   Grow,
   Menu,
   MenuItem,
-  Stack,
   TextField,
   Tooltip,
   useMediaQuery,
@@ -31,8 +30,6 @@ import { setUser } from "../../features/users/userSlice"
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import EditIcon from "@mui/icons-material/Edit"
 import InfoIcon from "@mui/icons-material/Info"
-import LightModeIcon from "@mui/icons-material/LightMode"
-import DarkModeIcon from "@mui/icons-material/DarkMode"
 import LogoutIcon from "@mui/icons-material/Logout"
 import NotificationPanel from "../NotificationPanel/NotificationPanel"
 import ExploreIcon from "@mui/icons-material/Explore"
@@ -44,6 +41,7 @@ import {
 } from "../../features/notifications/notificationSlice"
 import { changeMode } from "../../features/appearance/appearanceSlice"
 import { useTheme } from "@emotion/react"
+import DarkModeIcon from "@mui/icons-material/DarkMode"
 
 function Navbar() {
   const navigate = useNavigate()
@@ -173,17 +171,10 @@ function Navbar() {
     }
   }
 
-  const [anchorElNav, setAnchorElNav] = React.useState(null)
-  const [anchorElUser, setAnchorElUser] = React.useState(null)
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget)
-  }
+  const [anchorElUser, setAnchorElUser] = useState(null)
+
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget)
-  }
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null)
   }
 
   const handleCloseUserMenu = () => {

@@ -2,7 +2,7 @@ import React, { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchSavedPosts } from "../../features/posts/postSlice"
 import PostFeed from "../PostFeed/PostFeed"
-import { Box, Typography } from "@mui/material"
+import { Typography } from "@mui/material"
 
 const SavedPosts = () => {
   const dispatch = useDispatch()

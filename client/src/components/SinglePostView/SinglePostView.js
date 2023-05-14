@@ -32,7 +32,6 @@ import {
 } from "../../features/comments/commentSlice"
 import ShareOptions from "../ShareOptions/ShareOptions"
 import { socket } from "../../socket"
-import PostMenu from "../PostMenu/PostMenu"
 import SinglePostMenu from "../SinglePostMenu/SinglePostMenu"
 
 const SinglePostView = () => {
@@ -52,9 +51,7 @@ const SinglePostView = () => {
   const [error, setError] = useState("")
   const [comment, setComment] = useState("")
   const [anchorEl, setAnchorEl] = useState(null)
-  const [anchorElPostMenu, setAnchorElPostMenu] = useState(null)
   const [anchorElComments, setAnchorElComments] = useState(null)
-  const [show, setShow] = useState(false)
   const [openConfirmation, setOpenConfirmation] = useState(false)
   const [commentId, setCommentId] = useState("")
   const [openMenu, setOpenMenu] = useState(false)
@@ -109,15 +106,6 @@ const SinglePostView = () => {
     }
   }
 
-  //post handlers
-  const handleClick = (event) => {
-    setAnchorElPostMenu(event.currentTarget)
-  }
-  const handleClose = () => {
-    //here
-    setAnchorElPostMenu(null)
-  }
-
   //comment handlers
   const handleCommentClick = (event, id) => {
     setAnchorElComments(event.currentTarget)
@@ -134,9 +122,6 @@ const SinglePostView = () => {
     setOpenConfirmation(false)
   }
 
-  const handleDelete = () => {
-    setShow(true)
-  }
   const handleDeleteComment = async () => {
     try {
       const { data } = await axios.patch(
@@ -237,21 +222,6 @@ const SinglePostView = () => {
         <Typography sx={{ color: "gray" }}>No Comments To Show</Typography>
       </Box>
     )
-  }
-
-  //report post handlers
-  const handleReport = async () => {
-    try {
-      const { data } = await axios.patch(
-        `/api/post/${postId}/report`,
-        {},
-        { headers: { Authorization: auth } }
-      )
-      setAnchorElPostMenu(null)
-      //show snackbar
-    } catch (error) {
-      console.log(error)
-    }
   }
 
   //post menu handlers

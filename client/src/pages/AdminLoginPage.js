@@ -1,8 +1,6 @@
-import { Box, Card, CardContent } from "@mui/material"
+import { Card, CardContent } from "@mui/material"
 import { Container } from "@mui/system"
 import React, { useEffect } from "react"
-import TypographyBody from "../components/ui/TypographyBody"
-import TypographyTitle from "../components/ui/TypographyTitle"
 import AdminLogin from "../components/AdminLogin/AdminLogin"
 
 function AdminLoginPage() {

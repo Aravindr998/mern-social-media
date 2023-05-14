@@ -7,7 +7,6 @@ import { Avatar, Box, Fab, Tooltip, Typography } from "@mui/material"
 import CallIcon from "@mui/icons-material/Call"
 import CallEndIcon from "@mui/icons-material/CallEnd"
 import { socket } from "../../socket"
-import { useNavigate } from "react-router-dom"
 
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />
@@ -17,8 +16,6 @@ const IncomingCall = ({ show, details, close }) => {
   const [open, setOpen] = useState(false)
   const [profilePicture, setProfilePicture] = useState("")
   const [username, setUsername] = useState("")
-  const navigate = useNavigate()
-  console.log(details)
 
   useEffect(() => {
     if (show) {

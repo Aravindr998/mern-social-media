@@ -12,14 +12,10 @@ import {
 } from "@mui/material"
 import { useNavigate, useParams } from "react-router-dom"
 import axios from "../../axios"
-import { useDispatch, useSelector } from "react-redux"
-import { setTempAuth } from "../../features/tempAuth/tempAuth"
 
 const EnterEmailOTP = () => {
   const containerRef = useRef()
   const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const tempAuth = useSelector((state) => state.tempAuth)
   const [otp, setOtp] = useState("")
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)

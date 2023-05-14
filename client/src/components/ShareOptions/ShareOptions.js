@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   FormControl,
@@ -156,7 +155,7 @@ const ShareOptions = ({ anchorEl, handleShareClose, postId, shared }) => {
   const handleSave = async () => {
     setSaved(false)
     try {
-      const { data } = await axios.patch(
+      await axios.patch(
         "/api/post/save",
         { postId },
         { headers: { Authorization: auth } }

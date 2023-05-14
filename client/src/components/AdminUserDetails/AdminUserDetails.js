@@ -132,23 +132,19 @@ const AdminUserDetails = ({ drawerWidth }) => {
   if (actions.length) {
     allActions = actions.map((item) => {
       console.log(item)
-      let content, link, username
+      let content, username
       if (item.type === "create") {
         username = item.userId.username
         content = "created a new post"
-        link = `/post/${item.postId}`
       } else if (item.type === "post") {
         username = item.userId.username
         content = `${item.interaction} a post by ${item.postId.createdBy.username}`
-        link = `/post/${item.postId}`
       } else if (item.type === "friendRequest") {
         username = item.userId.username
         content = `sent friend request to ${item.to.username}`
-        link = `/profile/${item.userId.username}`
       } else if (item.type === "acceptedRequest") {
         username = item.userId.username
         content = `accepted a friend request by ${item.to.username}`
-        link = `/profile/${item.userId.username}`
       }
       return (
         <React.Fragment key={item._id}>

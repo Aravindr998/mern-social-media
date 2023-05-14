@@ -7,7 +7,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Fab,
   Paper,
@@ -22,7 +21,6 @@ import {
   addConversation,
   fetchCoversations,
 } from "../../features/conversations/conversationSlice"
-import Chat from "../Chat/Chat"
 import { Outlet, useParams } from "react-router-dom"
 import SelectChat from "../SelectChat/SelectChat"
 import axios from "../../axios"

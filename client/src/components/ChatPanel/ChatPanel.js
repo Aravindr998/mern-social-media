@@ -6,7 +6,6 @@ import ListItemText from "@mui/material/ListItemText"
 import Typography from "@mui/material/Typography"
 import { Avatar, Box, Menu, Skeleton } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchNotifications } from "../../features/notifications/notificationSlice"
 import { useNavigate } from "react-router-dom"
 import { fetchCoversations } from "../../features/conversations/conversationSlice"
 

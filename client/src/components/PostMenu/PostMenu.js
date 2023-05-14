@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef } from "react"
+import React, { useEffect, useState } from "react"
 import Paper from "@mui/material/Paper"
 import MenuList from "@mui/material/MenuList"
 import MenuItem from "@mui/material/MenuItem"
@@ -163,7 +163,7 @@ function PostMenu({ handleClickAway, checked, postOwner, postId }) {
     try {
       setError("")
       setReported(false)
-      const { data } = await axios.patch(
+      await axios.patch(
         `/api/post/${postId}/report`,
         {},
         { headers: { Authorization: auth } }

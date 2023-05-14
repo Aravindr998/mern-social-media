@@ -67,10 +67,12 @@ export const googleAuthenticate = (req, res, next) => {
       }
       const token = createToken(user._id, user.email)
       res.cookie("googleToken", token)
-      res.redirect(`http://localhost:3000`)
+      res.redirect(`https://vibee.kromium.shop`)
     } catch (error) {
       console.log(error)
-      return res.redirect("http://localhost:3000/login?authentication=failed")
+      return res.redirect(
+        "https://vibee.kromium.shop/login?authentication=failed"
+      )
     }
   })(req, res)
 }
@@ -194,14 +196,14 @@ export const authenticateGoogle = async (req, res) => {
   try {
     const token = createToken(req.user._id, req.user.email)
     res.cookie("googleToken", token)
-    res.redirect(`http://localhost:3000`)
+    res.redirect(`https://vibee.kromium.shop`)
   } catch (error) {
     console.log(error)
   }
 }
 
 export const failedGoogleAuthentication = async (req, res) => {
-  res.redirect("http://localhost:3000/login?authentication=failed")
+  res.redirect("https://vibee.kromium.shop/login?authentication=failed")
 }
 
 export const verifyUser = async (req, res) => {

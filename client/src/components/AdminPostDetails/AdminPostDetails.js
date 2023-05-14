@@ -9,7 +9,6 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  Link,
   Menu,
   MenuItem,
   Typography,
@@ -17,7 +16,7 @@ import {
 import axios from "../../axios"
 import React, { useEffect, useState } from "react"
 import { useNavigate, useOutletContext, useParams } from "react-router-dom"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import FavoriteIcon from "@mui/icons-material/Favorite"
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
 import MoreVertIcon from "@mui/icons-material/MoreVert"

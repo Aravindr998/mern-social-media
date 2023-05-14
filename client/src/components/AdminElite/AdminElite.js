@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import PropTypes from "prop-types"
 import Box from "@mui/material/Box"
 import Table from "@mui/material/Table"
@@ -14,7 +14,6 @@ import Paper from "@mui/material/Paper"
 import { visuallyHidden } from "@mui/utils"
 import axios from "../../axios"
 import { useSelector } from "react-redux"
-import { Outlet, useNavigate, useParams } from "react-router-dom"
 import { Avatar, Button } from "@mui/material"
 
 function descendingComparator(a, b, orderBy) {
@@ -130,7 +129,6 @@ EnhancedTableHead.propTypes = {
 
 const AdminElite = ({ drawerWidth }) => {
   const adminAuth = useSelector((state) => state.adminAuth)
-  const navigate = useNavigate()
   const [order, setOrder] = useState("desc")
   const [orderBy, setOrderBy] = useState("createdAt")
   const [selected, setSelected] = useState([])

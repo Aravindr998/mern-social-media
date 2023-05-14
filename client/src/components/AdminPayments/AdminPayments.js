@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import PropTypes from "prop-types"
 import Box from "@mui/material/Box"
 import Table from "@mui/material/Table"
@@ -14,8 +14,7 @@ import Paper from "@mui/material/Paper"
 import { visuallyHidden } from "@mui/utils"
 import axios from "../../axios"
 import { useSelector } from "react-redux"
-import { Outlet, useNavigate, useParams } from "react-router-dom"
-import { Avatar, Button } from "@mui/material"
+import { Avatar } from "@mui/material"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -130,17 +129,12 @@ EnhancedTableHead.propTypes = {
 
 const AdminPayments = ({ drawerWidth }) => {
   const adminAuth = useSelector((state) => state.adminAuth)
-  const navigate = useNavigate()
-  const { postId } = useParams()
   const [order, setOrder] = useState("desc")
   const [orderBy, setOrderBy] = useState("createdAt")
   const [selected, setSelected] = useState([])
   const [page, setPage] = useState(0)
-  const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [posts, setPosts] = useState([])
-  const [postToDelete, setPostToDelete] = useState("")
-  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -179,9 +173,6 @@ const AdminPayments = ({ drawerWidth }) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
-
-  const isSelected = (name) => selected.indexOf(name) !== -1
-
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - posts.length) : 0
@@ -194,12 +185,6 @@ const AdminPayments = ({ drawerWidth }) => {
       ),
     [order, orderBy, page, rowsPerPage, posts]
   )
-  const removePost = useCallback((data) => {
-    setPosts((prevState) => {
-      return prevState.filter((item) => item._id != data._id)
-    })
-    setOpen(false)
-  })
 
   return (
     <>
@@ -212,80 +197,76 @@ const AdminPayments = ({ drawerWidth }) => {
           width: { sm: `calc(100% - ${drawerWidth}px)` },
         }}
       >
-        {postId ? (
-          <Outlet context={removePost} />
-        ) : (
-          <Box sx={{ width: "100%" }}>
-            <Paper sx={{ width: "100%", mb: 2 }}>
-              <TableContainer>
-                <Table
-                  sx={{ minWidth: 750 }}
-                  aria-labelledby="tableTitle"
-                  size={dense ? "small" : "medium"}
-                >
-                  <EnhancedTableHead
-                    numSelected={selected.length}
-                    order={order}
-                    orderBy={orderBy}
-                    onSelectAllClick={handleSelectAllClick}
-                    onRequestSort={handleRequestSort}
-                    rowCount={posts.length}
-                  />
-                  <TableBody>
-                    {visibleRows.map((row, index) => {
-                      console.log(row, "---> row")
-                      const labelId = `enhanced-table-checkbox-${index}`
-                      return (
-                        <TableRow
-                          hover
-                          key={row.profilePicture}
-                          sx={{ cursor: "pointer" }}
-                        >
-                          <TableCell id={labelId}>
-                            <Avatar src={row.userId.profilePicture} />
-                          </TableCell>
-                          <TableCell>{row.userId.username}</TableCell>
-                          <TableCell align="left">
-                            <Typography
-                              fontWeight={500}
-                              sx={{
-                                "&:hover": { textDecoration: "underline" },
-                              }}
-                            >
-                              {row.paymentIntent}
-                            </Typography>
-                          </TableCell>
-                          <TableCell align="left">
-                            {new Date(row.createdAt).toString().slice(0, 16)}
-                          </TableCell>
-                          <TableCell align="left">{row.status}</TableCell>
-                        </TableRow>
-                      )
-                    })}
-                    {emptyRows > 0 && (
+        <Box sx={{ width: "100%" }}>
+          <Paper sx={{ width: "100%", mb: 2 }}>
+            <TableContainer>
+              <Table
+                sx={{ minWidth: 750 }}
+                aria-labelledby="tableTitle"
+                size={"medium"}
+              >
+                <EnhancedTableHead
+                  numSelected={selected.length}
+                  order={order}
+                  orderBy={orderBy}
+                  onSelectAllClick={handleSelectAllClick}
+                  onRequestSort={handleRequestSort}
+                  rowCount={posts.length}
+                />
+                <TableBody>
+                  {visibleRows.map((row, index) => {
+                    console.log(row, "---> row")
+                    const labelId = `enhanced-table-checkbox-${index}`
+                    return (
                       <TableRow
-                        style={{
-                          height: (dense ? 33 : 53) * emptyRows,
-                        }}
+                        hover
+                        key={row.profilePicture}
+                        sx={{ cursor: "pointer" }}
                       >
-                        <TableCell colSpan={6} />
+                        <TableCell id={labelId}>
+                          <Avatar src={row.userId.profilePicture} />
+                        </TableCell>
+                        <TableCell>{row.userId.username}</TableCell>
+                        <TableCell align="left">
+                          <Typography
+                            fontWeight={500}
+                            sx={{
+                              "&:hover": { textDecoration: "underline" },
+                            }}
+                          >
+                            {row.paymentIntent}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="left">
+                          {new Date(row.createdAt).toString().slice(0, 16)}
+                        </TableCell>
+                        <TableCell align="left">{row.status}</TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={posts.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Paper>
-          </Box>
-        )}
+                    )
+                  })}
+                  {emptyRows > 0 && (
+                    <TableRow
+                      style={{
+                        height: 53 * emptyRows,
+                      }}
+                    >
+                      <TableCell colSpan={6} />
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={posts.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
+        </Box>
       </Box>
     </>
   )

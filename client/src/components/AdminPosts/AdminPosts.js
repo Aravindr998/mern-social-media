@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import PropTypes from "prop-types"
 import Box from "@mui/material/Box"
 import Table from "@mui/material/Table"
@@ -169,7 +169,6 @@ const AdminPosts = ({ drawerWidth }) => {
   const [orderBy, setOrderBy] = useState("reports")
   const [selected, setSelected] = useState([])
   const [page, setPage] = useState(0)
-  const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
   const [posts, setPosts] = useState([])
   const [postToDelete, setPostToDelete] = useState("")
@@ -212,8 +211,6 @@ const AdminPosts = ({ drawerWidth }) => {
     setPage(0)
   }
 
-  const isSelected = (name) => selected.indexOf(name) !== -1
-
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - posts.length) : 0
@@ -230,12 +227,12 @@ const AdminPosts = ({ drawerWidth }) => {
     setPostToDelete("")
     setOpen(false)
   }
-  const removePost = useCallback((data) => {
+  const removePost = (data) => {
     setPosts((prevState) => {
       return prevState.filter((item) => item._id != data._id)
     })
     setOpen(false)
-  })
+  }
   const imageFormat = ["jpg", "jpeg", "png", "webp"]
 
   function getUrlExtension(url) {
@@ -261,7 +258,7 @@ const AdminPosts = ({ drawerWidth }) => {
                 <Table
                   sx={{ minWidth: 750 }}
                   aria-labelledby="tableTitle"
-                  size={dense ? "small" : "medium"}
+                  size={"medium"}
                 >
                   <EnhancedTableHead
                     numSelected={selected.length}
@@ -350,7 +347,7 @@ const AdminPosts = ({ drawerWidth }) => {
                     {emptyRows > 0 && (
                       <TableRow
                         style={{
-                          height: (dense ? 33 : 53) * emptyRows,
+                          height: 53 * emptyRows,
                         }}
                       >
                         <TableCell colSpan={6} />

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React from "react"
 import EnterEmailOTP from "../components/EnterEmailOTP/EnterEmailOTP"
 import { Card, CardContent, Container, CssBaseline } from "@mui/material"
 

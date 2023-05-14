@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef } from "react"
+import React, { useEffect, useState } from "react"
 import Paper from "@mui/material/Paper"
 import MenuList from "@mui/material/MenuList"
 import MenuItem from "@mui/material/MenuItem"
@@ -23,11 +23,7 @@ import {
   Typography,
 } from "@mui/material"
 import axios from "../../axios"
-import {
-  deletePost,
-  editPost,
-  fetchPosts,
-} from "../../features/posts/postSlice"
+import { deletePost, fetchPosts } from "../../features/posts/postSlice"
 import SidePopup from "../SidePopup/SidePopup"
 import { useNavigate } from "react-router-dom"
 
@@ -171,7 +167,7 @@ function SinglePostMenu({
     try {
       setError("")
       setReported(false)
-      const { data } = await axios.patch(
+      await axios.patch(
         `/api/post/${postId}/report`,
         {},
         { headers: { Authorization: auth } }

@@ -48,12 +48,10 @@ import AdminPaymentsPage from "./pages/AdminPaymentsPage"
 import VideoCall from "./components/VideoCall/VideoCall"
 import LiveStream from "./components/LiveStream/LiveStream"
 import EnterEmailPage from "./pages/EnterEmailPage"
-import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword"
 import ConfirmPasswordPage from "./pages/ConfirmPasswordPage"
 import EmailOtpPage from "./pages/EmailOtpPage"
 import PageNotFound from "./pages/PageNotFound"
 import ContentNotAvailable from "./pages/ContentNotAvailable"
-import PageNotFoundAdmin from "./pages/PageNotFoundAdmin"
 
 function App() {
   const dispatch = useDispatch()

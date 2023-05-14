@@ -8,7 +8,7 @@ import TableHead from "@mui/material/TableHead"
 import TablePagination from "@mui/material/TablePagination"
 import TableRow from "@mui/material/TableRow"
 import { useDispatch, useSelector } from "react-redux"
-import { Avatar, Box, Button, TextField, Typography } from "@mui/material"
+import { Avatar, Box, Button, TextField } from "@mui/material"
 import {
   editUserList,
   fetchAllUsers,

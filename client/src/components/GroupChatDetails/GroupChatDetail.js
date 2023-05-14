@@ -13,7 +13,7 @@ import {
 import axios from "../../axios"
 import React, { forwardRef, useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { fetchMessages } from "../../features/messages/messageSlice"
 import { fetchCoversations } from "../../features/conversations/conversationSlice"
 
@@ -25,7 +25,6 @@ const GroupChatDetail = ({ show, close }) => {
   const messages = useSelector((state) => state.messages)
   const userState = useSelector((state) => state.user)
   const auth = useSelector((state) => state.auth)
-  const navigate = useNavigate()
   const dispatch = useDispatch()
   const { conversationId } = useParams()
   const [search, setSearch] = useState("")
@@ -96,16 +95,12 @@ const GroupChatDetail = ({ show, close }) => {
           fileRef.current.files[0].name
         )
       }
-      const { data } = await axios.patch(
-        `/api/conversation/${conversationId}/edit`,
-        formData,
-        {
-          headers: {
-            Authorization: auth,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      )
+      await axios.patch(`/api/conversation/${conversationId}/edit`, formData, {
+        headers: {
+          Authorization: auth,
+          "Content-Type": "multipart/form-data",
+        },
+      })
       dispatch(fetchMessages(conversationId))
       dispatch(fetchCoversations())
       close()
