@@ -121,6 +121,13 @@ function App() {
   }, [authToken])
 
   useEffect(() => {
+    socket.on("connect_error", (error) => {
+      console.log("Socket connect_error:", error)
+    })
+
+    socket.on("error", (error) => {
+      console.log("Socket error:", error)
+    })
     socket.on("latestMessage", (message) => {
       if (
         pathname.includes("conversations") &&
@@ -157,6 +164,8 @@ function App() {
     })
 
     return () => {
+      socket.off("connect_error")
+      socket.off("error")
       socket.off("newCall")
       socket.off("fetchNewNotification")
       socket.off("latestMessage")

@@ -212,4 +212,12 @@ io.on("connection", (socket) => {
   })
 })
 
+io.on("connect_error", (error) => {
+  console.log("Socket connect_error:", error)
+})
+
+io.on("error", (error) => {
+  console.log("Socket error:", error)
+})
+
 export default io
