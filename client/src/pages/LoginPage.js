@@ -5,13 +5,15 @@ import LoginForm from "../components/LoginForm/LoginForm"
 import TypographyBody from "../components/ui/TypographyBody"
 import TypographyTitle from "../components/ui/TypographyTitle"
 import { TOKEN_KEY } from "../constants/constant"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { setAuth } from "../features/users/authSlice"
 import { useDispatch } from "react-redux"
 
 function LoginPage() {
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const [searchParams] = useSearchParams()
+  const googleToken = searchParams.get("googleToken")
   useEffect(() => {
     document.title = "Vibee | Login"
     const token = document.cookie
@@ -29,6 +31,13 @@ function LoginPage() {
       navigate("/")
     }
   }, [])
+  useEffect(() => {
+    if (googleToken) {
+      localStorage.setItem(TOKEN_KEY, `Bearer ${googleToken}`)
+      dispatch(setAuth())
+      navigate("/")
+    }
+  }, [googleToken])
   return (
     <>
       <Container
