@@ -52,6 +52,7 @@ import ConfirmPasswordPage from "./pages/ConfirmPasswordPage"
 import EmailOtpPage from "./pages/EmailOtpPage"
 import PageNotFound from "./pages/PageNotFound"
 import ContentNotAvailable from "./pages/ContentNotAvailable"
+import SearchPage from "./pages/SearchPage"
 
 function App() {
   const dispatch = useDispatch()
@@ -201,6 +202,7 @@ function App() {
               path="/content/not/available"
               element={<ContentNotAvailable />}
             />
+            <Route path="/search" element={<SearchPage />} />
           </Route>
           <Route element={<PublicRoutes />}>
             <Route path="/login" element={<LoginPage />} />

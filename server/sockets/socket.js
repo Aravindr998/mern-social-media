@@ -4,11 +4,13 @@ import jwt from "jsonwebtoken"
 import onlineUsersModel from "../model/OnlineUsers.js"
 import userModel from "../model/User.js"
 import callModel from "../model/Call.js"
+import cron from "node-cron"
 
 const io = new Server({
   pingTimeout: 60000,
   cors: {
     origin: "https://vibee.kromium.shop",
+    // origin: "http://localhost:3000",
   },
 })
 
@@ -218,6 +220,13 @@ io.on("connect_error", (error) => {
 
 io.on("error", (error) => {
   console.log("Socket error:", error)
+})
+
+cron.schedule("0 */10 * * * *", async () => {
+  const connectedSocketIDs = Array.from(io.of("/").sockets.keys())
+  console.log(connectedSocketIDs)
+  await onlineUsersModel.deleteMany({ socketId: { $nin: connectedSocketIDs } })
+  console.log("deleted")
 })
 
 export default io

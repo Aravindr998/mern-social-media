@@ -52,3 +52,75 @@ export const getOnlineUsersFromFriends = async (id) => {
     throw error
   }
 }
+
+export const filterUserSearch = async (key, friends, skip, id) => {
+  try {
+    const result = await userModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { firstName: new RegExp(key, "i") },
+            { lastName: new RegExp(key, "i") },
+            { username: new RegExp(key, "i") },
+          ],
+        },
+      },
+      {
+        $match: {
+          friends: {
+            $in: friends,
+          },
+        },
+      },
+      {
+        $match: {
+          _id: {
+            $ne: new mongoose.Types.ObjectId(id),
+          },
+        },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: 10,
+      },
+    ])
+    return result
+  } catch (error) {
+    throw error
+  }
+}
+
+export const filterUserCount = async (key, friends, skip, id) => {
+  try {
+    const result = await userModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { firstName: new RegExp(key, "i") },
+            { lastName: new RegExp(key, "i") },
+            { username: new RegExp(key, "i") },
+          ],
+        },
+      },
+      {
+        $match: {
+          friends: {
+            $in: friends,
+          },
+        },
+      },
+      {
+        $match: {
+          _id: {
+            $ne: new mongoose.Types.ObjectId(id),
+          },
+        },
+      },
+    ])
+    return result.length
+  } catch (error) {
+    throw error
+  }
+}

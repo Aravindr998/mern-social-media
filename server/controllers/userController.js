@@ -4,12 +4,17 @@ import {
   validateUpdatedDetails,
   validatePassword,
 } from "../helpers/authHelper.js"
-import { getOnlineUsersFromFriends } from "../helpers/userHelper.js"
+import {
+  getOnlineUsersFromFriends,
+  filterUserSearch,
+  filterUserCount,
+} from "../helpers/userHelper.js"
 import userModel from "../model/User.js"
 import notificationModel from "../model/Notifications.js"
 import paymentModel from "../model/Payment.js"
 import path from "path"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 
 export const validateDetails = async (req, res, next) => {
   try {
@@ -61,16 +66,55 @@ export const getDetails = async (req, res) => {
 
 export const getSearchResult = async (req, res) => {
   try {
+    const { id } = req.user
     const { key } = req.query
+    const { filter } = req.query
+    console.log(filter)
+    let skip = req.query.skip || 0
+    skip *= 10
+    if (filter === "true") {
+      const user = await userModel.findById(id)
+      const result = await filterUserSearch(key, user.friends, skip, id)
+      const count = await filterUserCount(key, user.friends, skip, id)
+      return res.json({ result, count })
+    }
     if (key) {
-      const result = await userModel.find({
-        $or: [
-          { firstName: new RegExp(key, "i") },
-          { lastName: new RegExp(key, "i") },
-          { username: new RegExp(key, "i") },
+      const result = await userModel
+        .find({
+          $and: [
+            {
+              $or: [
+                { firstName: new RegExp(key, "i") },
+                { lastName: new RegExp(key, "i") },
+                { username: new RegExp(key, "i") },
+              ],
+            },
+            {
+              _id: {
+                $ne: new mongoose.Types.ObjectId(id),
+              },
+            },
+          ],
+        })
+        .skip(skip)
+        .limit(10)
+      const count = await userModel.find({
+        $and: [
+          {
+            $or: [
+              { firstName: new RegExp(key, "i") },
+              { lastName: new RegExp(key, "i") },
+              { username: new RegExp(key, "i") },
+            ],
+          },
+          {
+            _id: {
+              $ne: new mongoose.Types.ObjectId(id),
+            },
+          },
         ],
       })
-      return res.json({ result })
+      return res.json({ result, count })
     }
     return res.json({ result: [] })
   } catch (error) {

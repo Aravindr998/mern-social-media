@@ -61,6 +61,9 @@ function Navbar() {
   const [checked, setChecked] = useState(false)
   const [height, setHeight] = useState("0rem")
   const [padding, setPadding] = useState("0rem")
+  const [count, setCount] = useState(0)
+  const [show, setShow] = useState(false)
+  const [key, setKey] = useState("")
   const searchRef = useRef()
   const theme = useTheme()
   const backgroundColor = theme.palette.mode === "dark" ? "#4e4f4f" : "#DFDFDF"
@@ -82,6 +85,14 @@ function Navbar() {
     }
     setSearch(false)
   }, [matches])
+
+  useEffect(() => {
+    if (count > result.length) {
+      setShow(true)
+    } else {
+      setShow(false)
+    }
+  }, [])
 
   const handleOpenNotification = (event) => {
     dispatch(changeReadState())
@@ -155,6 +166,7 @@ function Navbar() {
   }, [])
 
   const handleSearch = (e) => {
+    setKey(e.target.value)
     const { value } = e.target
     if (!loading) {
       setSearch(true)
@@ -166,6 +178,7 @@ function Navbar() {
         .then(({ data }) => {
           setLoading(false)
           setResult(data.result)
+          setCount(data.count)
         })
         .catch((error) => console.log(error))
     }
@@ -199,6 +212,7 @@ function Navbar() {
     }
     setChecked((prevState) => !prevState)
   }
+
   return (
     <Box>
       <AppBar position="fixed" sx={{ zIndex: 2 }}>
@@ -252,6 +266,7 @@ function Navbar() {
                 display: { xs: "none", sm: "flex" },
               }}
               ref={searchRef}
+              value={key}
             />
             {search && (
               <>
@@ -271,6 +286,19 @@ function Navbar() {
                       </Button>
                     ) : (
                       searchResult
+                    )}
+                    {!show && (
+                      <>
+                        <Box display={"flex"} justifyContent={"center"}>
+                          <Button
+                            onClick={() => {
+                              navigate(`/search?key=${key}`)
+                            }}
+                          >
+                            Show More
+                          </Button>
+                        </Box>
+                      </>
                     )}
                   </CardContent>
                 </Card>

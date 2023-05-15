@@ -161,7 +161,27 @@ const Notifications = () => {
         }}
       >
         <CardContent sx={{ height: "100%" }}>
-          <Stack sx={{ height: "100%", overflowY: "auto" }} key={1}>
+          <Stack
+            sx={{
+              height: "100%",
+              overflowY: "auto",
+              "&::-webkit-scrollbar": {
+                width: "7px",
+              },
+              "&::-webkit-scrollbar-track": {
+                background: "transparent",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "darkgrey",
+                borderRadius: "2rem",
+              },
+              "&::-webkit-scrollbar-thumb:hover": {
+                backgroundColor: "grey",
+                borderRadius: "2rem",
+              },
+            }}
+            key={1}
+          >
             <InfiniteScroll
               pageStart={0}
               loadMore={loadHandler}

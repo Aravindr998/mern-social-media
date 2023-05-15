@@ -238,6 +238,20 @@ const Chat = () => {
             flexDirection: "column",
             // justifyContent: "flex-end",
             overflowY: "auto",
+            "&::-webkit-scrollbar": {
+              width: "7px",
+            },
+            "&::-webkit-scrollbar-track": {
+              background: "transparent",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "darkgrey",
+              borderRadius: "2rem",
+            },
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: "grey",
+              borderRadius: "2rem",
+            },
           }}
           ref={chatParent}
         >
