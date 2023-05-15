@@ -68,6 +68,7 @@ export const googleAuthenticate = (req, res, next) => {
       }
       const token = createToken(user._id, user.email)
       res.cookie("googleToken", token)
+      console.log(token)
       res.redirect(`https://vibee.kromium.shop`)
     } catch (error) {
       console.log(error)
