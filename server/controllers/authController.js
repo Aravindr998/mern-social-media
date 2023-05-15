@@ -60,6 +60,7 @@ export const authenticate = (req, res, next) => {
 }
 
 export const googleAuthenticate = (req, res, next) => {
+  console.log("called")
   passport.authenticate("google", { session: false }, async (err, user) => {
     try {
       if (err) {

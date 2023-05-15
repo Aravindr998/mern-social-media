@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/static/css/main.2a22568d.css",
-    "main.js": "/static/js/main.45f6da9d.js",
+    "main.js": "/static/js/main.6c2d382b.js",
     "static/js/787.c4e7f8f9.chunk.js": "/static/js/787.c4e7f8f9.chunk.js",
     "static/media/Autumn in November.ttf": "/static/media/Autumn in November.c5c05948d9b521d79abf.ttf",
     "index.html": "/index.html",
     "main.2a22568d.css.map": "/static/css/main.2a22568d.css.map",
-    "main.45f6da9d.js.map": "/static/js/main.45f6da9d.js.map",
+    "main.6c2d382b.js.map": "/static/js/main.6c2d382b.js.map",
     "787.c4e7f8f9.chunk.js.map": "/static/js/787.c4e7f8f9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.2a22568d.css",
-    "static/js/main.45f6da9d.js"
+    "static/js/main.6c2d382b.js"
   ]
 }

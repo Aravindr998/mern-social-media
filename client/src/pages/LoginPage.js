@@ -19,6 +19,7 @@ function LoginPage() {
       ?.find((row) => row.startsWith("googleToken"))
       ?.split("=")[1]
     console.log(token)
+    console.log(document.cookie)
     if (token) {
       console.log("recieved token")
       localStorage.setItem(TOKEN_KEY, `Bearer ${token}`)
