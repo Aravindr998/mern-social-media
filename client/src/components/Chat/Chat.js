@@ -10,7 +10,6 @@ import {
 import LeftChatBubble from "../LeftChatBubble/LeftChatBubble"
 import RightChatBubble from "../RightChatBubble/RightChatBubble"
 import VideoCallIcon from "@mui/icons-material/VideoCall"
-import CallIcon from "@mui/icons-material/Call"
 import SendIcon from "@mui/icons-material/Send"
 import { useNavigate, useParams } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
@@ -221,9 +220,6 @@ const Chat = () => {
               >
                 <IconButton onClick={handleVideoCall}>
                   <VideoCallIcon color="primary" />
-                </IconButton>
-                <IconButton>
-                  <CallIcon fontSize="small" color="primary" />
                 </IconButton>
               </Box>
             )}
