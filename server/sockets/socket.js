@@ -9,7 +9,8 @@ import cron from "node-cron"
 const io = new Server({
   pingTimeout: 60000,
   cors: {
-    origin: "https://vibee.kromium.shop",
+    // origin: "https://vibee.kromium.shop",
+    origin: "https://gcp.kromium.shop",
     // origin: "http://localhost:3000",
   },
 })
