@@ -1,6 +1,4 @@
-// export const baseURL = "https://www1.kromium.shop"
-export const baseURL = "https://www2.kromium.shop"
-// export const baseURL = "http://localhost:4000"
+export const baseURL = process.env.REACT_APP_SERVER_URL
 export const TOKEN_KEY = "Authorization"
 export const ADMIN_TOKEN_KEY = "admin.auth"
 export const STRIPE_PUBLISHABLE_KEY =

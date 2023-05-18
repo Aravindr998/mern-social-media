@@ -1,8 +1,6 @@
 import { io } from "socket.io-client"
 
-// const URL = "https://www1.kromium.shop"
-const URL = "https://www2.kromium.shop"
-// const URL = "http://localhost:4000"
+const URL = process.env.REACT_APP_SERVER_URL
 
 export const socket = io(URL, {
   autoConnect: false,
